@@ -1,0 +1,27 @@
+package org.mskcc.picardstats.model;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+
+class PicardFileTest {
+
+    @Test
+    //DIANA_0008_AH3V2JDMXX___P07951_I___P-0005083-N01-WES_IGO_07951_I_11___hg19___MD.txt'
+    void fromFile() throws IOException {
+        File tempFile = File.createTempFile("DIANA_0008_AH3V2JDMXX___P07951_I___P-0005083-N01-WES_IGO_07951_I_11___hg19___MD", ".txt");
+        tempFile.deleteOnExit();
+
+        System.out.println("Created temp. file:" + tempFile.getName());
+        PicardFile f = PicardFile.fromFile(tempFile);
+        assertEquals("DIANA_0008_AH3V2JDMXX", f.getRun());
+        assertEquals("07951_I", f.getRequest());
+        assertEquals("P-0005083-N01-WES_IGO_07951_I_11", f.getSample());
+        assertEquals("hg19", f.getReferenceGenome());
+//        //assertEquals("MD", sf.fileType); // does not work with Java temp files
+        System.out.println("File created:" + f.getFileCreated());
+    }
+}
