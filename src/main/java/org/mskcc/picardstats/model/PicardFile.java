@@ -4,10 +4,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.persistence.*;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +23,7 @@ public class PicardFile {
 
     private String fileType;
 
-    private Date fileCreated;
+    private Date lastModified;
 
     private Date fileImported = new Date();
 
@@ -44,14 +40,14 @@ public class PicardFile {
     public PicardFile() {}
 
     public PicardFile(String filename, String run, String request, String sample, String referenceGenome,
-                      String fileType, Date fileCreated, boolean parseOK) {
+                      String fileType, Date lastModified, boolean parseOK) {
         this.filename = filename;
         this.run = run;
         this.request = request;
         this.sample = sample;
         this.referenceGenome = referenceGenome;
         this.fileType = fileType;
-        this.fileCreated = fileCreated;
+        this.lastModified = lastModified;
         this.parseOK = parseOK;
 
         if (run != null && request != null && sample != null) {
@@ -79,17 +75,7 @@ public class PicardFile {
         String referenceGenome = parts[3];
         String fileType = parts[4].substring(0, parts[4].length()-4); // remove .txt
 
-        BasicFileAttributes attrs;
-        Date fileCreated = null;
-        try {
-            attrs = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-            FileTime time = attrs.creationTime();
-
-            fileCreated = new Date(time.toMillis());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new PicardFile(filename, run, request, sample, referenceGenome, fileType, fileCreated, true);
+        return new PicardFile(filename, run, request, sample, referenceGenome, fileType, new Date(file.lastModified()), true);
     }
 
     public String getFilename() {
@@ -140,12 +126,12 @@ public class PicardFile {
         this.fileType = fileType;
     }
 
-    public Date getFileCreated() {
-        return fileCreated;
+    public Date getLastModified() {
+        return lastModified;
     }
 
-    public void setFileCreated(Date fileCreated) {
-        this.fileCreated = fileCreated;
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
     }
 
     public Date getFileImported() {

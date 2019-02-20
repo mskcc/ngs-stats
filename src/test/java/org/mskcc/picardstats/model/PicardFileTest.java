@@ -22,6 +22,6 @@ class PicardFileTest {
         assertEquals("P-0005083-N01-WES_IGO_07951_I_11", f.getSample());
         assertEquals("hg19", f.getReferenceGenome());
 //        //assertEquals("MD", sf.fileType); // does not work with Java temp files
-        System.out.println("File created:" + f.getFileCreated());
+        System.out.println("File created:" + f.getLastModified());
     }
 }
