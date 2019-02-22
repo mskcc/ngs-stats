@@ -8,14 +8,12 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class PicardStatsController {
 
-    private static final String BASE_STATS_DIR = "/Users/mcmanamd/Downloads/DONE/";
+    private static final String BASE_STATS_DIR = "/ifs/data/BIC/Stats/hiseq/DONE/"; // "/Users/mcmanamd/Downloads/DONE/";
 
     private static final String [] ACTIVE_SEQUENCERS =
             {"DIANA", "JAX", "JOHNSAWYERS", "KIM", "LIZ", "MICHELLE", "MOMO", "PITT", "SCOTT", "TOMS", "VIC"};
@@ -41,11 +39,78 @@ public class PicardStatsController {
     private PicardFileRepository picardFileRepository;
 
 
-    @RequestMapping(value = "/picardstats/request/{requestid}", method = RequestMethod.GET)
-    public String getQCSiteStats(@PathVariable String requestId) {
-        return "needNewClass";
+    /**
+     * Returns the Picard stats for the pooled normal samples if they were added to the run.
+     * @param runId
+     * @return
+     */
+    @RequestMapping(value = "/picardstats-controls/run/{runId}", method = RequestMethod.GET)
+    public List<QCSiteStats> getQCSiteStats(@PathVariable String runId) {
+        System.out.println("Querying pooled normals for run: " + runId);
+        long startTime = System.currentTimeMillis();
+
+        List<PicardFile> files = picardFileRepository.findByRunAndRequest(runId, "POOLEDNORMALS");
+        if (files == null || files.size() == 0)
+            return null;
+
+        HashMap<String, QCSiteStats> statsMap = new HashMap<>(); // Run-Request-Sample to QCSiteStats
+        for (PicardFile pf : files) {
+            QCSiteStats stats = statsMap.getOrDefault(pf.getMd5RRS(), new QCSiteStats(pf));
+
+            switch (pf.getFileType()) {
+                case "AM":
+                    List<AlignmentSummaryMetrics> am = amRepository.findByFilename(pf.getFilename());
+                    for (AlignmentSummaryMetrics x : am) {
+                        if (x.CATEGORY == AlignmentSummaryMetrics.Category.UNPAIRED ||
+                                x.CATEGORY == AlignmentSummaryMetrics.Category.PAIR)
+                            stats.addAM(x);
+                    }
+                    break;
+                case "MD":
+                    List<DuplicationMetrics> dm = dmRepository.findByFilename(pf.getFilename());
+                    stats.addDM(dm.get(0));
+                    break;
+                case "WGS":
+                    List<WgsMetrics> wgs = wgsRepository.findByFilename(pf.getFilename());
+                    stats.addWGS(wgs.get(0));
+                    break;
+                case "HS":
+                    List<HsMetrics> hs = hsRepository.findByFilename(pf.getFilename());
+                    stats.addHS(hs.get(0));
+                    break;
+                default:
+                    System.out.println("File type ignored by QC site:" + pf.getFileType());
+            }
+            statsMap.put(pf.getMd5RRS(), stats);
+        }
+
+        System.out.println("Elapsed time pooled normal stats queries (ms): " + (System.currentTimeMillis() - startTime));
+        List<QCSiteStats> result = new ArrayList(statsMap.values());
+        return result;
     }
 
+    @RequestMapping(value = "/picardstats/update/{days}", method = RequestMethod.GET)
+    public String updateDatabase(@PathVariable Integer days) throws Exception {
+        System.out.println("Updating the database for files written in the past " + days + " days.");
+
+        File baseDir = new File(BASE_STATS_DIR);
+        if (!baseDir.exists()) {
+            String msg = "Base directory does not exist: " + BASE_STATS_DIR;
+            System.err.println(msg);
+            return "ERROR: " + msg;
+        }
+
+        DaysFileFilter dff = new DaysFileFilter(days);
+        for (String sequencer : ACTIVE_SEQUENCERS) {
+            File f = new File(BASE_STATS_DIR + sequencer);
+            File [] statsFiles = f.listFiles(dff);
+            System.out.println("Processing sequencer: " + sequencer + " files to process: " + statsFiles.length);
+            for (File statsFile: statsFiles) {
+                saveStats(statsFile, true);
+            }
+        }
+        return "DONE";
+    }
 
     /*
     Include files modified in the last n days.
@@ -66,22 +131,6 @@ public class PicardStatsController {
             else
                 return false;
         }
-    }
-
-    @RequestMapping(value = "/picardstats/update/{days}", method = RequestMethod.GET)
-    public String updateDatabase(@PathVariable Integer days) throws Exception {
-        System.out.println("Updating the database for files written in the past " + days + " days.");
-
-        DaysFileFilter dff = new DaysFileFilter(days);
-        for (String sequencer : ACTIVE_SEQUENCERS) {
-            File f = new File(BASE_STATS_DIR + sequencer);
-            File [] statsFiles = f.listFiles(dff);
-            System.out.println("Processing sequencer: " + sequencer + " files to process: " + statsFiles.length);
-            for (File statsFile: statsFiles) {
-                saveStats(statsFile, true);
-            }
-        }
-        return "DONE";
     }
 
     /**

@@ -5,11 +5,12 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Scanner;
 
 @Entity
+/*
+Internal MSK metric for oxidation.
+ */
 public class QMetric {
     @Id
     @GeneratedValue(

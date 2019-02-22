@@ -226,4 +226,37 @@ public class AlignmentSummaryMetrics {
 
         return am;
     }
+
+    @Override
+    public String toString() {
+        return "AlignmentSummaryMetrics{" +
+                "id=" + id +
+                ", filename='" + filename + '\'' +
+                ", md5RRS='" + md5RRS + '\'' +
+                ", CATEGORY=" + CATEGORY +
+                ", TOTAL_READS=" + TOTAL_READS +
+                ", PF_READS=" + PF_READS +
+                ", PCT_PF_READS=" + PCT_PF_READS +
+                ", PF_NOISE_READS=" + PF_NOISE_READS +
+                ", PF_READS_ALIGNED=" + PF_READS_ALIGNED +
+                ", PCT_PF_READS_ALIGNED=" + PCT_PF_READS_ALIGNED +
+                ", PF_ALIGNED_BASES=" + PF_ALIGNED_BASES +
+                ", PF_HQ_ALIGNED_READS=" + PF_HQ_ALIGNED_READS +
+                ", PF_HQ_ALIGNED_BASES=" + PF_HQ_ALIGNED_BASES +
+                ", PF_HQ_ALIGNED_Q20_BASES=" + PF_HQ_ALIGNED_Q20_BASES +
+                ", PF_HQ_MEDIAN_MISMATCHES=" + PF_HQ_MEDIAN_MISMATCHES +
+                ", PF_MISMATCH_RATE=" + PF_MISMATCH_RATE +
+                ", PF_HQ_ERROR_RATE=" + PF_HQ_ERROR_RATE +
+                ", PF_INDEL_RATE=" + PF_INDEL_RATE +
+                ", MEAN_READ_LENGTH=" + MEAN_READ_LENGTH +
+                ", READS_ALIGNED_IN_PAIRS=" + READS_ALIGNED_IN_PAIRS +
+                ", PCT_READS_ALIGNED_IN_PAIRS=" + PCT_READS_ALIGNED_IN_PAIRS +
+                ", PF_READS_IMPROPER_PAIRS=" + PF_READS_IMPROPER_PAIRS +
+                ", PCT_PF_READS_IMPROPER_PAIRS=" + PCT_PF_READS_IMPROPER_PAIRS +
+                ", BAD_CYCLES=" + BAD_CYCLES +
+                ", STRAND_BALANCE=" + STRAND_BALANCE +
+                ", PCT_CHIMERAS=" + PCT_CHIMERAS +
+                ", PCT_ADAPTER=" + PCT_ADAPTER +
+                '}';
+    }
 }
