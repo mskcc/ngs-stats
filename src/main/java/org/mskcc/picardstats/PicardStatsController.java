@@ -55,6 +55,9 @@ public class PicardStatsController {
 
         HashMap<String, QCSiteStats> statsMap = new HashMap<>(); // Run-Request-Sample to QCSiteStats
         for (PicardFile pf : files) {
+            if (!pf.isParseOK())
+                continue;
+
             QCSiteStats stats = statsMap.getOrDefault(pf.getMd5RRS(), new QCSiteStats(pf));
 
             switch (pf.getFileType()) {
