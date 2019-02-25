@@ -1,5 +1,6 @@
 package org.mskcc.picardstats;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,11 +8,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class StatsApplication implements CommandLineRunner {
 
+    @Autowired
+    PicardStatsController c;
+
     public static void main(String[] args) {
         SpringApplication.run(StatsApplication.class, args);
     }
 
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws Exception {
+        if (args.length > 0 && args[0].equals("-buildDatabase"))
+            c.buildDatabaseFromPicardFiles();
     }
 }

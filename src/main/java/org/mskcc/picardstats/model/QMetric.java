@@ -1,7 +1,5 @@
 package org.mskcc.picardstats.model;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,22 +11,14 @@ Internal MSK metric for oxidation.
  */
 public class QMetric {
     @Id
-    @GeneratedValue(
-            strategy= GenerationType.AUTO,
-            generator="native"
-    )
-    @GenericGenerator(
-            name = "native",
-            strategy = "native"
-    )
-    int id; // AUTO_INCREMENT
-
     @Column(length = 150)
     public String filename;
     @Column(length = 32)
     public String md5RRS;
 
     public double mskQ;
+
+    public QMetric() {}
 
     public QMetric(String filename, Double mskQ, String md5) {
         this.filename = filename;

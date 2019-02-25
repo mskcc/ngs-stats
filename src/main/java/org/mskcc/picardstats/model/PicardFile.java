@@ -1,41 +1,31 @@
 package org.mskcc.picardstats.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.persistence.*;
 import java.io.File;
 import java.util.Date;
-import java.util.List;
 
 @Entity
+@Getter @Setter
 public class PicardFile {
     @Id
     @Column(length = 150)
     private String filename;
 
     private String run;
-
     private String request;
-
     private String sample;
 
     private String referenceGenome;
-
     private String fileType;
-
     private Date lastModified;
-
     private Date fileImported = new Date();
-
     @Column(length = 32)
     private String md5RRS;
-
     private boolean parseOK = true; // if the format is bad or unrecognized and parsing fails set to false
-
-    @OneToMany
-    @JoinColumn(name="filename")
-    private List<AlignmentSummaryMetrics> alignmentMetrics;
-
 
     public PicardFile() {}
 
@@ -76,93 +66,5 @@ public class PicardFile {
         String fileType = parts[4].substring(0, parts[4].length()-4); // remove .txt
 
         return new PicardFile(filename, run, request, sample, referenceGenome, fileType, new Date(file.lastModified()), true);
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public String getRun() {
-        return run;
-    }
-
-    public void setRun(String run) {
-        this.run = run;
-    }
-
-    public String getRequest() {
-        return request;
-    }
-
-    public void setRequest(String request) {
-        this.request = request;
-    }
-
-    public String getSample() {
-        return sample;
-    }
-
-    public void setSample(String sample) {
-        this.sample = sample;
-    }
-
-    public String getReferenceGenome() {
-        return referenceGenome;
-    }
-
-    public void setReferenceGenome(String referenceGenome) {
-        this.referenceGenome = referenceGenome;
-    }
-
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
-    }
-
-    public Date getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    public Date getFileImported() {
-        return fileImported;
-    }
-
-    public void setFileImported(Date fileImported) {
-        this.fileImported = fileImported;
-    }
-
-    public List<AlignmentSummaryMetrics> getAlignmentMetrics() {
-        return alignmentMetrics;
-    }
-
-    public void setAlignmentMetrics(List<AlignmentSummaryMetrics> alignmentMetrics) {
-        this.alignmentMetrics = alignmentMetrics;
-    }
-
-    public boolean isParseOK() {
-        return parseOK;
-    }
-
-    public void setParseOK(boolean parseOK) {
-        this.parseOK = parseOK;
-    }
-
-    public String getMd5RRS() {
-        return md5RRS;
-    }
-
-    public void setMd5RRS(String md5RRS) {
-        this.md5RRS = md5RRS;
     }
 }

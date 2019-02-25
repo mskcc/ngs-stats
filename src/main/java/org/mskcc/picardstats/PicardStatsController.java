@@ -13,7 +13,7 @@ import java.util.*;
 @RestController
 public class PicardStatsController {
 
-    private static final String BASE_STATS_DIR = "/ifs/data/BIC/Stats/hiseq/DONE/"; // "/Users/mcmanamd/Downloads/DONE/";
+    private static final String BASE_STATS_DIR = "/ifs/data/BIC/Stats/hiseq/DONE/";  // "/Users/mcmanamd/Downloads/DONE/DONE/";
 
     private static final String [] ACTIVE_SEQUENCERS =
             {"DIANA", "JAX", "JOHNSAWYERS", "KIM", "LIZ", "MICHELLE", "MOMO", "PITT", "SCOTT", "TOMS", "VIC"};

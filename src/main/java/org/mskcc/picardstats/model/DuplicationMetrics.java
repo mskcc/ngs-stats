@@ -1,7 +1,5 @@
 package org.mskcc.picardstats.model;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,16 +14,6 @@ https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/sam/Du
 @Entity
 public class DuplicationMetrics {
     @Id
-    @GeneratedValue(
-            strategy= GenerationType.AUTO,
-            generator="native"
-    )
-    @GenericGenerator(
-            name = "native",
-            strategy = "native"
-    )
-    int id; // AUTO_INCREMENT
-
     @Column(length = 150)
     public String filename;
     @Column(length = 32)

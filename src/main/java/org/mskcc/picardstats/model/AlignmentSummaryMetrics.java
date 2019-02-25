@@ -1,7 +1,7 @@
 package org.mskcc.picardstats.model;
 
 
-import org.hibernate.annotations.GenericGenerator;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.io.File;
@@ -14,18 +14,9 @@ import java.util.Scanner;
 /*
 https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/AlignmentSummaryMetrics.java
  */
+@ToString
 public class AlignmentSummaryMetrics {
     @Id
-    @GeneratedValue(
-            strategy= GenerationType.AUTO,
-            generator="native"
-    )
-    @GenericGenerator(
-            name = "native",
-            strategy = "native"
-    )
-    int id; // AUTO_INCREMENT
-
     @Column(length = 150)
     public String filename;
     @Column(length = 32)
@@ -225,38 +216,5 @@ public class AlignmentSummaryMetrics {
         am.PCT_ADAPTER = Double.parseDouble(parts[21]);
 
         return am;
-    }
-
-    @Override
-    public String toString() {
-        return "AlignmentSummaryMetrics{" +
-                "id=" + id +
-                ", filename='" + filename + '\'' +
-                ", md5RRS='" + md5RRS + '\'' +
-                ", CATEGORY=" + CATEGORY +
-                ", TOTAL_READS=" + TOTAL_READS +
-                ", PF_READS=" + PF_READS +
-                ", PCT_PF_READS=" + PCT_PF_READS +
-                ", PF_NOISE_READS=" + PF_NOISE_READS +
-                ", PF_READS_ALIGNED=" + PF_READS_ALIGNED +
-                ", PCT_PF_READS_ALIGNED=" + PCT_PF_READS_ALIGNED +
-                ", PF_ALIGNED_BASES=" + PF_ALIGNED_BASES +
-                ", PF_HQ_ALIGNED_READS=" + PF_HQ_ALIGNED_READS +
-                ", PF_HQ_ALIGNED_BASES=" + PF_HQ_ALIGNED_BASES +
-                ", PF_HQ_ALIGNED_Q20_BASES=" + PF_HQ_ALIGNED_Q20_BASES +
-                ", PF_HQ_MEDIAN_MISMATCHES=" + PF_HQ_MEDIAN_MISMATCHES +
-                ", PF_MISMATCH_RATE=" + PF_MISMATCH_RATE +
-                ", PF_HQ_ERROR_RATE=" + PF_HQ_ERROR_RATE +
-                ", PF_INDEL_RATE=" + PF_INDEL_RATE +
-                ", MEAN_READ_LENGTH=" + MEAN_READ_LENGTH +
-                ", READS_ALIGNED_IN_PAIRS=" + READS_ALIGNED_IN_PAIRS +
-                ", PCT_READS_ALIGNED_IN_PAIRS=" + PCT_READS_ALIGNED_IN_PAIRS +
-                ", PF_READS_IMPROPER_PAIRS=" + PF_READS_IMPROPER_PAIRS +
-                ", PCT_PF_READS_IMPROPER_PAIRS=" + PCT_PF_READS_IMPROPER_PAIRS +
-                ", BAD_CYCLES=" + BAD_CYCLES +
-                ", STRAND_BALANCE=" + STRAND_BALANCE +
-                ", PCT_CHIMERAS=" + PCT_CHIMERAS +
-                ", PCT_ADAPTER=" + PCT_ADAPTER +
-                '}';
     }
 }
