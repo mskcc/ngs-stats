@@ -50,8 +50,10 @@ public class PicardStatsController {
         long startTime = System.currentTimeMillis();
 
         List<PicardFile> files = picardFileRepository.findByRunAndRequest(runId, "POOLEDNORMALS");
-        if (files == null || files.size() == 0)
+        if (files == null || files.size() == 0) {
+            System.out.println("No data found for run: " + runId);
             return null;
+        }
 
         HashMap<String, QCSiteStats> statsMap = new HashMap<>(); // Run-Request-Sample to QCSiteStats
         for (PicardFile pf : files) {
@@ -92,9 +94,14 @@ public class PicardStatsController {
         return result;
     }
 
-    @RequestMapping(value = "/picardstats/update/{days}", method = RequestMethod.GET)
+    @GetMapping(value = "/picardstats/update/{days}")
+    /*
+    Without a messaging system to trigger updates to specific files we can list all files written in the last n days and check if they
+    are in the database.  Unfortunately, the RAID is very slow so this process takes ~3 minutes for MICHELLE only
+     */
     public String updateDatabase(@PathVariable Integer days) throws Exception {
-        System.out.println("Updating the database for files written in the past " + days + " days.");
+        System.out.println("Updating the database for files written in the past " + days + " day(s).");
+        long startTime = System.currentTimeMillis(); // the NY Isilon RAID is slow
 
         File baseDir = new File(BASE_STATS_DIR);
         if (!baseDir.exists()) {
@@ -104,15 +111,21 @@ public class PicardStatsController {
         }
 
         DaysFileFilter dff = new DaysFileFilter(days);
+        long elapsedTime;
         for (String sequencer : ACTIVE_SEQUENCERS) {
             File f = new File(BASE_STATS_DIR + sequencer);
             File [] statsFiles = f.listFiles(dff);
-            System.out.println("Processing sequencer: " + sequencer + " files to process: " + statsFiles.length);
+            elapsedTime = System.currentTimeMillis() - startTime;
+            System.out.println("Processing sequencer: " + sequencer + " files to process: " + statsFiles.length + ", Elapsed time (ms): " + elapsedTime);
             for (File statsFile: statsFiles) {
                 saveStats(statsFile, true);
             }
         }
-        return "DONE";
+
+        elapsedTime = System.currentTimeMillis() - startTime;
+        String msg = "DONE. Elampsed time (ms): " + elapsedTime;
+        System.out.println(msg);
+        return msg;
     }
 
     /*
