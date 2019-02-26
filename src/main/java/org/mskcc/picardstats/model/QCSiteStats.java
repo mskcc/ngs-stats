@@ -1,11 +1,13 @@
 package org.mskcc.picardstats.model;
 
+import lombok.ToString;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Columns from multiple Picard files displayed together on the QC site.
  */
 @ResponseBody
+@ToString
 public class QCSiteStats {
     // Picard File
     private String run;
@@ -86,28 +88,5 @@ public class QCSiteStats {
         result = 31 * result + request.hashCode();
         result = 31 * result + sample.hashCode();
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "QCSiteStats{" +
-                "run='" + run + '\'' +
-                ", request='" + request + '\'' +
-                ", sample='" + sample + '\'' +
-                ", PCT_ADAPTER=" + PCT_ADAPTER +
-                ", READ_PAIRS_EXAMINED=" + READ_PAIRS_EXAMINED +
-                ", UNMAPPED_READS=" + UNMAPPED_READS +
-                ", PERCENT_DUPLICATION=" + PERCENT_DUPLICATION +
-                ", MEAN_COVERAGE=" + MEAN_COVERAGE +
-                ", PCT_10X=" + PCT_10X +
-                ", PCT_30X=" + PCT_30X +
-                ", PCT_100X=" + PCT_100X +
-                ", PCT_UTR_BASES=" + PCT_UTR_BASES +
-                ", PCT_INTRONIC_BASES=" + PCT_INTRONIC_BASES +
-                ", PCT_INTERGENIC_BASES=" + PCT_INTERGENIC_BASES +
-                ", MEAN_TARGET_COVERAGE=" + MEAN_TARGET_COVERAGE +
-                ", ZERO_CVG_TARGETS_PCT=" + ZERO_CVG_TARGETS_PCT +
-                ", PCT_OFF_BAIT=" + PCT_OFF_BAIT +
-                '}';
     }
 }
