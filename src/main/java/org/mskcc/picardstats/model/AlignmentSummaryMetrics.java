@@ -160,6 +160,15 @@ public class AlignmentSummaryMetrics {
      */
     public double PCT_ADAPTER;
 
+    public Long getUnpairedReads() {
+        if (CATEGORY.equals(Category.PAIR)) {
+            return (TOTAL_READS - READS_ALIGNED_IN_PAIRS) / 2L;
+        } else if (CATEGORY.equals(Category.UNPAIRED)) {
+            return TOTAL_READS;
+        }
+        return null;
+    }
+
     public static List<AlignmentSummaryMetrics> readFile(File file, String md5RRS) throws FileNotFoundException {
         Scanner scan = new Scanner(file);
         for (int i=0;i < 7;i++) {

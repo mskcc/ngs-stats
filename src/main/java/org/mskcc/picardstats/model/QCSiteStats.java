@@ -1,5 +1,7 @@
 package org.mskcc.picardstats.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @ResponseBody
 @ToString
+@Getter @Setter
 public class QCSiteStats {
     // Picard File
     private String run;
@@ -15,28 +18,29 @@ public class QCSiteStats {
     private String sample;
 
     // ALIGNMENT SUMMARY METRICS
-    public double PCT_ADAPTER;
+    private double PCT_ADAPTER;
+    private long unpairedReads; // derived field
 
     // Duplication Metrics
-    public long READ_PAIRS_EXAMINED;
-    public long UNMAPPED_READS;
-    public Double PERCENT_DUPLICATION;
+    private long READ_PAIRS_EXAMINED;
+    private long UNMAPPED_READS;
+    private Double PERCENT_DUPLICATION;
 
     // WGS
-    public Double MEAN_COVERAGE;
-    public Double PCT_10X;
-    public Double PCT_30X;
-    public Double PCT_100X;
+    private Double MEAN_COVERAGE;
+    private Double PCT_10X;
+    private Double PCT_30X;
+    private Double PCT_100X;
 
     // RNASEQ
-    public Double PCT_UTR_BASES;
-    public Double PCT_INTRONIC_BASES;
-    public Double PCT_INTERGENIC_BASES;
+    private Double PCT_UTR_BASES;
+    private Double PCT_INTRONIC_BASES;
+    private Double PCT_INTERGENIC_BASES;
 
     // HS METRICS
-    public double MEAN_TARGET_COVERAGE;
-    public double ZERO_CVG_TARGETS_PCT;
-    public double PCT_OFF_BAIT;
+    private double MEAN_TARGET_COVERAGE;
+    private double ZERO_CVG_TARGETS_PCT;
+    private double PCT_OFF_BAIT;
 
 
     public QCSiteStats() {}
@@ -49,6 +53,7 @@ public class QCSiteStats {
 
     public void addAM(AlignmentSummaryMetrics am) {
         this.PCT_ADAPTER = am.PCT_ADAPTER;
+        this.unpairedReads = am.getUnpairedReads();
     }
 
     public void addHS(HsMetrics hs) {
