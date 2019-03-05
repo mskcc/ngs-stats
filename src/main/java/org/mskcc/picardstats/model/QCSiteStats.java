@@ -16,6 +16,7 @@ public class QCSiteStats {
     private String run;
     private String request;
     private String sample;
+    private String referenceGenome;
 
     // ALIGNMENT SUMMARY METRICS
     private double PCT_ADAPTER;
@@ -49,6 +50,7 @@ public class QCSiteStats {
         this.run = pf.getRun();
         this.request = pf.getRequest();
         this.sample = pf.getSample();
+        this.referenceGenome = pf.getReferenceGenome();
     }
 
     public void addAM(AlignmentSummaryMetrics am) {
