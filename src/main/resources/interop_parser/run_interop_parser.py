@@ -41,7 +41,7 @@ def parse_single(run_folder_path):
                     parse_runid(run_folder), 
                     read_summary.read().number(), 
                     lane_summary.lane(),
-                    parse_float(lane_summary.density().mean()/1000), parse_float(lane_summary.density().stddev()),
+                    parse_float(lane_summary.density().mean()/1000), parse_float(lane_summary.density().stddev()/1000),
                     parse_float(lane_summary.percent_pf().mean()), parse_float(lane_summary.percent_pf().stddev()),
                     parse_float(lane_summary.reads()/1000000),
                     parse_float(lane_summary.reads_pf()/1000000), 
