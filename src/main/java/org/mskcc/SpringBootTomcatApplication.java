@@ -1,10 +1,13 @@
-package org.mskcc.picardstats;
+package org.mskcc;
 
+import org.mskcc.picardstats.PicardStatsController;
+import org.mskcc.sequencer.SequencerDoneController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+
 
 @SpringBootApplication
 /*
@@ -13,6 +16,9 @@ from: https://www.baeldung.com/spring-boot-war-tomcat-deploy
 public class SpringBootTomcatApplication extends SpringBootServletInitializer implements CommandLineRunner {
     @Autowired
     PicardStatsController c;
+
+    @Autowired
+    SequencerDoneController x;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBootTomcatApplication.class, args);

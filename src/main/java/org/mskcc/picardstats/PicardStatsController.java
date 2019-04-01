@@ -153,7 +153,7 @@ public class PicardStatsController {
      * Reads all 380k+ Picard stats files written from 2014 to now
      * @throws Exception
      */
-    protected void buildDatabaseFromPicardFiles() throws Exception {
+    public void buildDatabaseFromPicardFiles() throws Exception {
         System.out.println("Building entire database from all available Picard stats files.");
         for (String sequencer : ALL_SEQUENCERS) {
             File f = new File(BASE_STATS_DIR + sequencer);
