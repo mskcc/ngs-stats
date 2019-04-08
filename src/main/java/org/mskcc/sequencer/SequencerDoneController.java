@@ -34,10 +34,15 @@ public class SequencerDoneController {
     }
 
 
-    @GetMapping(value = "/{run}")
+    @GetMapping(value = "/fastq/{directoryName}")
     public String trackDemuxAndArchiving(@PathVariable String directoryName) {
         String baseDir = "/ifs/archive/GCL/hiseq/FASTQ/";
-        String fastqDir = baseDir + directoryName;
+        String fastqDirName = baseDir + directoryName;
+        File fastqDir = new File(fastqDirName);
+
+        if (!fastqDir.exists()) {
+            return "Directory does not exist - " + fastqDirName;
+        }
 
         File statsDir = new File(fastqDir + "/Stats");
         File finished = new File(fastqDir + "/FINISHED");
