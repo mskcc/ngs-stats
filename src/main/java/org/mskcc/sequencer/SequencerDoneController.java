@@ -1,6 +1,8 @@
 package org.mskcc.sequencer;
 
+import org.mskcc.sequencer.model.StartStopArchiveFastq;
 import org.mskcc.sequencer.model.StartStopSequencer;
+import org.mskcc.sequencer.repository.StartStopArchiveFastqRepository;
 import org.mskcc.sequencer.repository.StartStopSequencerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +23,40 @@ public class SequencerDoneController {
     @Autowired
     private StartStopSequencerRepository startStopSequencerRepository;
 
+    @Autowired
+    private StartStopArchiveFastqRepository startStopArchiveFastqRepository;
+
+
     @RequestMapping(value = "*", method = RequestMethod.GET)
     @ResponseBody
     public String getFallback() {
         return "Fallback for GET Requests";
+    }
+
+
+    @GetMapping(value = "/{run}")
+    public String trackDemuxAndArchiving(@PathVariable String directoryName) {
+        String baseDir = "/ifs/archive/GCL/hiseq/FASTQ/";
+        String fastqDir = baseDir + directoryName;
+
+        File statsDir = new File(fastqDir + "/Stats");
+        File finished = new File(fastqDir + "/FINISHED");
+        File archiveDone = new File(fastqDir + "/fastq.md5.archive");
+        Date demuxDone = null;
+        if (statsDir.exists())
+            demuxDone = new Date(statsDir.lastModified());
+        Date finishedDate = new Date(finished.lastModified());
+        Date archiveDoneDate = new Date(archiveDone.lastModified());
+
+        // extract sequencer name & run name from directory Name
+        String sequencer = StartStopArchiveFastq.getSequencerName(directoryName);
+        String run = StartStopArchiveFastq.getRun(directoryName);
+
+        StartStopArchiveFastq startStop =
+                new StartStopArchiveFastq(directoryName, run, sequencer, demuxDone, finishedDate, archiveDoneDate, new Date());
+        log.info("Saving to database archiving times: " + startStop);
+        startStopArchiveFastqRepository.save(startStop);
+        return startStop.toString();
     }
 
     @GetMapping(value = "/{sequencer}/{run}/{lastFile}")
@@ -40,9 +72,9 @@ public class SequencerDoneController {
             endDate = new Date(endFile.lastModified());
         }
 
-        log.info("Start and end time recorded for run: " + run);
-
-        StartStopSequencer startStop = new StartStopSequencer(run, sequencer, startDate, endDate, new Date());
+        String runMinusDate = StartStopSequencer.removeDateFromRun(run);
+        StartStopSequencer startStop = new StartStopSequencer(run, runMinusDate, sequencer, startDate, endDate, new Date());
+        log.info("Saving to database sequencer start/stop times: " + startStop);
         startStopSequencerRepository.save(startStop);
         return startStop.toString();
     }
