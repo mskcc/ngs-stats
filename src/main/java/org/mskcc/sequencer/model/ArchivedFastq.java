@@ -1,9 +1,6 @@
 package org.mskcc.sequencer.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +18,7 @@ import java.util.List;
 @Getter @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 /**
  * A fastq.gz file that has been archived.
@@ -42,9 +40,20 @@ public class ArchivedFastq {
 
     private Date lastUpdated;
 
-    public static List<ArchivedFastq> walkDirectory(String baseDirectory, String directory) throws IOException  {
-        Path rootPath = new File(baseDirectory + directory).toPath();
-        log.info("Walking directory to find fastq.gz files: " + rootPath);
+    /**
+     * Walks a FASTQ run runDirectory looking for fastq.gz files.
+     *
+     * @param baseDirectory directory where FASTQ runs are written
+     * @param runDirectory run directory
+     * @return
+     * @throws IOException
+     */
+    public static List<ArchivedFastq> walkDirectory(String baseDirectory, String runDirectory) throws IOException  {
+        if (!baseDirectory.endsWith("/"))
+            baseDirectory = baseDirectory + "/";
+
+        Path rootPath = new File(baseDirectory + runDirectory).toPath();
+        log.info("Walking runDirectory to find fastq.gz files: " + rootPath);
 
         String runBaseDirectory = rootPath.getFileName().toString();
         String [] runParts = runBaseDirectory.split("_");

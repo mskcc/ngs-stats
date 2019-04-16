@@ -1,7 +1,9 @@
 package org.mskcc.sequencer;
 
+import org.mskcc.sequencer.model.ArchivedFastq;
 import org.mskcc.sequencer.model.StartStopArchiveFastq;
 import org.mskcc.sequencer.model.StartStopSequencer;
+import org.mskcc.sequencer.repository.ArchivedFastqRepository;
 import org.mskcc.sequencer.repository.StartStopArchiveFastqRepository;
 import org.mskcc.sequencer.repository.StartStopSequencerRepository;
 import org.slf4j.Logger;
@@ -11,9 +13,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("rundone")
@@ -25,6 +30,9 @@ public class SequencerDoneController {
 
     @Autowired
     private StartStopArchiveFastqRepository startStopArchiveFastqRepository;
+
+    @Autowired
+    private ArchivedFastqRepository archivedFastqRepository;
 
 
     @RequestMapping(value = "*", method = RequestMethod.GET)
@@ -51,23 +59,42 @@ public class SequencerDoneController {
         if (statsDir.exists())
             demuxDone = new Date(statsDir.lastModified());
         Date finishedDate = new Date(finished.lastModified());
-        Date archiveDoneDate = new Date(archiveDone.lastModified());
+        Date archivedDate = new Date(archiveDone.lastModified());
 
         // extract sequencer name & run name from directory Name
         String sequencer = StartStopArchiveFastq.getSequencerName(directoryName);
         String run = StartStopArchiveFastq.getRun(directoryName);
 
         StartStopArchiveFastq startStop =
-                new StartStopArchiveFastq(directoryName, run, sequencer, demuxDone, finishedDate, archiveDoneDate, new Date());
-        log.info("Saving to database archiving times: " + startStop);
+                new StartStopArchiveFastq(directoryName, run, sequencer, demuxDone, finishedDate, archivedDate, new Date());
+        log.info("Saving database archiving times: " + startStop);
         startStopArchiveFastqRepository.save(startStop);
+
+        try {
+            List<ArchivedFastq> fastqs = ArchivedFastq.walkDirectory(baseDir, directoryName);
+            archivedFastqRepository.saveAll(fastqs);
+            log.info(fastqs.size() + " fastq.gz file paths saved to the database.");
+        } catch (IOException e) {
+            log.error("Failed to save fastq.gz files to database.", e);
+        }
         return startStop.toString();
     }
 
-    @GetMapping(value = "/{sequencer}/{run}/{lastFile}")
-    public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile) {
-        String baseDir = "/ifs/input/GCL/hiseq/";
+    @GetMapping(value = "/{sequencer}/{run}/{lastFile}/{archive}")
+    public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile,
+                              @PathVariable Optional<String> archive) {
+        String baseDir;
+        if (archive.isPresent())
+            baseDir = "/ifs/archive/GCL/hiseq/";
+        else
+            baseDir = "/ifs/input/GCL/hiseq/";
+
         String runDirectoryName = baseDir + sequencer + "/" + run + "/";
+        if (!new File(runDirectoryName).exists()) {
+            log.error("Run directory does not exist: " + runDirectoryName);
+            return null;
+        }
+        log.info("Grabbing sequencer start/stop times for directory: " + runDirectoryName);
 
         Date startDate = findStartDateTime(runDirectoryName, sequencer);
 
