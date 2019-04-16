@@ -24,6 +24,7 @@ hs_err_pid*
 
 .idea/
 build/*
+out/*
 .gradle/
 
 **/application*.properties
