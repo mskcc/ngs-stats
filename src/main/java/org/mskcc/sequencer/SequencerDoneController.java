@@ -42,6 +42,17 @@ public class SequencerDoneController {
     }
 
 
+    @GetMapping(value = "/latestrun/{project}/{sample}/{run}")
+    public String findMostRecentFastqDir(@PathVariable String project, @PathVariable String sample, @PathVariable String run) {
+        log.info("Finding latest fastq.gz for project:%s sample:%s run:%s \n", project, sample, run);
+        List<ArchivedFastq> fastqs = archivedFastqRepository.findByProjectAndSampleAndRunOrderByFastqLastModifiedDesc(project, sample, run);
+
+        if (fastqs == null)
+            return null;
+        else
+            return fastqs.get(0).getRunBaseDirectory();
+    }
+
     @GetMapping(value = "/fastq/{directoryName}")
     public String trackDemuxAndArchiving(@PathVariable String directoryName) {
         String baseDir = "/ifs/archive/GCL/hiseq/FASTQ/";
