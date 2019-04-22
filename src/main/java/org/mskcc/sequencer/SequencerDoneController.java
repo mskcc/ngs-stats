@@ -18,7 +18,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("rundone")
@@ -43,14 +42,21 @@ public class SequencerDoneController {
 
 
     @GetMapping(value = "/latestrun/{project}/{sample}/{run}")
-    public String findMostRecentFastqDir(@PathVariable String project, @PathVariable String sample, @PathVariable String run) {
-        log.info("Finding latest fastq.gz for project:%s sample:%s run:%s \n", project, sample, run);
+    public ArchivedFastq findMostRecentFastqDir(@PathVariable String project, @PathVariable String sample, @PathVariable String run) {
+        log.info("Finding latest fastq.gz for project:" + project + " sample:" + sample + " run:" + run);
         List<ArchivedFastq> fastqs = archivedFastqRepository.findByProjectAndSampleAndRunOrderByFastqLastModifiedDesc(project, sample, run);
 
-        if (fastqs == null)
+        if (fastqs == null || fastqs.size() == 0) {
+            // Try query again with project removing leading '0' because from 2016-1-20 & prior fastq.gz files had the leading zero removed
+            if (project.startsWith("0") && sample.contains("_IGO_")) {
+                return findMostRecentFastqDir(project.substring(1), sample.substring(0, sample.indexOf("_IGO_")), run);
+            }
             return null;
-        else
-            return fastqs.get(0).getRunBaseDirectory();
+        } else {
+            ArchivedFastq fastq = fastqs.get(0);
+            log.info("Found fastq.gz: " + fastq);
+            return fastq;
+        }
     }
 
     @GetMapping(value = "/fastq/{directoryName}")
@@ -91,14 +97,9 @@ public class SequencerDoneController {
         return startStop.toString();
     }
 
-    @GetMapping(value = "/{sequencer}/{run}/{lastFile}/{archive}")
-    public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile,
-                              @PathVariable Optional<String> archive) {
-        String baseDir;
-        if (archive.isPresent())
-            baseDir = "/ifs/archive/GCL/hiseq/";
-        else
-            baseDir = "/ifs/input/GCL/hiseq/";
+    @GetMapping(value = "/{sequencer}/{run}/{lastFile}")
+    public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile) {
+        String baseDir = "/ifs/input/GCL/hiseq/";
 
         String runDirectoryName = baseDir + sequencer + "/" + run + "/";
         if (!new File(runDirectoryName).exists()) {
