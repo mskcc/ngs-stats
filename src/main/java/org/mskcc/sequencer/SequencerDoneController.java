@@ -59,6 +59,13 @@ public class SequencerDoneController {
         }
     }
 
+    @GetMapping(value = "/latestpoolednormal/{run}")
+    public List<ArchivedFastq> findMostRecentFastqDir(@PathVariable String run) {
+        log.info("Finding latest pooled normal fastq.gz for run:" + run);
+        List<ArchivedFastq> fastqs = archivedFastqRepository.findByProjectAndRunOrderByFastqLastModifiedDesc("POOLEDNORMALS", run);
+        return fastqs;
+    }
+
     @GetMapping(value = "/fastq/{directoryName}")
     public String trackDemuxAndArchiving(@PathVariable String directoryName) {
         String baseDir = "/ifs/archive/GCL/hiseq/FASTQ/";
