@@ -2,6 +2,7 @@ package org.mskcc.picardstats.model;
 
 
 import lombok.ToString;
+import org.mskcc.domain.picardstats.AlignmentStats;
 
 import javax.persistence.*;
 import java.io.File;
@@ -22,15 +23,16 @@ public class AlignmentSummaryMetrics {
     @Column(length = 32)
     public String md5RRS;
 
-    public enum Category { UNPAIRED, FIRST_OF_PAIR, SECOND_OF_PAIR, PAIR }
-
     /**
      * One of either UNPAIRED (for a fragment run), FIRST_OF_PAIR when metrics are for only the
      * first read in a paired run, SECOND_OF_PAIR when the metrics are for only the second read
      * in a paired run or PAIR when the metrics are aggregated for both first and second reads
      * in a pair.
      */
-    public Category CATEGORY;
+    public AlignmentStats.Category CATEGORY;
+    @OneToOne
+    @JoinColumn(name = "filename")
+    private PicardFile picardFile;
 
     /**
      * The total number of reads including all PF and non-PF reads. When CATEGORY equals PAIR
@@ -160,45 +162,6 @@ public class AlignmentSummaryMetrics {
      */
     public double PCT_ADAPTER;
 
-    /**
-     * UNPAIRED_READS_EXAMINED is a column in the mark duplicates stats file which is costly to run, the same result can
-     * be derived from the AM.txt file for PAIRED end runs by the caldulation: (TOTAL_READS - READS_ALIGNED_IN_PAIRS) / 2
-     * For UNPAIRED this function just returns TOTAL_READS.
-     * @return UNPAIRED_READS
-     */
-    public Long getUnpairedReads() {
-        if (CATEGORY.equals(Category.PAIR)) {
-            return (TOTAL_READS - READS_ALIGNED_IN_PAIRS) / 2L;
-        } else if (CATEGORY.equals(Category.UNPAIRED)) {
-            return TOTAL_READS;
-        }
-        return null;
-    }
-
-    public static List<AlignmentSummaryMetrics> readFile(File file, String md5RRS) throws FileNotFoundException {
-        Scanner scan = new Scanner(file);
-        for (int i=0;i < 7;i++) {
-            if (scan.hasNext())
-                scan.nextLine();
-            else {
-                System.err.println("File is not in the correct format, ignoring:" + file.getName());
-                return null;
-            }
-        }
-
-        scan.useDelimiter("\t");
-        List<AlignmentSummaryMetrics> amList = new ArrayList<>();
-        int lineCount = 0;
-        while (scan.hasNext()) {
-            String line = scan.nextLine();
-            if (line.contains("PAIR")) {
-                AlignmentSummaryMetrics am = parseLine(line, file.getName(), md5RRS);
-                amList.add(am);
-            }
-        }
-        return amList;
-    }
-
     //CATEGORY	BAD_CYCLES	STRAND_BALANCE	PCT_CHIMERAS	PCT_ADAPTER	SAMPLE	LIBRARY	READ_GROUP
     //FIRST_OF_PAIR	99865176	99865176	1	0	99541201	0.996756	9944286068	90230194	9030494459	8874341128	0	0.002737	0.002499	0.000108	101	99261598	0.997191	00.500459	0.009383	0.000001
     protected static AlignmentSummaryMetrics parseLine(String line, String filename, String md5RRS) {
@@ -207,7 +170,7 @@ public class AlignmentSummaryMetrics {
         AlignmentSummaryMetrics am = new AlignmentSummaryMetrics();
         am.filename = filename;
         am.md5RRS = md5RRS;
-        am.CATEGORY = Category.valueOf(parts[0]);
+        am.CATEGORY = AlignmentStats.Category.valueOf(parts[0]);
         am.TOTAL_READS = Long.parseLong(parts[1]);
         am.PF_READS = Long.parseLong(parts[2]);
         am.PCT_PF_READS = Double.parseDouble(parts[3]);
@@ -231,5 +194,46 @@ public class AlignmentSummaryMetrics {
         am.PCT_ADAPTER = Double.parseDouble(parts[21]);
 
         return am;
+    }
+
+    public static List<AlignmentSummaryMetrics> readFile(File file, String md5RRS) throws FileNotFoundException {
+        Scanner scan = new Scanner(file);
+        for (int i = 0; i < 7; i++) {
+            if (scan.hasNext())
+                scan.nextLine();
+            else {
+                System.err.println("File is not in the correct format, ignoring:" + file.getName());
+                return null;
+            }
+        }
+
+        scan.useDelimiter("\t");
+        List<AlignmentSummaryMetrics> amList = new ArrayList<>();
+        int lineCount = 0;
+        while (scan.hasNext()) {
+            String line = scan.nextLine();
+            if (line.contains("PAIR")) {
+                AlignmentSummaryMetrics am = parseLine(line, file.getName(), md5RRS);
+                amList.add(am);
+            }
+        }
+        return amList;
+    }
+
+    /**
+     * UNPAIRED_READS_EXAMINED is a column in the mark duplicates stats file which is costly to run, the same result can
+     * be derived from the AM.txt file for PAIRED end runs by the caldulation: (TOTAL_READS - READS_ALIGNED_IN_PAIRS)
+     * / 2
+     * For UNPAIRED this function just returns TOTAL_READS.
+     *
+     * @return UNPAIRED_READS
+     */
+    public Long getUnpairedReads() {
+        if (CATEGORY.equals(AlignmentStats.Category.PAIR)) {
+            return (TOTAL_READS - READS_ALIGNED_IN_PAIRS) / 2L;
+        } else if (CATEGORY.equals(AlignmentStats.Category.UNPAIRED)) {
+            return TOTAL_READS;
+        }
+        return null;
     }
 }

@@ -1,5 +1,7 @@
 package org.mskcc.picardstats;
 
+import org.mskcc.domain.picardstats.AlignmentStats;
+import org.mskcc.domain.picardstats.PicardStats;
 import org.mskcc.picardstats.model.*;
 import org.mskcc.picardstats.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class PicardStatsController {
@@ -38,6 +43,8 @@ public class PicardStatsController {
     @Autowired
     private PicardFileRepository picardFileRepository;
 
+    @Autowired
+    private PicardFileToStatsConverter picarfFileToPicardStatsConverter;
 
     /**
      * Returns the Picard stats for the pooled normal samples if they were added to the run.
@@ -66,8 +73,8 @@ public class PicardStatsController {
                 case "AM":
                     List<AlignmentSummaryMetrics> am = amRepository.findByFilename(pf.getFilename());
                     for (AlignmentSummaryMetrics x : am) {
-                        if (x.CATEGORY == AlignmentSummaryMetrics.Category.UNPAIRED ||
-                                x.CATEGORY == AlignmentSummaryMetrics.Category.PAIR)
+                        if (x.CATEGORY == AlignmentStats.Category.UNPAIRED ||
+                                x.CATEGORY == AlignmentStats.Category.PAIR)
                             stats.addAM(x);
                     }
                     break;
@@ -126,6 +133,18 @@ public class PicardStatsController {
         String msg = "DONE. Elampsed time (ms): " + elapsedTime;
         System.out.println(msg);
         return msg;
+    }
+
+    @GetMapping(value = "/picardstats/run/{runId}")
+    public List<PicardStats> getPicardStatsByRunId(@PathVariable String runId) {
+        List<PicardFile> picardFiles = picardFileRepository.findStatsByRun(runId);
+
+        List<PicardStats> picardStats = new ArrayList<>();
+        for (PicardFile runStat : picardFiles) {
+            picardStats.add(picarfFileToPicardStatsConverter.convert(runStat));
+        }
+
+        return picardStats;
     }
 
     /*

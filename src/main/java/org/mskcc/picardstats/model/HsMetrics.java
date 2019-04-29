@@ -16,6 +16,10 @@ public class HsMetrics {
     @Column(length = 32)
     public String md5RRS;
 
+    @OneToOne
+    @JoinColumn(name = "filename")
+    private PicardFile picardFile;
+
     public String BAIT_SET;
 
     public long GENOME_SIZE;

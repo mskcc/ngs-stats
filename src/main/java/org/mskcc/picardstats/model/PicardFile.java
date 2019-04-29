@@ -4,7 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import java.io.File;
 import java.util.Date;
 
@@ -26,6 +29,27 @@ public class PicardFile {
     @Column(length = 32)
     private String md5RRS;
     private boolean parseOK = true; // if the format is bad or unrecognized and parsing fails set to false
+
+    @OneToOne(mappedBy = "picardFile")
+    private AlignmentSummaryMetrics alignmentSummaryMetrics;
+
+    @OneToOne(mappedBy = "picardFile")
+    private CpcgMetrics cpcgMetrics;
+
+    @OneToOne(mappedBy = "picardFile")
+    private DuplicationMetrics duplicationMetrics;
+
+    @OneToOne(mappedBy = "picardFile")
+    private HsMetrics hsMetrics;
+
+    @OneToOne(mappedBy = "picardFile")
+    private QMetric qMetric;
+
+    @OneToOne(mappedBy = "picardFile")
+    private RnaSeqMetrics rnaSeqMetrics;
+
+    @OneToOne(mappedBy = "picardFile")
+    private WgsMetrics wgsMetrics;
 
     public PicardFile() {}
 

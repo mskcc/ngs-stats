@@ -18,6 +18,10 @@ public class CpcgMetrics {
     @Column(length = 32)
     public String md5RRS;
 
+    @OneToOne
+    @JoinColumn(name = "filename")
+    private PicardFile picardFile;
+
     /** The name of the sample being assayed. */
     public String SAMPLE_ALIAS;
     /** The name of the library being assayed. */
