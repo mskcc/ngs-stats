@@ -104,9 +104,14 @@ public class SequencerDoneController {
         return startStop.toString();
     }
 
-    @GetMapping(value = "/{sequencer}/{run}/{lastFile}")
-    public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile) {
-        String baseDir = "/ifs/input/GCL/hiseq/";
+    @GetMapping(value = {"/{sequencer}/{run}/{lastFile}", "/{sequencer}/{run}/{lastFile}/{useArchive}"})
+    public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile,
+                              @PathVariable(required = false) String useArchive) {
+        String baseDir;
+        if (useArchive == null)
+            baseDir = "/ifs/input/GCL/hiseq/";
+        else
+            baseDir = "/ifs/archive/GCL/hiseq/";
 
         String runDirectoryName = baseDir + sequencer + "/" + run + "/";
         if (!new File(runDirectoryName).exists()) {
