@@ -147,6 +147,18 @@ public class PicardStatsController {
         return picardStats;
     }
 
+    @GetMapping(value = "/picardstats/run-date/{runDate}")
+    public List<PicardStats> getPicardStatsByDate(@PathVariable String runDate) {
+        List<PicardFile> picardFiles = picardFileRepository.findStatsByRunDate(runDate);
+
+        List<PicardStats> picardStats = new ArrayList<>();
+        for (PicardFile runStat : picardFiles) {
+            picardStats.add(picarfFileToPicardStatsConverter.convert(runStat));
+        }
+
+        return picardStats;
+    }
+
     /*
     Include files modified in the last n days.
      */
