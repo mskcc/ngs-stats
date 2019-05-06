@@ -21,9 +21,13 @@ public class QCSiteStats {
     // ALIGNMENT SUMMARY METRICS
     private double PCT_ADAPTER;
     private long unpairedReads; // derived field
+    public long TOTAL_READS;
+    public long PF_READS_ALIGNED;
+    public long READS_ALIGNED_IN_PAIRS;
 
     // Duplication Metrics
     private long READ_PAIRS_EXAMINED;
+    private long READ_PAIRS_DUPLICATES;
     private long UNMAPPED_READS;
     private Double PERCENT_DUPLICATION;
 
@@ -32,6 +36,7 @@ public class QCSiteStats {
     private Double PCT_10X;
     private Double PCT_30X;
     private Double PCT_100X;
+    private long GENOME_TERRITORY;
 
     // RNASEQ
     private Double PCT_UTR_BASES;
@@ -42,7 +47,13 @@ public class QCSiteStats {
     private double MEAN_TARGET_COVERAGE;
     private double ZERO_CVG_TARGETS_PCT;
     private double PCT_OFF_BAIT;
+    private String BAIT_SET;
+    private double PCT_TARGET_BASES_10X;
+    private double PCT_TARGET_BASES_30X;
+    private double PCT_TARGET_BASES_100X;
 
+    //Q Metrics
+    private double MSK_Q;
 
     public QCSiteStats() {}
 
@@ -56,18 +67,24 @@ public class QCSiteStats {
     public void addAM(AlignmentSummaryMetrics am) {
         this.PCT_ADAPTER = am.PCT_ADAPTER;
         this.unpairedReads = am.getUnpairedReads();
+        this.TOTAL_READS = am.TOTAL_READS;
     }
 
     public void addHS(HsMetrics hs) {
         this.MEAN_TARGET_COVERAGE = hs.MEAN_TARGET_COVERAGE;
         this.ZERO_CVG_TARGETS_PCT = hs.ZERO_CVG_TARGETS_PCT;
         this.PCT_OFF_BAIT = hs.PCT_OFF_BAIT;
+        this.BAIT_SET = hs.BAIT_SET;
+        this.PCT_TARGET_BASES_10X = hs.PCT_TARGET_BASES_10X;
+        this.PCT_TARGET_BASES_30X = hs.PCT_TARGET_BASES_30X;
+        this.PCT_TARGET_BASES_100X = hs.PCT_TARGET_BASES_100X;
     }
 
     public void addDM(DuplicationMetrics dm) {
         this.READ_PAIRS_EXAMINED = dm.READ_PAIRS_EXAMINED;
         this.UNMAPPED_READS = dm.UNMAPPED_READS;
         this.PERCENT_DUPLICATION = dm.PERCENT_DUPLICATION;
+        this.READ_PAIRS_DUPLICATES = dm.READ_PAIR_DUPLICATES;
     }
 
     public void addWGS(WgsMetrics wgs) {
@@ -75,6 +92,11 @@ public class QCSiteStats {
         this.PCT_10X = wgs.PCT_10X;
         this.PCT_30X = wgs.PCT_30X;
         this.PCT_100X = wgs.PCT_100X;
+        this.GENOME_TERRITORY = wgs.GENOME_TERRITORY;
+    }
+
+    public void addQ(QMetric qMetric) {
+        this.MSK_Q = qMetric.mskQ;
     }
 
     @Override

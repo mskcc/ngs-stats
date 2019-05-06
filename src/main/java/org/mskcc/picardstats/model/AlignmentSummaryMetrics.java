@@ -2,7 +2,6 @@ package org.mskcc.picardstats.model;
 
 
 import lombok.ToString;
-import org.mskcc.domain.picardstats.AlignmentStats;
 
 import javax.persistence.*;
 import java.io.File;
@@ -29,7 +28,43 @@ public class AlignmentSummaryMetrics {
      * in a paired run or PAIR when the metrics are aggregated for both first and second reads
      * in a pair.
      */
-    public AlignmentStats.Category CATEGORY;
+    public Category CATEGORY;
+
+    //CATEGORY	BAD_CYCLES	STRAND_BALANCE	PCT_CHIMERAS	PCT_ADAPTER	SAMPLE	LIBRARY	READ_GROUP
+    //FIRST_OF_PAIR	99865176	99865176	1	0	99541201	0.996756	9944286068	90230194	9030494459
+    // 8874341128	0	0.002737	0.002499	0.000108	101	99261598	0.997191	00.500459	0.009383	0
+    // .000001
+    protected static AlignmentSummaryMetrics parseLine(String line, String filename, String md5RRS) {
+        String[] parts = line.split("\t");
+
+        AlignmentSummaryMetrics am = new AlignmentSummaryMetrics();
+        am.filename = filename;
+        am.md5RRS = md5RRS;
+        am.CATEGORY = AlignmentSummaryMetrics.Category.valueOf(parts[0]);
+        am.TOTAL_READS = Long.parseLong(parts[1]);
+        am.PF_READS = Long.parseLong(parts[2]);
+        am.PCT_PF_READS = Double.parseDouble(parts[3]);
+        am.PF_NOISE_READS = Long.parseLong(parts[4]);
+        am.PF_READS_ALIGNED = Long.parseLong(parts[5]);
+        am.PCT_PF_READS_ALIGNED = Double.parseDouble(parts[6]);
+        am.PF_ALIGNED_BASES = Long.parseLong(parts[7]);
+        am.PF_HQ_ALIGNED_READS = Long.parseLong(parts[8]);
+        am.PF_HQ_ALIGNED_BASES = Long.parseLong(parts[9]);
+        am.PF_HQ_ALIGNED_Q20_BASES = Long.parseLong(parts[10]);
+        am.PF_HQ_MEDIAN_MISMATCHES = Double.parseDouble(parts[11]);
+        am.PF_MISMATCH_RATE = Double.parseDouble(parts[12]);
+        am.PF_HQ_ERROR_RATE = Double.parseDouble(parts[13]);
+        am.PF_INDEL_RATE = Double.parseDouble(parts[14]);
+        am.MEAN_READ_LENGTH = Double.parseDouble(parts[15]);
+        am.READS_ALIGNED_IN_PAIRS = Long.parseLong(parts[16]);
+        am.PCT_READS_ALIGNED_IN_PAIRS = Double.parseDouble(parts[17]);
+        am.BAD_CYCLES = Long.parseLong(parts[18]);
+        am.STRAND_BALANCE = Double.parseDouble(parts[19]);
+        am.PCT_CHIMERAS = Double.parseDouble(parts[20]);
+        am.PCT_ADAPTER = Double.parseDouble(parts[21]);
+
+        return am;
+    }
     @OneToOne
     @JoinColumn(name = "filename")
     private PicardFile picardFile;
@@ -162,38 +197,21 @@ public class AlignmentSummaryMetrics {
      */
     public double PCT_ADAPTER;
 
-    //CATEGORY	BAD_CYCLES	STRAND_BALANCE	PCT_CHIMERAS	PCT_ADAPTER	SAMPLE	LIBRARY	READ_GROUP
-    //FIRST_OF_PAIR	99865176	99865176	1	0	99541201	0.996756	9944286068	90230194	9030494459	8874341128	0	0.002737	0.002499	0.000108	101	99261598	0.997191	00.500459	0.009383	0.000001
-    protected static AlignmentSummaryMetrics parseLine(String line, String filename, String md5RRS) {
-        String [] parts = line.split("\t");
-
-        AlignmentSummaryMetrics am = new AlignmentSummaryMetrics();
-        am.filename = filename;
-        am.md5RRS = md5RRS;
-        am.CATEGORY = AlignmentStats.Category.valueOf(parts[0]);
-        am.TOTAL_READS = Long.parseLong(parts[1]);
-        am.PF_READS = Long.parseLong(parts[2]);
-        am.PCT_PF_READS = Double.parseDouble(parts[3]);
-        am.PF_NOISE_READS = Long.parseLong(parts[4]);
-        am.PF_READS_ALIGNED = Long.parseLong(parts[5]);
-        am.PCT_PF_READS_ALIGNED = Double.parseDouble(parts[6]);
-        am.PF_ALIGNED_BASES = Long.parseLong(parts[7]);
-        am.PF_HQ_ALIGNED_READS = Long.parseLong(parts[8]);
-        am.PF_HQ_ALIGNED_BASES = Long.parseLong(parts[9]);
-        am.PF_HQ_ALIGNED_Q20_BASES = Long.parseLong(parts[10]);
-        am.PF_HQ_MEDIAN_MISMATCHES = Double.parseDouble(parts[11]);
-        am.PF_MISMATCH_RATE = Double.parseDouble(parts[12]);
-        am.PF_HQ_ERROR_RATE = Double.parseDouble(parts[13]);
-        am.PF_INDEL_RATE = Double.parseDouble(parts[14]);
-        am.MEAN_READ_LENGTH = Double.parseDouble(parts[15]);
-        am.READS_ALIGNED_IN_PAIRS = Long.parseLong(parts[16]);
-        am.PCT_READS_ALIGNED_IN_PAIRS = Double.parseDouble(parts[17]);
-        am.BAD_CYCLES = Long.parseLong(parts[18]);
-        am.STRAND_BALANCE = Double.parseDouble(parts[19]);
-        am.PCT_CHIMERAS = Double.parseDouble(parts[20]);
-        am.PCT_ADAPTER = Double.parseDouble(parts[21]);
-
-        return am;
+    /**
+     * UNPAIRED_READS_EXAMINED is a column in the mark duplicates stats file which is costly to run, the same result can
+     * be derived from the AM.txt file for PAIRED end runs by the caldulation: (TOTAL_READS - READS_ALIGNED_IN_PAIRS)
+     * / 2
+     * For UNPAIRED this function just returns TOTAL_READS.
+     *
+     * @return UNPAIRED_READS
+     */
+    public Long getUnpairedReads() {
+        if (CATEGORY.equals(AlignmentSummaryMetrics.Category.PAIR)) {
+            return (TOTAL_READS - READS_ALIGNED_IN_PAIRS) / 2L;
+        } else if (CATEGORY.equals(AlignmentSummaryMetrics.Category.UNPAIRED)) {
+            return TOTAL_READS;
+        }
+        return null;
     }
 
     public static List<AlignmentSummaryMetrics> readFile(File file, String md5RRS) throws FileNotFoundException {
@@ -220,20 +238,5 @@ public class AlignmentSummaryMetrics {
         return amList;
     }
 
-    /**
-     * UNPAIRED_READS_EXAMINED is a column in the mark duplicates stats file which is costly to run, the same result can
-     * be derived from the AM.txt file for PAIRED end runs by the caldulation: (TOTAL_READS - READS_ALIGNED_IN_PAIRS)
-     * / 2
-     * For UNPAIRED this function just returns TOTAL_READS.
-     *
-     * @return UNPAIRED_READS
-     */
-    public Long getUnpairedReads() {
-        if (CATEGORY.equals(AlignmentStats.Category.PAIR)) {
-            return (TOTAL_READS - READS_ALIGNED_IN_PAIRS) / 2L;
-        } else if (CATEGORY.equals(AlignmentStats.Category.UNPAIRED)) {
-            return TOTAL_READS;
-        }
-        return null;
-    }
+    public enum Category {UNPAIRED, FIRST_OF_PAIR, SECOND_OF_PAIR, PAIR}
 }
