@@ -2,6 +2,9 @@ package org.mskcc.picardstats;
 
 import org.mskcc.picardstats.model.*;
 import org.mskcc.picardstats.repository.*;
+import org.mskcc.sequencer.SequencerDoneController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +15,7 @@ import java.util.*;
 
 @RestController
 public class PicardStatsController {
+    private static Logger log = LoggerFactory.getLogger(SequencerDoneController.class);
 
     private static final String BASE_STATS_DIR = "/ifs/data/BIC/Stats/hiseq/DONE/";  // "/Users/mcmanamd/Downloads/DONE/DONE/";
 
@@ -38,7 +42,6 @@ public class PicardStatsController {
     @Autowired
     private PicardFileRepository picardFileRepository;
 
-
     /**
      * Returns the Picard stats for the pooled normal samples if they were added to the run.
      * @param runId
@@ -55,7 +58,15 @@ public class PicardStatsController {
             return null;
         }
 
-        HashMap<String, QCSiteStats> statsMap = new HashMap<>(); // Run-Request-Sample to QCSiteStats
+        Map<String, QCSiteStats> statsMap = convertPicardFilesToQcStats(files);
+
+        System.out.println("Elapsed time pooled normal stats queries (ms): " + (System.currentTimeMillis() - startTime));
+        List<QCSiteStats> result = new ArrayList(statsMap.values());
+        return result;
+    }
+
+    public Map<String, QCSiteStats> convertPicardFilesToQcStats(List<PicardFile> files) {
+        Map<String, QCSiteStats> statsMap = new HashMap<>(); // Run-Request-Sample to QCSiteStats
         for (PicardFile pf : files) {
             if (!pf.isParseOK())
                 continue;
@@ -83,15 +94,16 @@ public class PicardStatsController {
                     List<HsMetrics> hs = hsRepository.findByFilename(pf.getFilename());
                     stats.addHS(hs.get(0));
                     break;
+                case "mskQ":
+                    List<QMetric> qMetrics = qMetricsRepository.findByFilename(pf.getFilename());
+                    stats.addQ(qMetrics.get(0));
+                    break;
                 default:
                     System.out.println("File type ignored by QC site:" + pf.getFileType());
             }
             statsMap.put(pf.getMd5RRS(), stats);
         }
-
-        System.out.println("Elapsed time pooled normal stats queries (ms): " + (System.currentTimeMillis() - startTime));
-        List<QCSiteStats> result = new ArrayList(statsMap.values());
-        return result;
+        return statsMap;
     }
 
     @GetMapping(value = "/picardstats/update/{days}")
@@ -126,6 +138,27 @@ public class PicardStatsController {
         String msg = "DONE. Elampsed time (ms): " + elapsedTime;
         System.out.println(msg);
         return msg;
+    }
+
+    @GetMapping(value = "/picardstats/run/{runId}")
+    public Map<String, QCSiteStats> getPicardStatsByRunId(@PathVariable String runId) {
+        List<PicardFile> picardFiles = picardFileRepository.findByRun(runId);
+
+        Map<String, QCSiteStats> qcSiteStatsMap = convertPicardFilesToQcStats(picardFiles);
+
+        return qcSiteStatsMap;
+    }
+
+    @GetMapping(value = "/picardstats/run-date/{dateInMilis}")
+    public Map<String, QCSiteStats> getPicardStatsByDate(@PathVariable long dateInMilis) {
+        Date date = new Date(dateInMilis);
+        log.info(String.format("Retrieving picard stats for date %d (%s)", dateInMilis, date));
+
+        List<PicardFile> picardFiles = picardFileRepository.findByLastModifiedGreaterThan(date);
+
+        Map<String, QCSiteStats> qcSiteStatsMap = convertPicardFilesToQcStats(picardFiles);
+
+        return qcSiteStatsMap;
     }
 
     /*

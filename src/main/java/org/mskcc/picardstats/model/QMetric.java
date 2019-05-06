@@ -16,6 +16,10 @@ public class QMetric {
     @Column(length = 32)
     public String md5RRS;
 
+    @OneToOne
+    @JoinColumn(name = "filename")
+    private PicardFile picardFile;
+
     public double mskQ;
 
     public QMetric() {}

@@ -18,6 +18,10 @@ public class RnaSeqMetrics {
     @Column(length = 32)
     public String md5RRS;
 
+    @OneToOne
+    @JoinColumn(name = "filename")
+    private PicardFile picardFile;
+
     public long PF_BASES;
     public long PF_ALIGNED_BASES;
     @Column(nullable = true)

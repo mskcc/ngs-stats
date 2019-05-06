@@ -19,6 +19,10 @@ public class DuplicationMetrics {
     @Column(length = 32)
     public String md5RRS;
 
+    @OneToOne
+    @JoinColumn(name = "filename")
+    private PicardFile picardFile;
+
     public String LIBRARY;
     public long UNPAIRED_READS_EXAMINED;
     public long READ_PAIRS_EXAMINED;

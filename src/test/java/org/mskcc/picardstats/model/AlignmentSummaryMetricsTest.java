@@ -2,7 +2,8 @@ package org.mskcc.picardstats.model;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mskcc.picardstats.model.AlignmentSummaryMetrics.Category;
 
 class AlignmentSummaryMetricsTest {
 
@@ -15,7 +16,7 @@ class AlignmentSummaryMetricsTest {
 
         String line2 = "SECOND_OF_PAIR\t439205677\t439205677\t1\t0\t438567131\t0.998546\t65602540578\t419783248\t62939721194\t61441242394\t0\t0.004006\t0.003556\t0.000204\t150.720584\t438514544\t0.99988\t0\t0.500209\t0.016767\t0";
         AlignmentSummaryMetrics am2 = AlignmentSummaryMetrics.parseLine(line2, "", null);
-        assertEquals(AlignmentSummaryMetrics.Category.SECOND_OF_PAIR, am2.CATEGORY);
+        assertEquals(Category.SECOND_OF_PAIR, am2.CATEGORY);
         assertEquals(0.016767d, am2.PCT_CHIMERAS);
     }
 }
