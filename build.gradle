@@ -40,6 +40,7 @@ dependencies {
 	implementation ('org.springframework.boot:spring-boot-starter-tomcat')
 	
 	runtimeOnly('mysql:mysql-connector-java')
+	
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	testImplementation('org.junit.jupiter:junit-jupiter-api:5.3.1')
 	testRuntimeOnly ('org.junit.jupiter:junit-jupiter-engine:5.3.1')
@@ -47,8 +48,6 @@ dependencies {
 	// https://projectlombok.org
 	compileOnly 'org.projectlombok:lombok:1.18.6'
 //	annotationProcessor 'org.projectlombok:lombok:1.18.6'
-
-	compile 'org.mskcc.common:common-domain:2.13.0-SNAPSHOT'
 }
 
 uploadArchives {

@@ -8,4 +8,5 @@ import java.util.List;
 public interface ArchivedFastqRepository extends CrudRepository<ArchivedFastq, String> {
     List<ArchivedFastq> findByProjectAndSampleAndRunOrderByFastqLastModifiedDesc(String project, String sample, String run);
     List<ArchivedFastq> findByProjectAndRunOrderByFastqLastModifiedDesc(String project, String run);
+    List<ArchivedFastq> findBySampleStartsWith(String sample);
 }

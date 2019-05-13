@@ -32,3 +32,5 @@ out/*
 
 
 **.DS_Store
+*.kotlin_module
+gradle.properties
