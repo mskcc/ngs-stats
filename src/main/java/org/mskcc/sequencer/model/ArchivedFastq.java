@@ -30,7 +30,7 @@ public class ArchivedFastq {
     private String run;
     private String runBaseDirectory;
     private String project;
-    private String sample;
+    private String sample; // from Jan. 2016 format example: A123456_V3_IGO_07973_8 ie sampleId_IGO_igoId
 
     @Id
     @Column(length = 500)
@@ -39,6 +39,13 @@ public class ArchivedFastq {
     private Date fastqLastModified;
 
     private Date lastUpdated;
+
+    public String getSampleName() {
+        if (sample.contains("_IGO_"))
+            return sample.substring(0, sample.indexOf("_IGO_"));
+        else
+            return sample;
+    }
 
     /**
      * Walks a FASTQ run runDirectory looking for fastq.gz files.

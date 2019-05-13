@@ -3,13 +3,19 @@ package org.mskcc.sequencer;
 import org.mskcc.sequencer.model.ArchivedFastq;
 import org.mskcc.sequencer.model.StartStopArchiveFastq;
 import org.mskcc.sequencer.model.StartStopSequencer;
+import org.mskcc.sequencer.model.dto.SampleQcSummary;
 import org.mskcc.sequencer.repository.ArchivedFastqRepository;
 import org.mskcc.sequencer.repository.StartStopArchiveFastqRepository;
 import org.mskcc.sequencer.repository.StartStopSequencerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -32,6 +38,9 @@ public class SequencerDoneController {
 
     @Autowired
     private ArchivedFastqRepository archivedFastqRepository;
+
+    @Value("${limsEndpoint}")
+    private String limsEndpoint;
 
 
     @RequestMapping(value = "*", method = RequestMethod.GET)
@@ -57,6 +66,42 @@ public class SequencerDoneController {
             log.info("Found fastq.gz: " + fastq);
             return fastq;
         }
+    }
+
+    /**
+     * For external IGO Customers to determine when a fastq is ready and they can start their pipeline.
+     * @param sample
+     * @return
+     */
+    @GetMapping(value = "/sampleigocomplete/{sample}")
+    public List<ArchivedFastq> findDeliveredFastq(@PathVariable String sample) {
+        log.info("Finding delivered fastqs for sample:" + sample);
+
+        if (sample.contains(" "))
+            return null;
+
+        List<ArchivedFastq> fastqs = archivedFastqRepository.findBySampleStartsWith(sample + "_IGO_");
+        if (fastqs != null) {
+            if (sampleIsIGOComplete(sample, fastqs, limsEndpoint)) {
+                return fastqs;
+            }
+        }
+        return null;
+    }
+
+    protected static boolean sampleIsIGOComplete(String sample, List<ArchivedFastq> fastqs, String limsEndpoint) {
+        String url = limsEndpoint + "/LimsRest/getIGOCompleteQC?sampleId=" + sample;
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<List<SampleQcSummary>> statsResponse =
+                restTemplate.exchange(url,
+                        HttpMethod.GET, null, new ParameterizedTypeReference<List<SampleQcSummary>>() {});
+        List<SampleQcSummary> qcSummaries = statsResponse.getBody();
+        if (qcSummaries != null && qcSummaries.size() > 1) {
+            if (sample.equals(qcSummaries.get(0).getSampleName()))
+                return true;
+        }
+        log.info("No IGO complete records found for sample: " + sample);
+        return false;
     }
 
     @GetMapping(value = "/latestpoolednormal/{run}")

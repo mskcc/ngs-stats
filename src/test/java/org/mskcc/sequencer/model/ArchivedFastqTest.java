@@ -25,4 +25,18 @@ class ArchivedFastqTest {
             }
         }
     }
+
+    @Test
+    void getSampleNamePostJan2016() {
+        ArchivedFastq x = new ArchivedFastq();
+        x.setSample("hello_IGO_there");
+        assertEquals("hello", x.getSampleName());
+    }
+
+    @Test
+    void getSampleNameOrig() {
+        ArchivedFastq x = new ArchivedFastq();
+        x.setSample("hello");
+        assertEquals("hello", x.getSampleName());
+    }
 }
