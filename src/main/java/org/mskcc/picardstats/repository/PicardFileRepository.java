@@ -31,7 +31,7 @@ public interface PicardFileRepository extends CrudRepository<PicardFile, String>
     List<Object[]> findWGSStatsForPooledNormals(@Param("run") String run);
 
 
-
+    List<PicardFile> findByRunAndSample(String runId, String sampleId);
 }
 
 

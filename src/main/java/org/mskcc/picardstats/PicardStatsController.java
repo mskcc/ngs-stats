@@ -98,6 +98,14 @@ public class PicardStatsController {
                     List<QMetric> qMetrics = qMetricsRepository.findByFilename(pf.getFilename());
                     stats.addQ(qMetrics.get(0));
                     break;
+                case "RNA":
+                    List<RnaSeqMetrics> rnaSeqMetrics = rnaSeqRepository.findByFilename(pf.getFilename());
+                    stats.addRna(rnaSeqMetrics.get(0));
+                    break;
+                case "oxoG":
+                    List<CpcgMetrics> cpcgMetrics = cpcgRepository.findByFilename(pf.getFilename());
+                    stats.addCpcg(cpcgMetrics.get(0));
+                    break;
                 default:
                     System.out.println("File type ignored by QC site:" + pf.getFileType());
             }
@@ -143,6 +151,16 @@ public class PicardStatsController {
     @GetMapping(value = "/picardstats/run/{runId}")
     public Map<String, QCSiteStats> getPicardStatsByRunId(@PathVariable String runId) {
         List<PicardFile> picardFiles = picardFileRepository.findByRun(runId);
+
+        Map<String, QCSiteStats> qcSiteStatsMap = convertPicardFilesToQcStats(picardFiles);
+
+        return qcSiteStatsMap;
+    }
+
+    @GetMapping(value = "/picardstats/run/{runId}/sample/{sampleId}")
+    public Map<String, QCSiteStats> getPicardStatsByRunIdAndSample(@PathVariable String runId,
+                                                                   @PathVariable String sampleId) {
+        List<PicardFile> picardFiles = picardFileRepository.findByRunAndSample(runId, sampleId);
 
         Map<String, QCSiteStats> qcSiteStatsMap = convertPicardFilesToQcStats(picardFiles);
 
