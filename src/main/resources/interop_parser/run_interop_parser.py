@@ -1,89 +1,150 @@
+# report summary metrics, given run folder path
+# ref: http://illumina.github.io/interop/classillumina_1_1interop_1_1model_1_1summary_1_1stat__summary.html
 
-# report summary metrics, given run folder path 
-# ref: http://illumina.github.io/interop/classillumina_1_1interop_1_1model_1_1summary_1_1stat__summary.html 
-
-from interop import py_interop_run_metrics
-from interop import py_interop_summary 
-from interop import py_interop_run 
+import logging
+import os
 import numpy as np
-import logging 
-import sys 
-import os  
-import subprocess
-from subprocess import Popen, PIPE 
-from pprint import pprint
-import datetime, time
+import requests
+from flask import json
+from settings import NOVASEQ, LIMSREST_BASE_URL, HISEQ_INPUT_PATH
+from detect_new_run import *
+from interop import py_interop_run, py_interop_table
+from interop import py_interop_run_metrics
+from interop import py_interop_summary
+from requests.auth import HTTPBasicAuth
+from utils import *
+import pandas as pd
 
-import csv
-from settings import MACHINES
-from utils import * 
-
-def parse_single(run_folder_path):
-    run_folder = os.path.basename(run_folder_path) 
-    run_metrics = py_interop_run_metrics.run_metrics() 
-    summary = py_interop_summary.run_summary() 
-
+def parse_single_json(run_folder_path, xrange=None):
+    run_folder = os.path.basename(run_folder_path)
+    run_metrics = py_interop_run_metrics.run_metrics()
+    summary = py_interop_summary.run_summary()
     valid_to_load = py_interop_run.uchar_vector(py_interop_run.MetricCount, 0)
     py_interop_run_metrics.list_summary_metrics_to_load(valid_to_load)
-    try: 
+    percent_occupied_df = pd.DataFrame
+    if 'MyRun' not in str(run_folder_path):
+        percent_occupied_df = get_percent_occupied_by_lane(run_folder_path)
+    summary_dict = {}
+    try:
         run_metrics.read(run_folder_path, valid_to_load)
         py_interop_summary.summarize_run_metrics(run_metrics, summary)
-        logging.info("Read {}, Lane {}".format(summary.size(), summary.lane_count()))
- 
-        summary_array = []
-    
-        for read_index in xrange(summary.size()): 
-            for lane_index in xrange(summary.lane_count()): 
+        logging.info("Read: {}, Lane: {}".format(summary.size(), summary.lane_count()))
+        for read_index in range(summary.size()):
+            logging.info("Read {}".format(read_index + 1))
+            summary_dict.setdefault("run", run_folder)
+            for lane_index in range(summary.lane_count()):
                 read_summary = summary.at(read_index)
                 lane_summary = read_summary.at(lane_index)
-                summary_array.append([
-                    run_folder,
-                    parse_runid(run_folder), 
-                    read_summary.read().number(), 
-                    lane_summary.lane(),
-                    parse_float(lane_summary.density().mean()/1000), parse_float(lane_summary.density().stddev()/1000),
-                    parse_float(lane_summary.percent_pf().mean()), parse_float(lane_summary.percent_pf().stddev()),
-                    parse_float(lane_summary.reads()/1000000),
-                    parse_float(lane_summary.reads_pf()/1000000), 
-                    parse_float(lane_summary.percent_gt_q30()),
-                    parse_float(lane_summary.percent_aligned().mean()), parse_float(lane_summary.percent_aligned().stddev()), 
-                    parse_float(lane_summary.error_rate().mean()), parse_float(lane_summary.error_rate().stddev())
-                ])
-        with open(OUT_PATH, 'ab') as file: 
-            writer = csv.writer(file)
-            for s in summary_array: 
-                writer.writerow(s) 
-    except Exception, ex: 
-        logging.warn("Skipping - ERROR: %s - %s"%(run_folder, str(ex)))
+                summary_dict.setdefault("data", []).append({
+                    "runname": parse_runid(run_folder),
+                    "read": read_summary.read().number(),
+                    "lane": lane_summary.lane(),
+                    "density": parse_float(lane_summary.density().mean() / 1000),
+                    "density_stddev": parse_float(lane_summary.density().stddev() / 1000),
+                    "clusterpf": parse_float(lane_summary.percent_pf().mean()),
+                    "clusterpf_stddev": parse_float(lane_summary.percent_pf().stddev()),
+                    "readsm": parse_float(lane_summary.reads() / 1000000),
+                    "readspfm": parse_float(lane_summary.reads_pf() / 1000000),
+                    "q30": parse_float(lane_summary.percent_gt_q30()),
+                    "aligned": parse_float(lane_summary.percent_aligned().mean()),
+                    "aligned_stddev": parse_float(lane_summary.percent_aligned().stddev()),
+                    "errorrate": parse_float(lane_summary.error_rate().mean()),
+                    "errorrate_stddev": parse_float(lane_summary.error_rate().stddev()),
+                    "percent_occupied": parse_float(parse_lane_occupancy(lane_index, percent_occupied_df))
+                })
+        return summary_dict
+    except Exception as ex:
+        logging.warn("Skipping - ERROR: %s - %s" % (run_folder, str(ex)))
 
-def main(runs): 
-    logging.basicConfig(level = logging.INFO)
-    for run_folder_path in runs: 
+
+def parse_runs(runs):
+    data = []
+    for run_folder_path in runs:
         run_folder = os.path.basename(run_folder_path)
         logging.info("Processing run folder: {}".format(run_folder))
-        parse_single(run_folder_path)
+        json = parse_single_json(run_folder_path)
+        if json:
+            data.append(json)
+    return data
 
-def listdir_shell(dt_start, dt_end):
-    files = [] 
-    for machine in MACHINES: 
-        path = os.path.join(BASE_PATH, machine)
-        if os.path.isdir(path): 
-            files += filterdir_shell(path, dt_start, dt_end)
-        else: 
-            logging.warn("path not found: {}".format(path))
-    return files 
 
-def filterdir_shell(path, dt_start, dt_end): 
-    cmd = 'find '+ path + ' -mindepth 1 -maxdepth 1 -type d -newermt '+ dt_start +' ! -newermt ' + dt_end 
-    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
-    return [v.rstrip('\n') for v in process.stdout.readlines()]
+def get_percent_occupied_by_lane(run_folder_path):
+    df = pd.DataFrame
+    for item in NOVASEQ:
+        if 'myrun' not in run_folder_path.lower() and item.lower() in run_folder_path.lower():
+            valid_to_load = py_interop_run.uchar_vector(py_interop_run.MetricCount, 0)
+            valid_to_load[py_interop_run.ExtendedTile] = 1
+            valid_to_load[py_interop_run.Tile] = 1
+            valid_to_load[py_interop_run.Extraction] = 1
+            run_metrics = py_interop_run_metrics.run_metrics()
+            run_metrics.read(run_folder_path, valid_to_load)
+            columns = py_interop_table.imaging_column_vector()
+            py_interop_table.create_imaging_table_columns(run_metrics, columns)
+            headers = get_headers(columns, run_folder_path)
+            column_count = py_interop_table.count_table_columns(columns)
+            row_offsets = py_interop_table.map_id_offset()
+            py_interop_table.count_table_rows(run_metrics, row_offsets)
+            data = np.zeros((row_offsets.size(), column_count), dtype=np.float32)
+            py_interop_table.populate_imaging_table_data(run_metrics, columns, row_offsets, data.ravel())
 
-BASE_PATH = "/ifs/archive/GCL/hiseq/"
-OUT_PATH="/home/upops/interop-feng/out-{}.csv".format(time.time())
-dt_start = datetime.datetime(2018, 8, 1)
-dt_end = datetime.datetime(2019, 2, 1)
+            header_subset = ["Lane", "Tile", "Cycle", "% Occupied"]
+            header_index = [(header, headers.index(header)) for header in header_subset]
+            ids = np.asarray([headers.index(header) for header in header_subset[:3]])
 
-if __name__ == '__main__': 
-    files = listdir_shell(dt_start.strftime("%Y-%m-%d") , dt_end.strftime("%Y-%m-%d") )
+            data_for_selected_header_subset = []
+            for label, col in header_index:
+                data_for_selected_header_subset.append(
+                    (label, pd.Series([val for val in data[:, col]], index=[tuple(r) for r in data[:, ids]])))
+
+            df = pd.DataFrame.from_dict(dict(data_for_selected_header_subset))
+    return df 
+
+
+def parse_lane_occupancy(lane_index, df):
+    percent_occupied = 0.0
+    if df.empty:
+        return 0.0
+    else:
+        for index, row in df.iterrows():
+            if row['Lane'] == lane_index + 1:
+                percent_occupied = row['% Occupied']
+                return percent_occupied
+
+
+def get_headers(columns, run_folder_path):
+    headers = []
+    try:
+        for i in range(columns.size()):
+            column = columns[i]
+            if column.has_children():
+                headers.extend([column.name() + "(" + subname + ")" for subname in column.subcolumns()])
+            else:
+                headers.append(column.name())
+    except Exception as ex: \
+            logging.error("Error parsing data for lane occupancy metrics - ERROR: %s - %s" % (run_folder_path, str(ex)))
+
+    return headers
+
+
+def post_interopdata(data):
+    with(open("Connect.txt")) as connectInfo:
+        username = connectInfo.readline().strip()
+        password = connectInfo.readline().strip()
+        resp = requests.post(url=LIMSREST_BASE_URL + "addInteropData", data=json.dumps(data),
+                             auth=HTTPBasicAuth(username, password), verify=False)
+        logging.info(resp.text)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(filename='logs/interop-{}.log'.format(datetime.datetime.now().strftime('%Y_%m_%d')),
+                        level=logging.INFO, format="%(asctime)s.%(msecs)03d[%(levelname)-8s]: %(message)s ",
+                        datefmt=" % Y - % m - % d % H: % M: % S")
+    files = detect_new_runs()
+    #files = detect_historical_runs((datetime.datetime.now() - datetime.timedelta(days=1*10)), datetime.datetime.now(), HISEQ_INPUT_PATH)
     files.sort()
-    main(files)
+    logging.info(files)
+    logging.info(len(files))
+    data = parse_runs(files)
+    logging.info(data)
+    if data:
+        post_interopdata(data)
