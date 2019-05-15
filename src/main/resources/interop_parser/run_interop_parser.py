@@ -15,6 +15,14 @@ from requests.auth import HTTPBasicAuth
 from utils import *
 import pandas as pd
 
+'''
+The functions in this module extract the 'Run summary/Interop data' from the Illumina sequencing runs. The code connects to 
+Illumina sequencing run folders on /ifs/input/GCL/hiseq/ and reads the Interop Data from all the subfolders. The Run summary data 
+is then posted to LIMS database using ExemplarRest endpoint. This module uses Illumina interop libraries which can be found on
+github at https://github.com/Illumina/interop 
+'''
+
+
 def parse_single_json(run_folder_path, xrange=None):
     run_folder = os.path.basename(run_folder_path)
     run_metrics = py_interop_run_metrics.run_metrics()
