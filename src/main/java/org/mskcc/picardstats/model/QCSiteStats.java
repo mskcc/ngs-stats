@@ -18,17 +18,17 @@ public class QCSiteStats {
     private String sample;
     private String referenceGenome;
 
+    public Long TOTAL_READS;
+    public Long PF_READS_ALIGNED;
+    public Long READS_ALIGNED_IN_PAIRS;
+    public AlignmentSummaryMetrics.Category category;
     // ALIGNMENT SUMMARY METRICS
-    private double PCT_ADAPTER;
-    private long unpairedReads; // derived field
-    public long TOTAL_READS;
-    public long PF_READS_ALIGNED;
-    public long READS_ALIGNED_IN_PAIRS;
-
+    private Double PCT_ADAPTER;
+    private Long unpairedReads; // derived field
     // Duplication Metrics
-    private long READ_PAIRS_EXAMINED;
-    private long READ_PAIRS_DUPLICATES;
-    private long UNMAPPED_READS;
+    private Long READ_PAIRS_EXAMINED;
+    private Long READ_PAIRS_DUPLICATES;
+    private Long UNMAPPED_READS;
     private Double PERCENT_DUPLICATION;
 
     // WGS
@@ -36,24 +36,30 @@ public class QCSiteStats {
     private Double PCT_10X;
     private Double PCT_30X;
     private Double PCT_100X;
-    private long GENOME_TERRITORY;
+    private Long GENOME_TERRITORY;
 
     // RNASEQ
     private Double PCT_UTR_BASES;
     private Double PCT_INTRONIC_BASES;
     private Double PCT_INTERGENIC_BASES;
+    private Double PCT_RIBOSOMAL_BASES;
+    private Double PCT_CODING_BASES;
+    private Double PCT_MRNA_BASES;
 
     // HS METRICS
-    private double MEAN_TARGET_COVERAGE;
-    private double ZERO_CVG_TARGETS_PCT;
-    private double PCT_OFF_BAIT;
+    private Double MEAN_TARGET_COVERAGE;
+    private Double ZERO_CVG_TARGETS_PCT;
+    private Double PCT_OFF_BAIT;
     private String BAIT_SET;
-    private double PCT_TARGET_BASES_10X;
-    private double PCT_TARGET_BASES_30X;
-    private double PCT_TARGET_BASES_100X;
+    private Double PCT_TARGET_BASES_10X;
+    private Double PCT_TARGET_BASES_30X;
+    private Double PCT_TARGET_BASES_100X;
 
     //Q Metrics
-    private double MSK_Q;
+    private Double MSK_Q;
+
+    //CPCG METRICS
+    private Double G_REF_OXO_Q;
 
     public QCSiteStats() {}
 
@@ -68,6 +74,9 @@ public class QCSiteStats {
         this.PCT_ADAPTER = am.PCT_ADAPTER;
         this.unpairedReads = am.getUnpairedReads();
         this.TOTAL_READS = am.TOTAL_READS;
+        this.PF_READS_ALIGNED = am.PF_READS_ALIGNED;
+        this.READS_ALIGNED_IN_PAIRS = am.READS_ALIGNED_IN_PAIRS;
+        this.category = am.CATEGORY;
     }
 
     public void addHS(HsMetrics hs) {
@@ -97,6 +106,19 @@ public class QCSiteStats {
 
     public void addQ(QMetric qMetric) {
         this.MSK_Q = qMetric.mskQ;
+    }
+
+    public void addRna(RnaSeqMetrics rnaSeqMetrics) {
+        this.PCT_RIBOSOMAL_BASES = rnaSeqMetrics.PCT_RIBOSOMAL_BASES;
+        this.PCT_CODING_BASES = rnaSeqMetrics.PCT_CODING_BASES;
+        this.PCT_UTR_BASES = rnaSeqMetrics.PCT_UTR_BASES;
+        this.PCT_INTRONIC_BASES = rnaSeqMetrics.PCT_INTRONIC_BASES;
+        this.PCT_INTERGENIC_BASES = rnaSeqMetrics.PCT_INTERGENIC_BASES;
+        this.PCT_MRNA_BASES = rnaSeqMetrics.PCT_MRNA_BASES;
+    }
+
+    public void addCpcg(CpcgMetrics cpcgMetrics) {
+        this.G_REF_OXO_Q = cpcgMetrics.G_REF_OXO_Q;
     }
 
     @Override
