@@ -39,7 +39,7 @@ public class SequencerDoneController {
     @Autowired
     private ArchivedFastqRepository archivedFastqRepository;
 
-    @Value("${limsEndpoint}")
+    //@Value("${limsEndpoint}")
     private String limsEndpoint;
 
 
@@ -82,9 +82,8 @@ public class SequencerDoneController {
 
         List<ArchivedFastq> fastqs = archivedFastqRepository.findBySampleStartsWith(sample + "_IGO_");
         if (fastqs != null) {
-            if (sampleIsIGOComplete(sample, fastqs, limsEndpoint)) {
+            //if (sampleIsIGOComplete(sample, fastqs, limsEndpoint))
                 return fastqs;
-            }
         }
         return null;
     }
