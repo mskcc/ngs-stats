@@ -1,5 +1,9 @@
 package org.mskcc.sequencer;
 
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.TrustStrategy;
 import org.mskcc.sequencer.model.ArchivedFastq;
 import org.mskcc.sequencer.model.StartStopArchiveFastq;
 import org.mskcc.sequencer.model.StartStopSequencer;
@@ -14,14 +18,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.InterceptingClientHttpRequestFactory;
+import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -39,8 +50,12 @@ public class SequencerDoneController {
     @Autowired
     private ArchivedFastqRepository archivedFastqRepository;
 
-    //@Value("${limsEndpoint}")
-    private String limsEndpoint;
+    @Value("${lims.rest.url}")
+    private String limsUrl;
+    @Value("${lims.rest.username}")
+    private String limsUser;
+    @Value("${lims.rest.password}")
+    private String limsPass;
 
 
     @RequestMapping(value = "*", method = RequestMethod.GET)
@@ -49,6 +64,44 @@ public class SequencerDoneController {
         return "Fallback for GET Requests";
     }
 
+    /**
+     * For external IGO Customers to determine when a fastq is ready and they can start their pipeline.
+     * @param sample
+     * @return
+     */
+    @GetMapping(value = "/sampleigocomplete/{sample}")
+    public List<ArchivedFastq> findDeliveredFastq(@PathVariable String sample) {
+        log.info("Finding delivered fastqs for sample:" + sample);
+        if (sample.contains(" ")) // invalid sample id
+            return null;
+
+        List<ArchivedFastq> fastqs = archivedFastqRepository.findBySampleStartsWith(sample + "_IGO_");
+        if (fastqs != null) {
+            if (sampleIsIGOComplete(sample, fastqs, limsUrl, limsUser, limsPass))
+                return fastqs;
+        }
+        return null;
+    }
+
+    protected boolean sampleIsIGOComplete(String sample, List<ArchivedFastq> fastqs, String limsUrl, String limsUser, String limsPass) {
+        String url = limsUrl + "/getIGOCompleteQC?sampleId=" + sample;
+        log.info("Checking if sample is IGO complete via: " + url);
+
+        RestTemplate rt = limsRestTemplate();
+        ResponseEntity<List<SampleQcSummary>> response = rt.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<SampleQcSummary>>(){});
+        List<SampleQcSummary> qcSummaries = response.getBody();
+        if (qcSummaries != null && qcSummaries.size() > 0) {
+            log.info("Samples that are igo complete: " + qcSummaries.size());
+            if (sample.equals(qcSummaries.get(0).getSampleName()))
+                return true;
+        }
+        log.info("No IGO complete records found for sample: " + sample);
+        return false;
+    }
 
     @GetMapping(value = "/latestrun/{project}/{sample}/{run}")
     public ArchivedFastq findMostRecentFastqDir(@PathVariable String project, @PathVariable String sample, @PathVariable String run) {
@@ -66,41 +119,6 @@ public class SequencerDoneController {
             log.info("Found fastq.gz: " + fastq);
             return fastq;
         }
-    }
-
-    /**
-     * For external IGO Customers to determine when a fastq is ready and they can start their pipeline.
-     * @param sample
-     * @return
-     */
-    @GetMapping(value = "/sampleigocomplete/{sample}")
-    public List<ArchivedFastq> findDeliveredFastq(@PathVariable String sample) {
-        log.info("Finding delivered fastqs for sample:" + sample);
-
-        if (sample.contains(" "))
-            return null;
-
-        List<ArchivedFastq> fastqs = archivedFastqRepository.findBySampleStartsWith(sample + "_IGO_");
-        if (fastqs != null) {
-            //if (sampleIsIGOComplete(sample, fastqs, limsEndpoint))
-                return fastqs;
-        }
-        return null;
-    }
-
-    protected static boolean sampleIsIGOComplete(String sample, List<ArchivedFastq> fastqs, String limsEndpoint) {
-        String url = limsEndpoint + "/LimsRest/getIGOCompleteQC?sampleId=" + sample;
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<List<SampleQcSummary>> statsResponse =
-                restTemplate.exchange(url,
-                        HttpMethod.GET, null, new ParameterizedTypeReference<List<SampleQcSummary>>() {});
-        List<SampleQcSummary> qcSummaries = statsResponse.getBody();
-        if (qcSummaries != null && qcSummaries.size() > 1) {
-            if (sample.equals(qcSummaries.get(0).getSampleName()))
-                return true;
-        }
-        log.info("No IGO complete records found for sample: " + sample);
-        return false;
     }
 
     @GetMapping(value = "/latestpoolednormal/{run}")
@@ -228,6 +246,36 @@ public class SequencerDoneController {
 
         Date startDate = new Date(startFile.lastModified());
         return startDate;
+    }
+
+    public RestTemplate limsRestTemplate() {
+        RestTemplate restTemplate = getInsecureRestTemplate();
+        addBasicAuth(restTemplate, limsUser, limsPass);
+        return restTemplate;
+    }
+    private void addBasicAuth(RestTemplate restTemplate, String username, String password) {
+        List<ClientHttpRequestInterceptor> interceptors = Collections.singletonList(new BasicAuthorizationInterceptor(username, password));
+        restTemplate.setRequestFactory(new InterceptingClientHttpRequestFactory(restTemplate.getRequestFactory(),
+                interceptors));
+    }
+    private RestTemplate getInsecureRestTemplate() {
+        try {
+            TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+            SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
+                    .loadTrustMaterial(null, acceptingTrustStrategy)
+                    .build();
+            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setSSLSocketFactory(csf)
+                    .build();
+            HttpComponentsClientHttpRequestFactory requestFactory =
+                    new HttpComponentsClientHttpRequestFactory();
+            requestFactory.setHttpClient(httpClient);
+
+            return new RestTemplate(requestFactory);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while initializing insecure rest template", e);
+        }
     }
 
     public static class SuffixFilenameFilter implements FilenameFilter {
