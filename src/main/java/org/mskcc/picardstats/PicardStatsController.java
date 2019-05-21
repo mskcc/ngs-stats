@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.util.*;
 
 @RestController
@@ -146,6 +147,30 @@ public class PicardStatsController {
         String msg = "DONE. Elampsed time (ms): " + elapsedTime;
         System.out.println(msg);
         return msg;
+    }
+
+    /**
+     * Parse Picard files for a specific Sequencer/Run pair
+     */
+    @GetMapping(value = "/picardstats/updaterun/{sequencer}/{run}")
+    public String updateDatabaseByRun(@PathVariable String sequencer, @PathVariable String run) throws Exception {
+        if (sequencer.contains(" ") || run.contains(" "))
+            return "Error";
+
+        FilenameFilter prefixFilter = (dir, name) -> {
+            if (name.startsWith(run)) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        File statsDir = new File(BASE_STATS_DIR + sequencer);
+        File [] statsFiles = statsDir.listFiles(prefixFilter);
+        for (File statsFile: statsFiles) {
+            saveStats(statsFile, true);
+        }
+        return "Files parsed: " + statsFiles.length;
     }
 
     @GetMapping(value = "/picardstats/run/{runId}")
