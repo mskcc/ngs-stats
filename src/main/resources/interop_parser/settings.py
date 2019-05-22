@@ -1,14 +1,6 @@
-
-MACHINES = ('LIST_OF_MACHINE_NAMES')
-# ex: MACHINES = ("jax")
-
-DB_CONFIG = {
-    'host': 'HOST',
-    'port': 3306,
-    'database': 'DATABASE',
-    'user': 'USER',
-    'password': 'PASS',
-    'charset': 'utf8',
-    'use_unicode': True,
-    'get_warnings': True,
-}
+#LIMSREST_BASE_URL = 'https://igo.cbio.mskcc.org:8443/LimsRest/'
+LIMSREST_BASE_URL = 'https://tango.mskcc.org:8443/LimsRest/'
+HISEQ_ARCHIVE_PATH = "/ifs/archive/GCL/hiseq/"
+HISEQ_INPUT_PATH = "/ifs/input/GCL/hiseq/"
+MACHINES = ("brad","diana","jax","johnsawyers","kim","liz","lola","michelle","momo","pitt","scott","toms","vic")
+NOVASEQ = ("michelle","diana","a00227")
