@@ -6,7 +6,8 @@ import lombok.ToString;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * Columns from multiple Picard files displayed together on the QC site.
+ * DTO https://martinfowler.com/eaaCatalog/dataTransferObject.html
+ * for columns from multiple Picard files displayed together on the QC site.
  */
 @ResponseBody
 @ToString
@@ -18,13 +19,14 @@ public class QCSiteStats {
     private String sample;
     private String referenceGenome;
 
+    // ALIGNMENT SUMMARY METRICS
     public Long TOTAL_READS;
     public Long PF_READS_ALIGNED;
     public Long READS_ALIGNED_IN_PAIRS;
     public AlignmentSummaryMetrics.Category category;
-    // ALIGNMENT SUMMARY METRICS
     private Double PCT_ADAPTER;
     private Long unpairedReads; // derived field
+
     // Duplication Metrics
     private Long READ_PAIRS_EXAMINED;
     private Long READ_PAIRS_DUPLICATES;
@@ -32,11 +34,23 @@ public class QCSiteStats {
     private Double PERCENT_DUPLICATION;
 
     // WGS
-    private Double MEAN_COVERAGE;
-    private Double PCT_10X;
-    private Double PCT_30X;
-    private Double PCT_100X;
     private Long GENOME_TERRITORY;
+    private Double MEAN_COVERAGE;
+    private Double SD_COVERAGE;
+    private Double MEDIAN_COVERAGE;
+    private Double MAD_COVERAGE;
+    private Double PCT_EXC_MAPQ;
+    private Double PCT_EXC_DUPE;
+    private Double PCT_EXC_BASEQ;
+    private Double PCT_EXC_OVERLAP;
+    private Double PCT_EXC_CAPPED;
+    private Double PCT_EXC_TOTAL;
+    private Double PCT_10X;
+    private Double PCT_20X;
+    private Double PCT_30X;
+    private Double PCT_40X;
+    private Double PCT_80X;
+    private Double PCT_100X;
 
     // RNASEQ
     private Double PCT_UTR_BASES;
@@ -97,11 +111,23 @@ public class QCSiteStats {
     }
 
     public void addWGS(WgsMetrics wgs) {
-        this.MEAN_COVERAGE = wgs.MEAN_COVERAGE;
-        this.PCT_10X = wgs.PCT_10X;
-        this.PCT_30X = wgs.PCT_30X;
-        this.PCT_100X = wgs.PCT_100X;
         this.GENOME_TERRITORY = wgs.GENOME_TERRITORY;
+        this.MEAN_COVERAGE = wgs.MEAN_COVERAGE;
+        this.SD_COVERAGE = wgs.SD_COVERAGE;
+        this.MEDIAN_COVERAGE = wgs.MEDIAN_COVERAGE;
+        this.MAD_COVERAGE = wgs.MAD_COVERAGE;
+        this.PCT_EXC_MAPQ = wgs.PCT_EXC_MAPQ;
+        this.PCT_EXC_DUPE = wgs.PCT_EXC_DUPE;
+        this.PCT_EXC_BASEQ = wgs.PCT_EXC_BASEQ;
+        this.PCT_EXC_OVERLAP = wgs.PCT_EXC_OVERLAP;
+        this.PCT_EXC_CAPPED = wgs.PCT_EXC_CAPPED;
+        this.PCT_EXC_TOTAL = wgs.PCT_EXC_TOTAL;
+        this.PCT_10X = wgs.PCT_10X;
+        this.PCT_20X = wgs.PCT_20X;
+        this.PCT_30X = wgs.PCT_30X;
+        this.PCT_40X = wgs.PCT_40X;
+        this.PCT_80X = wgs.PCT_80X;
+        this.PCT_100X = wgs.PCT_100X;
     }
 
     public void addQ(QMetric qMetric) {
