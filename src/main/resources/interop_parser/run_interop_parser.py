@@ -113,7 +113,8 @@ def parse_lane_occupancy(lane_index, df):
     if df.empty:
         return 0.0
     else:
-        for index, row in df.iterrows():
+        average_data = df.groupby('Lane').mean().reset_index()
+        for index, row in average_data.iterrows():
             if row['Lane'] == lane_index + 1:
                 percent_occupied = row['% Occupied']
                 return percent_occupied
