@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface PicardFileRepository extends CrudRepository<PicardFile, String> {
 
+    List<PicardFile> findByRequest(String request);
+
     List<PicardFile> findByRunAndRequest(String run, String request);
 
     List<PicardFile> findByRun(String run);

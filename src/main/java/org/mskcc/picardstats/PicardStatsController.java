@@ -8,10 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
+import java.io.*;
 import java.util.*;
 
 @RestController
@@ -42,6 +39,19 @@ public class PicardStatsController {
     private AlignmentMetricsRepository amRepository;
     @Autowired
     private PicardFileRepository picardFileRepository;
+
+
+    @RequestMapping(value = "*", method = RequestMethod.GET)
+    @ResponseBody
+    public String getFallback() {
+        try {
+            String request = "07008_AZ";
+            PicardToExcel.writeProjectExcel(new File("workbook.xls"), picardFileRepository.findByRequest(request));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "Fallback for Picard Stats GET Requests";
+    }
 
     /**
      * Returns the Picard stats for the pooled normal samples if they were added to the run.
