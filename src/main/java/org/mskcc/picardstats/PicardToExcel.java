@@ -2,14 +2,9 @@ package org.mskcc.picardstats;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.mskcc.picardstats.model.AlignmentSummaryMetrics;
-import org.mskcc.picardstats.model.DuplicationMetrics;
-import org.mskcc.picardstats.model.HsMetrics;
-import org.mskcc.picardstats.model.PicardFile;
+import org.mskcc.picardstats.model.*;
 
-import javax.persistence.Column;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -42,11 +37,18 @@ public class PicardToExcel {
             "HS_LIBRARY_SIZE","HS_PENALTY_10X","HS_PENALTY_20X","HS_PENALTY_30X", "HS_PENALTY_40X","HS_PENALTY_50X",
             "HS_PENALTY_100X","AT_DROPOUT","GC_DROPOUT","HET_SNP_SENSITIVITY", "HET_SNP_Q"};
 
+    private static final String [] titlesRNA = {"Run", "Request", "Sample", "ReferenceGenome", "Last Modified Date",
+            "   PF_BASES   ", "PF_ALIGNED_BASES","RIBOSOMAL_BASES","CODING_BASES", "UTR_BASES","INTRONIC_BASES",
+            "INTERGENIC_BASES","IGNORED_READS","CORRECT_STRAND_READS","INCORRECT_STRAND_READS",
+            "NUM_R1_TRANSCRIPT_STRAND_READS","NUM_R2_TRANSCRIPT_STRAND_READS","NUM_UNEXPLAINED_READS",
+            "PCT_R1_TRANSCRIPT_STRAND_READS","PCT_R2_TRANSCRIPT_STRAND_READS","PCT_RIBOSOMAL_BASES", "PCT_CODING_BASES",
+            "PCT_UTR_BASES", "PCT_INTRONIC_BASES", "PCT_INTERGENIC_BASES", "PCT_MRNA_BASES", "PCT_USABLE_BASES",
+            "PCT_CORRECT_STRAND_READS","MEDIAN_CV_COVERAGE","MEDIAN_5PRIME_BIAS","MEDIAN_3PRIME_BIAS","MEDIAN_5PRIME_TO_3PRIME_BIAS"};
 
-    protected static void writeProjectExcel(File fileName, List<PicardFile> picardFiles) throws FileNotFoundException, IOException {
+
+    protected static void writeExcel(File fileName, List<PicardFile> picardFiles) throws IOException {
         Workbook wb = new HSSFWorkbook();
         Map<String, CellStyle> styles = createStyles(wb);
-        CreationHelper createHelper = wb.getCreationHelper();
 
         Sheet mdMetrics = wb.createSheet("MD Metrics");
         Row mdHeaderRow = mdMetrics.createRow(0);
@@ -74,21 +76,32 @@ public class PicardToExcel {
             hsMetrics.autoSizeColumn(i);
         }
 
-        int mdRow = 1;
-        int amRow = 1;
-        int hsRow = 1;
+        Sheet rnaMetrics = wb.createSheet("RNA Seq Metrics");
+        Row rnaHeaderRow = rnaMetrics.createRow(0);
+        for (int i = 0; i < titlesRNA.length; i++) {
+            Cell cell = rnaHeaderRow.createCell(i);
+            cell.setCellValue(titlesRNA[i]);
+            cell.setCellStyle(styles.get("header"));
+            rnaMetrics.autoSizeColumn(i);
+        }
+
+        int mdRow  = 1;
+        int amRow  = 1;
+        int hsRow  = 1;
+        int rnaRow = 1;
         for (PicardFile f: picardFiles) {
             if (!f.isParseOK())
                 continue;
             if ("MD".equals(f.getFileType())) {
                 System.out.println("Creating additional MD row." + mdRow);
                 Row row = mdMetrics.createRow(mdRow++);
-                writeRunRequestSampleGenomeDate(wb, createHelper, f, row);
+                writeRunRequestSampleGenomeDate(styles, f, row);
 
                 Cell cell;
                 DuplicationMetrics dm = f.getDuplicationMetrics();
                 cell = row.createCell(5);
                 cell.setCellValue(dm.LIBRARY);
+                cell.setCellStyle(styles.get("cell"));
                 cell = row.createCell(6);
                 cell.setCellStyle(styles.get("number"));
                 cell.setCellValue(dm.UNPAIRED_READS_EXAMINED);
@@ -118,13 +131,14 @@ public class PicardToExcel {
                 cell.setCellValue(dm.ESTIMATED_LIBRARY_SIZE);
             } else if ("AM".equals(f.getFileType())) {
                 Row row = amMetrics.createRow(amRow++);
-                writeRunRequestSampleGenomeDate(wb, createHelper, f, row);
+                writeRunRequestSampleGenomeDate(styles, f, row);
 
                 Cell cell;
                 AlignmentSummaryMetrics am = f.getAlignmentSummaryMetrics();
                 int i=5;
                 cell = row.createCell(i++);
                 cell.setCellValue(am.CATEGORY.name());
+                cell.setCellStyle(styles.get("cell"));
                 cell = row.createCell(i++);
                 cell.setCellStyle(styles.get("number"));
                 cell.setCellValue(am.TOTAL_READS);
@@ -190,7 +204,7 @@ public class PicardToExcel {
                 cell.setCellValue(am.PCT_ADAPTER);
             } else if ("HS".equals(f.getFileType())) {
                 Row row = hsMetrics.createRow(hsRow++);
-                writeRunRequestSampleGenomeDate(wb, createHelper, f, row);
+                writeRunRequestSampleGenomeDate(styles, f, row);
 
                 Cell cell;
                 System.out.println("Getting: " + f.getFilename());
@@ -327,8 +341,6 @@ public class PicardToExcel {
                 cell.setCellStyle(styles.get("percent"));
                 cell.setCellValue(hs.PCT_TARGET_BASES_100X);
                 cell = row.createCell(i++);
-                cell.setCellStyle(styles.get("percent"));
-                cell = row.createCell(i++);
                 cell.setCellStyle(styles.get("number"));
                 if (hs.HS_LIBRARY_SIZE != null)
                     cell.setCellValue(hs.HS_LIBRARY_SIZE);
@@ -362,6 +374,97 @@ public class PicardToExcel {
                 cell = row.createCell(i++);
                 cell.setCellStyle(styles.get("percent"));
                 cell.setCellValue(hs.HET_SNP_Q);
+            } else if ("RNA".equals(f.getFileType())) {
+                Row row = rnaMetrics.createRow(rnaRow++);
+                writeRunRequestSampleGenomeDate(styles, f, row);
+
+                Cell cell;
+                System.out.println("Getting: " + f.getFilename());
+                RnaSeqMetrics rna = f.getRnaSeqMetrics();
+                int i=5;
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.PF_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.PF_ALIGNED_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                if (rna.RIBOSOMAL_BASES != null)
+                    cell.setCellValue(rna.RIBOSOMAL_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.CODING_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.UTR_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.INTRONIC_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.INTERGENIC_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.IGNORED_READS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.CORRECT_STRAND_READS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.INCORRECT_STRAND_READS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.NUM_R1_TRANSCRIPT_STRAND_READS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.NUM_R2_TRANSCRIPT_STRAND_READS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("number"));
+                cell.setCellValue(rna.NUM_UNEXPLAINED_READS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.PCT_R1_TRANSCRIPT_STRAND_READS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.PCT_R2_TRANSCRIPT_STRAND_READS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                if (rna.PCT_RIBOSOMAL_BASES != null)
+                    cell.setCellValue(rna.PCT_RIBOSOMAL_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.PCT_CODING_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.PCT_UTR_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.PCT_INTRONIC_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.PCT_INTERGENIC_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.PCT_MRNA_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.PCT_USABLE_BASES);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.PCT_CORRECT_STRAND_READS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.MEDIAN_CV_COVERAGE);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.MEDIAN_5PRIME_BIAS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.MEDIAN_3PRIME_BIAS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("percent"));
+                cell.setCellValue(rna.MEDIAN_5PRIME_TO_3PRIME_BIAS);
             }
         }
 
@@ -369,21 +472,38 @@ public class PicardToExcel {
             if (i != 5) // LIBRARY can be very long
                 mdMetrics.autoSizeColumn(i);
         }
+        for (int i=0; i < titlesHS.length; i++) {
+            hsMetrics.autoSizeColumn(i);
+        }
+        for (int i=0; i < titlesAM.length; i++) {
+            amMetrics.autoSizeColumn(i);
+        }
+        for (int i=0; i < titlesRNA.length; i++) {
+            rnaMetrics.autoSizeColumn(i);
+        }
 
         FileOutputStream out = new FileOutputStream(fileName);
         wb.write(out);
         out.close();
     }
 
-    private static void writeRunRequestSampleGenomeDate(Workbook wb, CreationHelper createHelper, PicardFile f, Row row) {
-        row.createCell(0).setCellValue(f.getRun());
-        row.createCell(1).setCellValue(f.getRequest());
-        row.createCell(2).setCellValue(f.getSample());
-        row.createCell(3).setCellValue(f.getReferenceGenome());
-        CellStyle cellStyle = wb.createCellStyle();
-        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy/mm/dd h:mm"));
-        Cell cell = row.createCell(4);
-        cell.setCellStyle(cellStyle);
+    protected static void writeRunRequestSampleGenomeDate(Map<String, CellStyle> styles, PicardFile f, Row row) {
+        Cell cell;
+        cell = row.createCell(0);
+        cell.setCellValue(f.getRun());
+        cell.setCellStyle(styles.get("cell"));
+        cell = row.createCell(1);
+        cell.setCellValue(f.getRequest());
+        cell.setCellStyle(styles.get("cell"));
+        cell = row.createCell(2);
+        cell.setCellValue(f.getSample());
+        cell.setCellStyle(styles.get("cell"));
+        cell = row.createCell(3);
+        cell.setCellValue(f.getReferenceGenome());
+        cell.setCellStyle(styles.get("cell"));
+
+        cell = row.createCell(4);
+        cell.setCellStyle(styles.get("date"));
         cell.setCellValue(f.getLastModified());
     }
 
@@ -416,7 +536,7 @@ public class PicardToExcel {
 
         style = wb.createCellStyle();
         style.setAlignment(HorizontalAlignment.CENTER);
-        style.setWrapText(true);
+        //style.setWrapText(true);
         style.setBorderRight(BorderStyle.THIN);
         style.setRightBorderColor(IndexedColors.BLACK.getIndex());
         style.setBorderLeft(BorderStyle.THIN);
@@ -425,6 +545,8 @@ public class PicardToExcel {
         style.setTopBorderColor(IndexedColors.BLACK.getIndex());
         style.setBorderBottom(BorderStyle.THIN);
         style.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         styles.put("cell", style);
 
         style = wb.createCellStyle();
@@ -458,6 +580,22 @@ public class PicardToExcel {
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         style.setDataFormat(wb.createDataFormat().getFormat("0.000"));
         styles.put("percent", style);
+
+        style = wb.createCellStyle();
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setWrapText(true);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setRightBorderColor(IndexedColors.BLACK.getIndex());
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+        style.setBorderTop(BorderStyle.THIN);
+        style.setTopBorderColor(IndexedColors.BLACK.getIndex());
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setDataFormat(wb.createDataFormat().getFormat("yyyy/mm/dd hh:mm"));
+        styles.put("date", style);
 
         return styles;
     }

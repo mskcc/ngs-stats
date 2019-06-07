@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
@@ -45,8 +46,18 @@ public class PicardStatsController {
     @ResponseBody
     public String getFallback() {
         try {
-            String request = "07008_AZ";
-            PicardToExcel.writeProjectExcel(new File("workbook.xls"), picardFileRepository.findByRequest(request));
+            // TODO call from new endpoint & write output to /lims/stats/run_reports
+            //currently written to /ifs/data/bio/LIMS/stats/run_reports/ /ifs/data/bio/LIMS/stats/project_reports/
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+            String date = simpleDateFormat.format(new Date());
+
+            String request = "09377_B";
+            File projectFileName =  new File("AutoReport_P" + request + "_" + date + ".xls");
+            PicardToExcel.writeExcel(projectFileName, picardFileRepository.findByRequest(request));
+
+            String run = "JOHNSAWYERS_0205_000000000-G3N9B";
+            File runFileName =  new File("AutoReport_" + run + "_" + date + ".xls");
+            PicardToExcel.writeExcel(runFileName, picardFileRepository.findByRun(run));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -39,12 +39,12 @@ public class RnaSeqMetrics {
     public double PCT_R1_TRANSCRIPT_STRAND_READS;
     public double PCT_R2_TRANSCRIPT_STRAND_READS;
     @Column(nullable = true)
-    public Double PCT_RIBOSOMAL_BASES; // ADD TO VIEW
-    public double PCT_CODING_BASES; // ADD TO VIEW
-    public double PCT_UTR_BASES; // ADD TO VIEW
-    public double PCT_INTRONIC_BASES; // ADD TO VIEW
-    public double PCT_INTERGENIC_BASES; // // ADD TO VIEW
-    public double PCT_MRNA_BASES;  // ADD TO VIEW
+    public Double PCT_RIBOSOMAL_BASES;
+    public double PCT_CODING_BASES;
+    public double PCT_UTR_BASES;
+    public double PCT_INTRONIC_BASES;
+    public double PCT_INTERGENIC_BASES;
+    public double PCT_MRNA_BASES;
     public double PCT_USABLE_BASES;
     public double PCT_CORRECT_STRAND_READS;
     public double MEDIAN_CV_COVERAGE;
