@@ -186,6 +186,10 @@ public class PicardStatsController {
 
         File statsDir = new File(BASE_STATS_DIR + sequencer);
         File [] statsFiles = statsDir.listFiles(prefixFilter);
+        if (statsFiles == null || statsFiles.length == 0) {
+            return "No files found in: " + statsDir.getAbsolutePath();
+        }
+
         for (File statsFile: statsFiles) {
             saveStats(statsFile, true);
         }

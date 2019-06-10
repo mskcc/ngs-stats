@@ -38,6 +38,8 @@ public class ArchivedFastq {
 
     private Date fastqLastModified;
 
+    private Long bytes;
+
     private Date lastUpdated;
 
     public String getSampleName() {
@@ -78,8 +80,9 @@ public class ArchivedFastq {
 
     protected static void save(String run, String runBaseDirectory,  Path p, List<ArchivedFastq> paths) {
         String filename = p.getFileName().toString();
+        Long bytes = p.toFile().length();
         if (filename.contains("Undetermined_")) {
-            ArchivedFastq f = new ArchivedFastq(run, runBaseDirectory, null, null, p.toString(), new Date(p.toFile().lastModified()), new Date());
+            ArchivedFastq f = new ArchivedFastq(run, runBaseDirectory, null, null, p.toString(), new Date(p.toFile().lastModified()), bytes, new Date());
             paths.add(f);
         } else {
             Path samplePath = p.getParent();
@@ -87,7 +90,7 @@ public class ArchivedFastq {
             Path projectPath = samplePath.getParent();
             String project = projectPath.getFileName().toString().substring(8);  // remove "Project_" prefix
 
-            ArchivedFastq f = new ArchivedFastq(run, runBaseDirectory, project, sample, p.toAbsolutePath().toString(), new Date(p.toFile().lastModified()), new Date());
+            ArchivedFastq f = new ArchivedFastq(run, runBaseDirectory, project, sample, p.toAbsolutePath().toString(), new Date(p.toFile().lastModified()), bytes, new Date());
             paths.add(f);
         }
     }
