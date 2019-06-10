@@ -39,14 +39,19 @@ public class DuplicationMetrics {
     public long ESTIMATED_LIBRARY_SIZE;
 
 
-    public static int headerRow = 6;
-
     public static DuplicationMetrics readFile(File file, String md5) throws FileNotFoundException, IllegalAccessException {
         Scanner scan = new Scanner(file);
-        for (int i=0;i < headerRow;i++) {
-            if (scan.hasNext())
-                scan.nextLine();
-            else {
+        String firstLine = scan.nextLine();
+        int headerRow;
+        if (firstLine.contains("## htsjdk.samtools.metrics.StringHeader")) // Normal Picard first row
+            headerRow = 6;
+        else
+            headerRow = 3;
+
+        for (int i=1;i < headerRow;i++) {
+            if (scan.hasNext()) {
+                scan.nextLine(); // throw away
+            } else {
                 return null;
             }
         }
