@@ -93,7 +93,6 @@ public class PicardToExcel {
             if (!f.isParseOK())
                 continue;
             if ("MD".equals(f.getFileType())) {
-                System.out.println("Creating additional MD row." + mdRow);
                 Row row = mdMetrics.createRow(mdRow++);
                 writeRunRequestSampleGenomeDate(styles, f, row);
 
@@ -207,7 +206,7 @@ public class PicardToExcel {
                 writeRunRequestSampleGenomeDate(styles, f, row);
 
                 Cell cell;
-                System.out.println("Getting: " + f.getFilename());
+                //System.out.println("Reading: " + f.getFilename());
                 HsMetrics hs = f.getHsMetrics();
                 int i=5;
                 cell = row.createCell(i++);
@@ -379,7 +378,7 @@ public class PicardToExcel {
                 writeRunRequestSampleGenomeDate(styles, f, row);
 
                 Cell cell;
-                System.out.println("Getting: " + f.getFilename());
+                //System.out.println("Getting: " + f.getFilename());
                 RnaSeqMetrics rna = f.getRnaSeqMetrics();
                 int i=5;
                 cell = row.createCell(i++);

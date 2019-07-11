@@ -22,6 +22,12 @@ public interface PicardFileRepository extends CrudRepository<PicardFile, String>
             true)
     List<String> findFiletypeByRunAndRequest(@Param("run") String run, @Param("request") String request);
 
+    @Query(value = "SELECT DISTINCT RUN FROM PICARDFILE WHERE lastModified BETWEEN DATE_ADD(CURDATE(), INTERVAL -3 DAY) AND DATE_ADD(CURDATE(), INTERVAL -1 DAY)", nativeQuery = true)
+    List<String> findRecentRuns();
+
+    @Query(value = "SELECT DISTINCT REQUEST FROM PICARDFILE WHERE lastModified BETWEEN DATE_ADD(CURDATE(), INTERVAL -3 DAY) AND DATE_ADD(CURDATE(), INTERVAL -1 DAY)", nativeQuery = true)
+    List<String> findRecentRequests();
+
     // Note that the MD file is not always generated for non pooled normals - 116k AM files vs 111k MD files
     @Query(value = "SELECT DISTINCT PF.RUN, PF.REQUEST, PF.SAMPLE, PF.REFERENCEGENOME, PF.MD5RRS, AM.PCT_ADAPTER, AM" +
             ".CATEGORY, MD.READ_PAIRS_EXAMINED, MD.UNMAPPED_READS, MD.PERCENT_DUPLICATION, WGS.MEAN_COVERAGE, WGS" +
@@ -35,5 +41,3 @@ public interface PicardFileRepository extends CrudRepository<PicardFile, String>
 
     List<PicardFile> findByRunAndSample(String runId, String sampleId);
 }
-
-

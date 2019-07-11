@@ -45,23 +45,37 @@ public class PicardStatsController {
     @RequestMapping(value = "*", method = RequestMethod.GET)
     @ResponseBody
     public String getFallback() {
+        return "Fallback for Picard Stats GET Requests";
+    }
+
+    @RequestMapping(value = "/picardtoexcel", method = RequestMethod.GET)
+    public String writeRecentStatsToExcel() {
         try {
-            // TODO call from new endpoint & write output to /lims/stats/run_reports
+            // TODO write to official directory
             //currently written to /ifs/data/bio/LIMS/stats/run_reports/ /ifs/data/bio/LIMS/stats/project_reports/
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-            String date = simpleDateFormat.format(new Date());
 
-            String request = "09377_B";
-            File projectFileName =  new File("AutoReport_P" + request + "_" + date + ".xls");
-            PicardToExcel.writeExcel(projectFileName, picardFileRepository.findByRequest(request));
+            // historically the excel files have the date appended to them
+            String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
 
-            String run = "JOHNSAWYERS_0205_000000000-G3N9B";
-            File runFileName =  new File("AutoReport_" + run + "_" + date + ".xls");
-            PicardToExcel.writeExcel(runFileName, picardFileRepository.findByRun(run));
+            // generate the Excel files on demand or via crontab? (can be a bit slow so use crontab?)
+
+            List<String> recentRequests = picardFileRepository.findRecentRequests();
+            for (String request : recentRequests) {
+                File projectFileName = new File("AutoReport_P" + request + ".xls");
+                System.out.println("Writing: " + projectFileName.getAbsolutePath());
+                PicardToExcel.writeExcel(projectFileName, picardFileRepository.findByRequest(request));
+            }
+
+            List<String> recentRuns = picardFileRepository.findRecentRuns();
+            for (String run : recentRuns) {
+                File runFileName = new File("AutoReport_" + run + ".xls");
+                System.out.println("Writing: " + runFileName.getAbsolutePath());
+                PicardToExcel.writeExcel(runFileName, picardFileRepository.findByRun(run));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "Fallback for Picard Stats GET Requests";
+        return "Request and Run Excel files Generated.";
     }
 
     /**
