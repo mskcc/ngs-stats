@@ -18,6 +18,10 @@ public class PicardStatsController {
 
     private static final String BASE_STATS_DIR = "/ifs/data/BIC/Stats/hiseq/DONE/";  // "/Users/mcmanamd/Downloads/DONE/DONE/";
 
+    // directories where Picard stats Excel files are written
+    final String RUN_REPORTS_SHARED_DIR = "/ifs/data/bio/LIMS/stats/run_reports/";
+    final String PROJ_REPORTS_SHARED_DIR = "/ifs/data/bio/LIMS/stats/project_reports/";
+
     private static final String [] ACTIVE_SEQUENCERS =
             {"DIANA", "JAX", "JOHNSAWYERS", "KIM", "LIZ", "MICHELLE", "MOMO", "PITT", "SCOTT", "TOMS", "VIC"};
 
@@ -49,26 +53,31 @@ public class PicardStatsController {
     }
 
     @RequestMapping(value = "/picardtoexcel", method = RequestMethod.GET)
+    // generate the Excel files on demand or via crontab? (can be a bit slow so use crontab?)
     public String writeRecentStatsToExcel() {
         try {
-            // TODO write to official directory
-            //currently written to /ifs/data/bio/LIMS/stats/run_reports/ /ifs/data/bio/LIMS/stats/project_reports/
+            // store to the shared location if the directories exist on the computer where we are running
+            String runBasePath = "";
+            if (new File(RUN_REPORTS_SHARED_DIR).exists())
+                runBasePath = RUN_REPORTS_SHARED_DIR;
+            String projBasePath = "";
+            if (new File(PROJ_REPORTS_SHARED_DIR).exists())
+                projBasePath = PROJ_REPORTS_SHARED_DIR;
 
             // historically the excel files have the date appended to them
             String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
 
-            // generate the Excel files on demand or via crontab? (can be a bit slow so use crontab?)
-
             List<String> recentRequests = picardFileRepository.findRecentRequests();
             for (String request : recentRequests) {
-                File projectFileName = new File("AutoReport_P" + request + ".xls");
+                File projectFileName = new File(projBasePath + "AutoReport_P" + request + ".xls");
                 System.out.println("Writing: " + projectFileName.getAbsolutePath());
                 PicardToExcel.writeExcel(projectFileName, picardFileRepository.findByRequest(request));
             }
 
             List<String> recentRuns = picardFileRepository.findRecentRuns();
             for (String run : recentRuns) {
-                File runFileName = new File("AutoReport_" + run + ".xls");
+                // TODO add sequencer name to directory path as previously done http://seq.cbio.mskcc.org/lims/stats/run_reports/?
+                File runFileName = new File(runBasePath + "AutoReport_" + run + ".xls");
                 System.out.println("Writing: " + runFileName.getAbsolutePath());
                 PicardToExcel.writeExcel(runFileName, picardFileRepository.findByRun(run));
             }
