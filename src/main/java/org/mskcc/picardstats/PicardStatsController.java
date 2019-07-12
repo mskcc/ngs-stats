@@ -72,6 +72,7 @@ public class PicardStatsController {
                 File projectFileName = new File(projBasePath + "AutoReport_P" + request + ".xls");
                 System.out.println("Writing: " + projectFileName.getAbsolutePath());
                 PicardToExcel.writeExcel(projectFileName, picardFileRepository.findByRequest(request));
+                projectFileName.setReadable(true, false);
             }
 
             List<String> recentRuns = picardFileRepository.findRecentRuns();
@@ -80,6 +81,7 @@ public class PicardStatsController {
                 File runFileName = new File(runBasePath + "AutoReport_" + run + ".xls");
                 System.out.println("Writing: " + runFileName.getAbsolutePath());
                 PicardToExcel.writeExcel(runFileName, picardFileRepository.findByRun(run));
+                runFileName.setReadable(true, false);
             }
         } catch (IOException e) {
             e.printStackTrace();
