@@ -46,12 +46,6 @@ public class PicardStatsController {
     private PicardFileRepository picardFileRepository;
 
 
-    @RequestMapping(value = "*", method = RequestMethod.GET)
-    @ResponseBody
-    public String getFallback() {
-        return "Fallback for Picard Stats GET Requests";
-    }
-
     @RequestMapping(value = "/picardtoexcel", method = RequestMethod.GET)
     // generate the Excel files on demand or via crontab? (can be a bit slow so use crontab?)
     public String writeRecentStatsToExcel() {

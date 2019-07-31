@@ -15,6 +15,7 @@ repositories {
 	mavenCentral()
 	maven { url "${nexusUrlReleases}" }
 	maven { url "${nexusUrlSnapshots}" }
+	jcenter()
 }
 
 apply plugin: 'war'
@@ -34,6 +35,8 @@ repositories {
 
 dependencies {
 	//implementation ('com.github.broadinstitute:picard:2.18.26')
+	implementation "io.springfox:springfox-swagger-ui:2.9.2"
+	implementation "io.springfox:springfox-swagger2:2.9.2"
 	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
 	implementation group: 'commons-codec', name: 'commons-codec', version: '1.12'
 	implementation('org.springframework.boot:spring-boot-starter-data-jpa')

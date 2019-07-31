@@ -57,13 +57,6 @@ public class SequencerDoneController {
     @Value("${lims.rest.password}")
     private String limsPass;
 
-
-    @RequestMapping(value = "*", method = RequestMethod.GET)
-    @ResponseBody
-    public String getFallback() {
-        return "Fallback for GET Requests";
-    }
-
     /**
      * For external IGO Customers to determine when a fastq is ready and they can start their pipeline.
      * @param sample
@@ -119,13 +112,6 @@ public class SequencerDoneController {
             log.info("Found fastq.gz: " + fastq);
             return fastq;
         }
-    }
-
-    @GetMapping(value = "/latestpoolednormal/{run}")
-    public List<ArchivedFastq> findMostRecentFastqDir(@PathVariable String run) {
-        log.info("Finding latest pooled normal fastq.gz for run:" + run);
-        List<ArchivedFastq> fastqs = archivedFastqRepository.findByProjectAndRunOrderByFastqLastModifiedDesc("POOLEDNORMALS", run);
-        return fastqs;
     }
 
     @GetMapping(value = "/fastq/{directoryName}")
