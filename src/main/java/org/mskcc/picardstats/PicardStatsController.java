@@ -52,11 +52,14 @@ public class PicardStatsController {
         try {
             // store to the shared location if the directories exist on the computer where we are running
             String runBasePath = "";
-            if (new File(RUN_REPORTS_SHARED_DIR).exists())
+            if (new File(RUN_REPORTS_SHARED_DIR).exists()) {
                 runBasePath = RUN_REPORTS_SHARED_DIR;
+            }
             String projBasePath = "";
-            if (new File(PROJ_REPORTS_SHARED_DIR).exists())
+            if (new File(PROJ_REPORTS_SHARED_DIR).exists()) {
                 projBasePath = PROJ_REPORTS_SHARED_DIR;
+            }
+            System.out.println("Writing Picard Excel files.");
 
             // historically the excel files have the date appended to them
             String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
@@ -65,8 +68,13 @@ public class PicardStatsController {
             for (String request : recentRequests) {
                 File projectFileName = new File(projBasePath + "AutoReport_P" + request + ".xls");
                 System.out.println("Writing: " + projectFileName.getAbsolutePath());
-                PicardToExcel.writeExcel(projectFileName, picardFileRepository.findByRequest(request));
-                projectFileName.setReadable(true, false);
+                try {
+                    PicardToExcel.writeExcel(projectFileName, picardFileRepository.findByRequest(request));
+                    projectFileName.setReadable(true, false);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Failed to write: " + projectFileName);
+                }
             }
 
             List<String> recentRuns = picardFileRepository.findRecentRuns();
@@ -77,6 +85,8 @@ public class PicardStatsController {
                 PicardToExcel.writeExcel(runFileName, picardFileRepository.findByRun(run));
                 runFileName.setReadable(true, false);
             }
+
+            System.out.println("Picard to Excel complete.");
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -55,42 +55,14 @@ public class SpringBootTomcatApplication extends SpringBootServletInitializer im
     private ApiInfo apiInfo(){
         return new ApiInfoBuilder()
                 .title("NGS Stats")
-                .description("Picard Stats and more.")
+                .description("Picard Stats, Sequencer Start/Stop Times, Archived Fastq.gz File Paths.")
                 .contact(new Contact("The IGO Data Team", "https://igo.mskcc.org", "zzPDL_SKI_IGO_DATA@mskcc.org"))
                 .build();
-    }
-
-    @Bean
-    public FilterRegistrationBean filterRegistrationBean(){
-        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
-        MyFilter myFilter = new MyFilter();
-        filterRegistrationBean.setFilter(myFilter);
-        return filterRegistrationBean;
     }
 
     @Override
     public void run(String... args) throws Exception {
         if (args.length > 0 && args[0].equals("-buildDatabase"))
             c.buildDatabaseFromPicardFiles();
-    }
-}
-
-class MyFilter implements Filter {
-    @Override
-    public void init(FilterConfig filterConfig) {
-    }
-
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
-        if (request.getRequestURI().equals("") || request.getRequestURI().equals("/")){
-            response.sendRedirect("/swagger-ui.html");
-            return;
-        }
-        filterChain.doFilter(servletRequest, servletResponse);
-    }
-    @Override
-    public void destroy() {
     }
 }

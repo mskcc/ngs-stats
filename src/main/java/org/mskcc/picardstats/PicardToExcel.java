@@ -109,7 +109,8 @@ public class PicardToExcel {
                 cell.setCellValue(dm.READ_PAIRS_EXAMINED);
                 cell = row.createCell(8);
                 cell.setCellStyle(styles.get("number"));
-                cell.setCellValue(dm.SECONDARY_OR_SUPPLEMENTARY_RDS);
+                if (dm.SECONDARY_OR_SUPPLEMENTARY_RDS != null)
+                    cell.setCellValue(dm.SECONDARY_OR_SUPPLEMENTARY_RDS);
                 cell = row.createCell(9);
                 cell.setCellStyle(styles.get("number"));
                 cell.setCellValue(dm.UNMAPPED_READS);
@@ -124,7 +125,8 @@ public class PicardToExcel {
                 cell.setCellValue(dm.READ_PAIR_OPTICAL_DUPLICATES);
                 cell = row.createCell(13);
                 cell.setCellStyle(styles.get("percent"));
-                cell.setCellValue(dm.PERCENT_DUPLICATION);
+                if (dm.PERCENT_DUPLICATION != null)
+                    cell.setCellValue(dm.PERCENT_DUPLICATION);
                 cell = row.createCell(14);
                 cell.setCellStyle(styles.get("number"));
                 cell.setCellValue(dm.ESTIMATED_LIBRARY_SIZE);
