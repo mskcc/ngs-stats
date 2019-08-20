@@ -1,5 +1,7 @@
 package org.mskcc.picardstats.model;
 
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,6 +11,7 @@ import java.util.Scanner;
 
 //https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/directed/HsMetrics.java
 @Entity
+@ToString
 public class HsMetrics {
     @Id
     @Column(length = 150)
@@ -102,14 +105,18 @@ public class HsMetrics {
                 nameToField.put(f.getName(), f);
 
             for (int i = 0; i < parts.length; i++) {
+                String fieldName = columnHeaders[i];
+                Field field = nameToField.get(fieldName);
+                String typeName = field.getType().getName();
+
                 String value = parts[i];
                 if ("".equals(value)) // some columns are nullable
                     continue;
-                else if ("?".equals(value))
+                else if ("?".equals(value)) {
+                    System.err.println("Failing due to type:" + typeName + " fieldName:" + fieldName);
                     return null;
+                }
 
-                String fieldName = columnHeaders[i];
-                Field field = nameToField.get(fieldName);
                 if (field.getType().getName().equals("double"))
                     field.setDouble(x, Double.parseDouble(value));
                 else if (field.getType().getName().equals("java.lang.Double"))
