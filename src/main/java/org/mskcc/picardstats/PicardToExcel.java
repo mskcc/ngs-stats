@@ -11,6 +11,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Combines many Picard text files into one Excel file.
+ * <BR>
+ * Two Excel files are written, one grouped by Request and another grouped by Run.  The Excel files have separate sheets for MD, AM, HS & RNA Picard stats.
+ * <BR>
+ * Used to view Picard stats not available on the QC site or as a fallback if the QC site is down.
+ * <BR>
+ * Currently viewable http://seq.cbio.mskcc.org/lims/stats/
+ */
 public class PicardToExcel {
 
     private static final String[] titlesMD = {"Run", "Request", "Sample", "ReferenceGenome", "Last Modified Date",
