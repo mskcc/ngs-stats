@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.persistence.Entity;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -73,17 +73,54 @@ public class CellRangerController {
         Element element;
         String value;
         String identifier;
+        Class type;
         List<FieldMapper> fieldMapperList = fieldMapperModel.getFieldMapperList();
         for(FieldMapper fm : fieldMapperList){
             identifier = String.format("%s:contains(%s)",fm.getHtmlElement(),fm.getHtmlField());
             Elements matches = doc.select(identifier);
+            if(matches.size() == 0){
+                // TODO - log
+                System.out.println(String.format("No elements found for %s", identifier));
+            }
             // TODO - error checking for multiple matches
             for (Element label : matches) {
                 element = label.nextElementSibling​();  // value follows field in html document
                 value = element.text();
+                type = fm.getType();
+
+                value = sanitize(value, type);
+
                 entity.setField(fm.getTableField(), value, fm.getType());
             }
         }
+    }
+
+    private String sanitize(String input, Class type){
+        if(input == null) return "";
+
+        String typeString = type.toString();
+        String value = input.trim();
+
+        // String values are fine
+        if(String.class.toString().equals(type.toString())){
+            return input;
+        }
+
+        value = value.replace(",", "");
+        if(isPercent(value)){
+            value = formatPercent(value);
+        }
+
+        return value;
+    }
+
+    private boolean isPercent(String input){
+        return input.indexOf("%") !=-1? true: false;
+    }
+
+    private String formatPercent(String percentage){
+        BigDecimal bd = new BigDecimal(percentage.replace("%", "")).divide(BigDecimal.valueOf(100));
+        return bd.toString();
     }
 
     private void createRowFromEntity(FieldSetter fs, String type){

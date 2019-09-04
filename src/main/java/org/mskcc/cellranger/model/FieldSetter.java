@@ -9,6 +9,7 @@ public class FieldSetter {
         try{
             field = this.getClass().getField(fieldName);
         } catch(NoSuchFieldException e){
+            System.out.println(e);
             return;
         }
 
@@ -29,13 +30,15 @@ public class FieldSetter {
             castValue = Float.parseFloat(value);
         } catch (Exception e){
             // TODO - logging
+            System.out.println(e);
             return;
         }
 
         try {
-            field.setFloat(this, castValue);
+            field.set(this, castValue);
         } catch (IllegalAccessException e){
             // TODO - logging
+            System.out.println(e);
             return;
         }
     }
@@ -45,13 +48,15 @@ public class FieldSetter {
         try {
             castValue = Long.parseLong(value);
         } catch (Exception e){
+            System.out.println(e);
             // TODO - logging
             return;
         }
 
         try {
-            field.setLong(this, castValue);
+            field.set(this, castValue);
         } catch (IllegalAccessException e){
+            System.out.println(e);
             // TODO - logging
             return;
         }
@@ -61,6 +66,7 @@ public class FieldSetter {
         try {
             field.set(this, value);
         } catch (IllegalAccessException e){
+            System.out.println(e);
             // TODO - logging
             return;
         }
