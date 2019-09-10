@@ -1,4 +1,4 @@
-package org.mskcc.cellranger.controller;
+package org.mskcc.cellranger.documentation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +22,7 @@ public class CellRangerSummaryVDJModel extends FieldMapperModel {
                 new FieldMapper("td", "Q30 Bases in Sample Index", "Q30BasesInSampleIndex", Float.class),
                 new FieldMapper("td", "Q30 Bases in UMI", "Q30BasesInUMI", Float.class),
                 new FieldMapper("td", "Name", "Name", String.class),
+                // Excluding Description because it is usually blank
                 // new FieldMapper("td", "Description", "Description", String.class),
                 new FieldMapper("td", "V(D)J Reference", "VDJReference", String.class),
                 new FieldMapper("td", "Chemistry", "Chemistry", String.class),

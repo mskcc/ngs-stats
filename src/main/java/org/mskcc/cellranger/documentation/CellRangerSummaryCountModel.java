@@ -1,4 +1,4 @@
-package org.mskcc.cellranger.controller;
+package org.mskcc.cellranger.documentation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +31,7 @@ public class CellRangerSummaryCountModel extends FieldMapperModel {
                 new FieldMapper("td", "Total Genes Detected", "TotalGenesDetected", Long.class),
                 new FieldMapper("td", "Median UMI Counts per Cell", "MedianUMICountsPerCell", Long.class),
                 new FieldMapper("td", "Name", "Name", String.class),
+                // Excluding Description because it is usually blank
                 // new FieldMapper("td", "Description", "Description", String.class),
                 new FieldMapper("td", "Transcriptome", "Transcriptome", String.class),
                 new FieldMapper("td", "Chemistry", "Chemistry", String.class),

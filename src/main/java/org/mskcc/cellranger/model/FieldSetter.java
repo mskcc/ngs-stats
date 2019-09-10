@@ -2,7 +2,7 @@ package org.mskcc.cellranger.model;
 
 import java.lang.reflect.Field;
 
-// TODO - Rename
+// TODO - Refactor to "CellRangerDataRecord"
 public class FieldSetter {
     public void setField(String fieldName, String value, Class type){
         Field field;

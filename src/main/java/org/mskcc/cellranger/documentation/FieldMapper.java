@@ -1,4 +1,4 @@
-package org.mskcc.cellranger.controller;
+package org.mskcc.cellranger.documentation;
 
 public class FieldMapper {
     private String htmlElement;
