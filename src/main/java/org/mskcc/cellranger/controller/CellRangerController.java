@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 public class CellRangerController {
     // TODO - Put into constant file
-    final String VDJ = "vdj";
+    final String API_TYPE_VDJ = "vdj";
     final String COUNT = "count";
 
     @Autowired
@@ -125,7 +125,7 @@ public class CellRangerController {
 
     private void createRowFromEntity(FieldSetter fs, String type){
         switch (type.toLowerCase()) {
-            case "vdj":
+            case API_TYPE_VDJ:
                 CellRangerSummaryVdj cellRangerSummaryVdj = (CellRangerSummaryVdj) fs;
                 cellRangerSummaryVdjRepository.save(cellRangerSummaryVdj);
             case "count":
@@ -138,7 +138,7 @@ public class CellRangerController {
 
     private FieldSetter getEntity(String type){
         switch (type.toLowerCase()) {
-            case "vdj":
+            case API_TYPE_VDJ:
                 return new CellRangerSummaryCount();
             case "count":
                 return new CellRangerSummaryCount();
@@ -150,7 +150,7 @@ public class CellRangerController {
 
     private FieldMapperModel getFieldMapperModel(String type){
         switch (type.toLowerCase()) {
-            case "vdj":
+            case API_TYPE_VDJ:
                 return new CellRangerSummaryVDJModel();
             case "count":
                 return new CellRangerSummaryCountModel();
@@ -163,9 +163,11 @@ public class CellRangerController {
     private String getWebSummaryPath(String sample, String type){
         final String baseDir;
         switch (type.toLowerCase()) {
-            case "vdj":  baseDir = CELL_RANGER_VDJ_DIR;
+            case API_TYPE_VDJ:
+                baseDir = CELL_RANGER_VDJ_DIR;
                 break;
-            case "count": baseDir = CELL_RANGER_COUNT_DIR;
+            case "count":
+                baseDir = CELL_RANGER_COUNT_DIR;
                 break;
             default:
                 return String.format("ERROR: No corresponding web summary path for %s", type);
