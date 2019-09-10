@@ -47,7 +47,7 @@ import javax.persistence.Id;
  * ****************************************************************************** */
 @Entity
 @NoArgsConstructor
-public class CellRangerSummaryVdj extends FieldSetter {
+public class CellRangerSummaryVdj extends CellRangerDataRecord {
     public Long EstimatedNumberOfCells;
 
     public Long MeanReadsPerCell;

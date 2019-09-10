@@ -12,7 +12,7 @@ import org.mskcc.cellranger.documentation.FieldMapper;
 import org.mskcc.cellranger.documentation.FieldMapperModel;
 import org.mskcc.cellranger.model.CellRangerSummaryCount;
 import org.mskcc.cellranger.model.CellRangerSummaryVdj;
-import org.mskcc.cellranger.model.FieldSetter;
+import org.mskcc.cellranger.model.CellRangerDataRecord;
 import org.mskcc.cellranger.repository.CellRangerSummaryCountRepository;
 import org.mskcc.cellranger.repository.CellRangerSummaryVdjRepository;
 import org.mskcc.picardstats.PicardStatsController;
@@ -97,7 +97,7 @@ public class CellRangerController {
         } catch(IOException e){
             String error = "Failed to parse post body from request";
             log.error(String.format("%s. Error: %s", error, e.getMessage()));
-            return jsonResponse(error, false);
+            return mapResponse(error, false);
         }
 
         final String sample = (String) jsonMap.get(API_SAMPLE);
@@ -108,33 +108,21 @@ public class CellRangerController {
             final String error = String.format("ERROR: Bad Parameters. Type: %s, Sample: %s, Project: %s, Run: %s",
                     type, sample, project, run);
             log.error(error);
-            return jsonResponse(error, false);
+            return mapResponse(error, false);
         }
 
-        // Create entity
-        final FieldMapperModel fieldMapperModel = getFieldMapperModel(type);
-        final FieldSetter entity = getEntity(type);
-        entity.setField("id", sample, String.class);
-
-        final String filePath = getWebSummaryPath(run, sample, project, type);
+        CellRangerDataRecord dataRecord;
         try {
-            populateEntity(filePath, fieldMapperModel, entity);
-            createRowFromEntity(entity, type);
+            dataRecord = populateEntity(run, sample, project, type);
         } catch(IOException e){
-            final String error = String.format("Failed to create entry for %s", sample);
+            final String error = String.format("Failed to read file for sample %s", sample);
             log.error(String.format("%s. Error: %s", error, e.getMessage()));
-            return jsonResponse(error, false);
+            return mapResponse(error, false);
         }
-        return jsonResponse(String.format("Created entry for Type: %s, Sample: %s, Project: %s, Run: %s",
+        putRecordIntoDB(dataRecord, type);
+
+        return mapResponse(String.format("Created entry for Type: %s, Sample: %s, Project: %s, Run: %s",
                 type, sample, project, run), true);
-    }
-
-    private Map<String,String> jsonResponse(String status, boolean success){
-        Map<String, String> map = new HashMap<>();
-        map.put("status", status);
-        map.put("success", success ? "true" : "false");
-
-        return map;
     }
 
     /**
@@ -178,18 +166,21 @@ public class CellRangerController {
         return body;
     }
 
-    private void populateEntity(String fileName, FieldMapperModel fieldMapperModel, FieldSetter entity) throws IOException {
-        // Requires full path
-        File input = new File(fileName);
+    private CellRangerDataRecord populateEntity(String run, String sample, String project, String type) throws IOException {
+        // Create Entity w/ sample-id
+        final FieldMapperModel fieldMapperModel = getFieldMapperModel(type);
+        final CellRangerDataRecord dataRecord = getDataRecord(type);
+        dataRecord.setField("id", sample, String.class);
+
+        // Parse
+        final String filePath = getWebSummaryPath(run, sample, project, type);
+        File input = new File(filePath);
         Document doc = Jsoup.parse(input, "UTF-8", ""); // TODO - throws warning
 
+        String value, htmlElement, htmlField;
         Element element;
-        String value;
-
-        Class type;
+        Class fieldType;
         List<FieldMapper> fieldMapperList = fieldMapperModel.getFieldMapperList();
-        String htmlElement;
-        String htmlField;
         for(FieldMapper fm : fieldMapperList){
             htmlElement = fm.getHtmlElement();
             htmlField = fm.getHtmlField();
@@ -202,12 +193,14 @@ public class CellRangerController {
             }
             for (Element label : matches) {
                 element = label.nextElementSibling​();  // value follows field in html document
-                type = fm.getType();
-                value = sanitize(element.text(), type);
+                fieldType = fm.getType();
+                value = sanitize(element.text(), fieldType);
 
-                entity.setField(fm.getTableField(), value, fm.getType());
+                dataRecord.setField(fm.getTableField(), value, fm.getType());
             }
         }
+
+        return dataRecord;
     }
 
     /**
@@ -221,6 +214,77 @@ public class CellRangerController {
     private Elements findMatchesInHtml(Document doc, String htmlElement, String htmlField){
         String identifier = String.format("%s:contains(%s)",htmlElement, htmlField);
         return doc.select(identifier);
+    }
+
+    private void putRecordIntoDB(CellRangerDataRecord dataRecord, String type){
+        switch (type.toLowerCase()) {
+            case API_TYPE_VDJ:
+                CellRangerSummaryVdj cellRangerSummaryVdj = (CellRangerSummaryVdj) dataRecord;
+                cellRangerSummaryVdjRepository.save(cellRangerSummaryVdj);
+            case API_TYPE_COUNT:
+                CellRangerSummaryCount cellRangerSummaryCountModel = (CellRangerSummaryCount) dataRecord;
+                cellRangerSummaryCountRepository.save(cellRangerSummaryCountModel);
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Returns the CellRangerDataRecord model that will be saved directly to the database
+     *
+     * @param type
+     * @return
+     */
+    private CellRangerDataRecord getDataRecord(String type){
+        switch (type.toLowerCase()) {
+            case API_TYPE_VDJ:
+                return new CellRangerSummaryCount();
+            case API_TYPE_COUNT:
+                return new CellRangerSummaryCount();
+            default:
+                break;
+        }
+        return null;
+    }
+
+    /**
+     * Returns Model w/ mappings for parsing cell-ranger output and creating the dataRecord field
+     *
+     * @param type
+     * @return, FieldMapperModel
+     */
+    private FieldMapperModel getFieldMapperModel(String type){
+        switch (type.toLowerCase()) {
+            case API_TYPE_VDJ:
+                return new CellRangerSummaryVDJModel();
+            case API_TYPE_COUNT:
+                return new CellRangerSummaryCountModel();
+            default:
+                break;
+        }
+        return null;
+    }
+
+    /**
+     * Returns path to where field cell ranger output for input parameters can be found
+     */
+    private String getWebSummaryPath(String run, String sample, String project, String type){
+        final String baseDir;
+        switch (type.toLowerCase()) {
+            case API_TYPE_VDJ:
+                baseDir = CELL_RANGER_VDJ_DIR;
+                break;
+            case API_TYPE_COUNT:
+                baseDir = CELL_RANGER_COUNT_DIR;
+                break;
+            default:
+                return String.format("ERROR: No corresponding web summary path for %s", type);
+        }
+        final String samplePath = String.format("/%s/%s/%s", project, run, sample);
+        final String runPath = String.format("%s%s%s", baseDir, samplePath, WEB_SUMMARY_PATH);
+
+        log.info(String.format("Using path %s", runPath));
+        return runPath;
     }
 
     /**
@@ -245,12 +309,17 @@ public class CellRangerController {
         return sanitizeNumber(value);
     }
 
+    /**
+     * Sanitizes string of a number for any characters that won't be parsable
+     *      e.g.     97.0%  -> 0.97
+     *               19,431 -> 19431
+     * @param value
+     * @return
+     */
     private String sanitizeNumber(String value){
-        // e.g.     97.0%  -> 0.97
         if(isPercent(value)){
             return formatPercent(value);
         }
-        // e.g.     19,431 -> 19431
         return value.replace(",", "");
     }
 
@@ -263,59 +332,18 @@ public class CellRangerController {
         return bd.toString();
     }
 
-    private void createRowFromEntity(FieldSetter fs, String type){
-        switch (type.toLowerCase()) {
-            case API_TYPE_VDJ:
-                CellRangerSummaryVdj cellRangerSummaryVdj = (CellRangerSummaryVdj) fs;
-                cellRangerSummaryVdjRepository.save(cellRangerSummaryVdj);
-            case API_TYPE_COUNT:
-                CellRangerSummaryCount cellRangerSummaryCountModel = (CellRangerSummaryCount) fs;
-                cellRangerSummaryCountRepository.save(cellRangerSummaryCountModel);
-            default:
-                break;
-        }
-    }
+    /**
+     * Creates a map w/ status and response to be returned to the client
+     *
+     * @param status, String - Informative message about the request status
+     * @param success, boolean - Whether request succeeded or not
+     * @return
+     */
+    private Map<String,String> mapResponse(String status, boolean success){
+        Map<String, String> map = new HashMap<>();
+        map.put("status", status);
+        map.put("success", success ? "true" : "false");
 
-    private FieldSetter getEntity(String type){
-        switch (type.toLowerCase()) {
-            case API_TYPE_VDJ:
-                return new CellRangerSummaryCount();
-            case API_TYPE_COUNT:
-                return new CellRangerSummaryCount();
-            default:
-                break;
-        }
-        return null;
-    }
-
-    private FieldMapperModel getFieldMapperModel(String type){
-        switch (type.toLowerCase()) {
-            case API_TYPE_VDJ:
-                return new CellRangerSummaryVDJModel();
-            case API_TYPE_COUNT:
-                return new CellRangerSummaryCountModel();
-            default:
-                break;
-        }
-        return null;
-    }
-
-    private String getWebSummaryPath(String run, String sample, String project, String type){
-        final String baseDir;
-        switch (type.toLowerCase()) {
-            case API_TYPE_VDJ:
-                baseDir = CELL_RANGER_VDJ_DIR;
-                break;
-            case API_TYPE_COUNT:
-                baseDir = CELL_RANGER_COUNT_DIR;
-                break;
-            default:
-                return String.format("ERROR: No corresponding web summary path for %s", type);
-        }
-        final String samplePath = String.format("/%s/%s/%s", project, run, sample);
-        final String runPath = String.format("%s%s%s", baseDir, samplePath, WEB_SUMMARY_PATH);
-
-        log.info(String.format("Using path %s", runPath));
-        return runPath;
+        return map;
     }
 }
