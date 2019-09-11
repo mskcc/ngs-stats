@@ -50,6 +50,8 @@ dependencies {
 	implementation group: 'org.json', name: 'json', version: '20190722'
 	implementation 'org.apache.httpcomponents:httpclient:4.5.8'
 	implementation group: 'org.jsoup', name: 'jsoup', version: '1.12.1'
+	implementation group: 'com.squareup', name: 'javapoet', version: '1.10.0'
+	implementation group: 'org.projectlombok', name: 'lombok', version: '1.16.16'
 
 	runtimeOnly('mysql:mysql-connector-java')
 
@@ -75,4 +77,9 @@ uploadArchives {
 			}
 		}
 	}
+}
+
+task generateDocs(type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	main = 'org.mskcc.cellranger.documentation.CodeGenerator'
 }

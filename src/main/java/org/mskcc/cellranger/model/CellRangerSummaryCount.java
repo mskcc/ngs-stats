@@ -1,10 +1,12 @@
 package org.mskcc.cellranger.model;
 
-import lombok.NoArgsConstructor;
-
+import java.lang.Float;
+import java.lang.Long;
+import java.lang.String;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import lombok.NoArgsConstructor;
 
 /**
  * ─────────────────▄████▄
@@ -40,7 +42,7 @@ import javax.persistence.Id;
  * ─────────────────█▀▀▀▀█
  * ─────────────────█▀▀▀▀█
  * ─────────────────█▀▀▀▀█
- * ─────────────────▀████▀
+ * ─────────────────▀████▀ 
  *
  * ******************************************************************************
  * ******************************** DO NOT EDIT *********************************
@@ -48,6 +50,12 @@ import javax.persistence.Id;
 @Entity
 @NoArgsConstructor
 public class CellRangerSummaryCount extends CellRangerDataRecord {
+    @Id
+    @Column(
+            length = 128
+    )
+    public String id;
+
     public Long EstimatedNumberOfCells;
 
     public Long MeanReadsPerCell;
@@ -107,10 +115,4 @@ public class CellRangerSummaryCount extends CellRangerDataRecord {
             length = 64
     )
     public String CellRangerVersion;
-
-    @Id
-    @Column(
-            length = 150
-    )
-    public String id;
 }

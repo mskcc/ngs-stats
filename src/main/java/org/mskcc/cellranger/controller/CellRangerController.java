@@ -15,7 +15,6 @@ import org.mskcc.cellranger.model.CellRangerSummaryVdj;
 import org.mskcc.cellranger.model.CellRangerDataRecord;
 import org.mskcc.cellranger.repository.CellRangerSummaryCountRepository;
 import org.mskcc.cellranger.repository.CellRangerSummaryVdjRepository;
-import org.mskcc.picardstats.PicardStatsController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,7 @@ public class CellRangerController {
     final String API_PROJECT = "project";
     final String API_RUN = "run";
 
-    private static Logger log = LoggerFactory.getLogger(PicardStatsController.class);
+    private static Logger log = LoggerFactory.getLogger(CellRangerDataRecord.class);
 
     @Autowired
     private CellRangerSummaryCountRepository cellRangerSummaryCountRepository;
