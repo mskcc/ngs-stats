@@ -132,7 +132,7 @@ public class CellRangerController {
      * @return String
      * @throws IOException
      */
-    public static String getBody(HttpServletRequest request) throws IOException {
+    private static String getBody(HttpServletRequest request) throws IOException {
         String body = null;
         StringBuilder stringBuilder = new StringBuilder();
         BufferedReader bufferedReader = null;
