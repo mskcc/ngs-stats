@@ -17,7 +17,7 @@
 | td | Reads Mapped Confidently to Intronic Regions | ReadsMappedToIntronicRegions | class java.lang.Float |
 | td | Reads Mapped Confidently to Exonic Regions | ReadsMappedToExonicRegions | class java.lang.Float |
 | td | Reads Mapped Confidently to Transcriptome | ReadsMappedToTranscriptome | class java.lang.Float |
-| td | Reads Mapped Antisense to Gene | ReadsMappedToGene | class java.lang.Float |
+| td | Reads Mapped Antisense to Gene | ReadsMappedAntisenseToGene | class java.lang.Float |
 | td | Fraction Reads in Cells | FractionReadsInCells | class java.lang.Float |
 | td | Total Genes Detected | TotalGenesDetected | class java.lang.Long |
 | td | Median UMI Counts per Cell | MedianUMICountsPerCell | class java.lang.Long |

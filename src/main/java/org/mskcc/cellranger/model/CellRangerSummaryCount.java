@@ -88,7 +88,7 @@ public class CellRangerSummaryCount extends CellRangerDataRecord {
 
     public Float ReadsMappedToTranscriptome;
 
-    public Float ReadsMappedToGene;
+    public Float ReadsMappedAntisenseToGene;
 
     public Float FractionReadsInCells;
 

@@ -26,7 +26,7 @@ public class CellRangerSummaryCountModel extends FieldMapperModel {
                 new FieldMapper("td", "Reads Mapped Confidently to Intronic Regions", "ReadsMappedToIntronicRegions", Float.class),
                 new FieldMapper("td", "Reads Mapped Confidently to Exonic Regions", "ReadsMappedToExonicRegions", Float.class),
                 new FieldMapper("td", "Reads Mapped Confidently to Transcriptome", "ReadsMappedToTranscriptome", Float.class),
-                new FieldMapper("td", "Reads Mapped Antisense to Gene", "ReadsMappedToGene", Float.class),
+                new FieldMapper("td", "Reads Mapped Antisense to Gene", "ReadsMappedAntisenseToGene", Float.class),
                 new FieldMapper("td", "Fraction Reads in Cells", "FractionReadsInCells", Float.class),
                 new FieldMapper("td", "Total Genes Detected", "TotalGenesDetected", Long.class),
                 new FieldMapper("td", "Median UMI Counts per Cell", "MedianUMICountsPerCell", Long.class),
