@@ -39,7 +39,7 @@ public class CellRangerController {
     final String API_PROJECT = "project";
     final String API_RUN = "run";
 
-    private static Logger log = LoggerFactory.getLogger(CellRangerDataRecord.class);
+    private static Logger log = LoggerFactory.getLogger(CellRangerController.class);
 
     @Autowired
     private CellRangerSummaryCountRepository cellRangerSummaryCountRepository;
@@ -191,7 +191,7 @@ public class CellRangerController {
                 continue;
             }
             for (Element label : matches) {
-                element = label.nextElementSibling​();  // value follows field in html document
+                element = label.nextElementSibling();  // value follows field in html document
                 fieldType = fm.getType();
                 value = sanitize(element.text(), fieldType);
 
