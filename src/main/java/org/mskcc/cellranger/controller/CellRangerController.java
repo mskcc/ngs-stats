@@ -220,9 +220,11 @@ public class CellRangerController {
             case API_TYPE_VDJ:
                 CellRangerSummaryVdj cellRangerSummaryVdj = (CellRangerSummaryVdj) dataRecord;
                 cellRangerSummaryVdjRepository.save(cellRangerSummaryVdj);
+                break;
             case API_TYPE_COUNT:
                 CellRangerSummaryCount cellRangerSummaryCountModel = (CellRangerSummaryCount) dataRecord;
                 cellRangerSummaryCountRepository.save(cellRangerSummaryCountModel);
+                break;
             default:
                 break;
         }
@@ -237,7 +239,7 @@ public class CellRangerController {
     private CellRangerDataRecord getDataRecord(String type){
         switch (type.toLowerCase()) {
             case API_TYPE_VDJ:
-                return new CellRangerSummaryCount();
+                return new CellRangerSummaryVdj();
             case API_TYPE_COUNT:
                 return new CellRangerSummaryCount();
             default:
@@ -280,7 +282,7 @@ public class CellRangerController {
                 return String.format("ERROR: No corresponding web summary path for %s", type);
         }
         final String samplePath = String.format("/%s/%s/%s", project, run, sample);
-        final String runPath = String.format("%s%s%s", baseDir, samplePath, WEB_SUMMARY_PATH);
+        final String runPath = String.format("%s%s/%s", baseDir, samplePath, WEB_SUMMARY_PATH);
 
         log.info(String.format("Using path %s", runPath));
         return runPath;
