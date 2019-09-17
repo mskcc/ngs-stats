@@ -7,7 +7,7 @@ public class CellRangerSummaryVDJModel extends FieldMapperModel {
     public CellRangerSummaryVDJModel() {
         fieldMapperList = new ArrayList<FieldMapper>(Arrays.asList(
                 new FieldMapper("h1", "Estimated Number of Cells", "EstimatedNumberOfCells", Long.class),
-                new FieldMapper("h2", "Mean Reads per Cell", "MeanReadsPerCell",Long.class),
+                new FieldMapper("h2", "Mean Read Pairs per Cell", "MeanReadsPerCell",Long.class),
                 new FieldMapper("h2", "Number of Cells With Productive V-J Spanning Pair", "NumCellsWithVDJSpanningPair", Long.class),
                 new FieldMapper("td", "Reads Mapped to Any V(D)J Gene", "ReadsMappedToAnyVDJGene", Float.class),
                 new FieldMapper("td", "Reads Mapped to TRA", "ReadsMappedToTRA", Float.class),

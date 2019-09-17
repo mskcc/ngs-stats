@@ -29,7 +29,7 @@
 | Html Element | Html Label | Table Field | Table Type |
 | ------------ | ---------- | ----------- | ---------- |
 | h1 | Estimated Number of Cells | EstimatedNumberOfCells | class java.lang.Long |
-| h2 | Mean Reads per Cell | MeanReadsPerCell | class java.lang.Long |
+| h2 | Mean Read Pairs per Cell | MeanReadsPerCell | class java.lang.Long |
 | h2 | Number of Cells With Productive V-J Spanning Pair | NumCellsWithVDJSpanningPair | class java.lang.Long |
 | td | Reads Mapped to Any V(D)J Gene | ReadsMappedToAnyVDJGene | class java.lang.Float |
 | td | Reads Mapped to TRA | ReadsMappedToTRA | class java.lang.Float |
