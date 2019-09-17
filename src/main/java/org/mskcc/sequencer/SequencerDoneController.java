@@ -96,21 +96,24 @@ public class SequencerDoneController {
         return false;
     }
 
-    @GetMapping(value = "/latestrun/{project}/{sample}/{run}")
-    public ArchivedFastq findMostRecentFastqDir(@PathVariable String project, @PathVariable String sample, @PathVariable String run) {
-        log.info("Finding latest fastq.gz for project:" + project + " sample:" + sample + " run:" + run);
-        List<ArchivedFastq> fastqs = archivedFastqRepository.findByProjectAndSampleAndRunOrderByFastqLastModifiedDesc(project, sample, run);
+    @GetMapping(value = "/search/most/recent/fastqpath/{run}/{sampleAndigoid}")
+    public List<ArchivedFastq> findMostRecentFastqDir(@PathVariable String run, @PathVariable String sampleAndigoid) {
+        log.info("/search/most/recent/fastqpath/ for run:" + run + " sampleAndigoid:" + sampleAndigoid);
+        List<ArchivedFastq> fastqs =
+                archivedFastqRepository.findByRunStartsWithAndSampleOrderByFastqLastModifiedDesc(run, sampleAndigoid);
 
         if (fastqs == null || fastqs.size() == 0) {
+            // TODO test for fastq.gz files written prior to 2016-1-20
             // Try query again with project removing leading '0' because from 2016-1-20 & prior fastq.gz files had the leading zero removed
-            if (project.startsWith("0") && sample.contains("_IGO_")) {
-                return findMostRecentFastqDir(project.substring(1), sample.substring(0, sample.indexOf("_IGO_")), run);
-            }
+//            if (project.startsWith("0") && sampleAndigoid.contains("_IGO_")) {
+//                return findMostRecentFastqDir(project.substring(1), sample.substring(0, sample.indexOf("_IGO_")), run);
+//            }
+            log.error("null found");
             return null;
         } else {
-            ArchivedFastq fastq = fastqs.get(0);
-            log.info("Found fastq.gz: " + fastq);
-            return fastq;
+            // TODO filter old runs when there is a manual redemux like MICHELLE_0098_BHJCFJDMXX_A1
+            log.info("Found fastq.gz: " + fastqs.size());
+            return fastqs;
         }
     }
 
@@ -152,6 +155,7 @@ public class SequencerDoneController {
         return startStop.toString();
     }
 
+    //TODO make this endpoint name clearer
     @GetMapping(value = {"/{sequencer}/{run}/{lastFile}", "/{sequencer}/{run}/{lastFile}/{useArchive}"})
     public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile,
                               @PathVariable(required = false) String useArchive) {

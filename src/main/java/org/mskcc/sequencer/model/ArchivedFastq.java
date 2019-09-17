@@ -42,6 +42,7 @@ public class ArchivedFastq {
 
     private Date lastUpdated;
 
+
     public String getSampleName() {
         if (sample.contains("_IGO_"))
             return sample.substring(0, sample.indexOf("_IGO_"));
@@ -78,7 +79,7 @@ public class ArchivedFastq {
         return fastqs;
     }
 
-    protected static void save(String run, String runBaseDirectory,  Path p, List<ArchivedFastq> paths) {
+    protected static void save(String run, String runBaseDirectory, Path p, List<ArchivedFastq> paths) {
         String filename = p.getFileName().toString();
         Long bytes = p.toFile().length();
         if (filename.contains("Undetermined_")) {
@@ -88,6 +89,7 @@ public class ArchivedFastq {
             Path samplePath = p.getParent();
             String sample = samplePath.getFileName().toString().substring(7);    // remove "Sample_" prefix
             Path projectPath = samplePath.getParent();
+            // TODO debug and unit test failure for /ifs/archive/GCL/hiseq/FASTQ/VIC_2120_000000000-A6N30
             String project = projectPath.getFileName().toString().substring(8);  // remove "Project_" prefix
 
             ArchivedFastq f = new ArchivedFastq(run, runBaseDirectory, project, sample, p.toAbsolutePath().toString(), new Date(p.toFile().lastModified()), bytes, new Date());
