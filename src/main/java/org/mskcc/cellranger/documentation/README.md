@@ -25,6 +25,7 @@
 | td | Transcriptome | Transcriptome | class java.lang.String |
 | td | Chemistry | Chemistry | class java.lang.String |
 | td | Cell Ranger Version | CellRangerVersion | class java.lang.String |
+
 #CellRangerSummaryVdj
 | Html Element | Html Label | Table Field | Table Type |
 | ------------ | ---------- | ----------- | ---------- |
