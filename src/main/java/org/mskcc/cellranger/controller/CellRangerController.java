@@ -112,16 +112,21 @@ public class CellRangerController {
 
         CellRangerDataRecord dataRecord;
         try {
+            log.info(String.format("Creating entry for Sample %s (Project: %s, Run: %s, Type: %s)",
+                    sample, project, run, type));
             dataRecord = populateEntity(run, sample, project, type);
         } catch(IOException e){
             final String error = String.format("Failed to read file for sample %s", sample);
             log.error(String.format("%s. Error: %s", error, e.getMessage()));
             return mapResponse(error, false);
         }
+
         putRecordIntoDB(dataRecord, type);
 
-        return mapResponse(String.format("Created entry for Type: %s, Sample: %s, Project: %s, Run: %s",
-                type, sample, project, run), true);
+        final String status = String.format("Saved entry for Sample %s (Project: %s, Run: %s, Type: %s)",
+                sample, project, run, type);
+        log.info(status);
+        return mapResponse(status, true);
     }
 
     /**
@@ -284,7 +289,7 @@ public class CellRangerController {
         final String samplePath = String.format("/%s/%s/%s", project, run, sample);
         final String runPath = String.format("%s%s/%s", baseDir, samplePath, WEB_SUMMARY_PATH);
 
-        log.info(String.format("Using path %s", runPath));
+        log.info(String.format("Using Web Summary path %s", runPath));
         return runPath;
     }
 
