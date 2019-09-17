@@ -114,7 +114,7 @@ public class CellRangerController {
         try {
             log.info(String.format("Creating entry for Sample %s (Project: %s, Run: %s, Type: %s)",
                     sample, project, run, type));
-            dataRecord = populateEntity(run, sample, project, type);
+            dataRecord = createDataRecordFromWebSummary(run, sample, project, type);
         } catch(IOException e){
             final String error = String.format("Failed to read file for sample %s", sample);
             log.error(String.format("%s. Error: %s", error, e.getMessage()));
@@ -170,7 +170,19 @@ public class CellRangerController {
         return body;
     }
 
-    private CellRangerDataRecord populateEntity(String run, String sample, String project, String type) throws IOException {
+    /**
+     * Parses data from web_summary.html and creates a CellRangerDataRecord instance. The fields it parses is
+     * dependent upon the parameters passed to it, specifically the "type", which can be either vdj or count.
+     *
+     * @param run, String - Run of the sample
+     * @param sample, String - Name of the sample
+     * @param project, String - Project of the sample
+     * @param type, String - cellranger output type. Must have an associated model in org.mskcc.cellranger.model
+     *
+     * @return, CellRangerDataRecord - Field populated from web_summary file
+     * @throws IOException
+     */
+    private CellRangerDataRecord createDataRecordFromWebSummary(String run, String sample, String project, String type) throws IOException {
         // Create Entity w/ sample-id
         final FieldMapperModel fieldMapperModel = getFieldMapperModel(type);
         final CellRangerDataRecord dataRecord = getDataRecord(type);

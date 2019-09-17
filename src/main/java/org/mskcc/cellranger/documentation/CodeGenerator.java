@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Generates the org.mskcc.cellranger.model files w/ accompanying documentation
+ * Generates the org.mskcc.cellranger.model files w/ accompanying documentation in org.mskcc.cellranger.documentation.
+ * Should run as a seperate gradle task
  */
 public class CodeGenerator {
     private static Logger log = LoggerFactory.getLogger(PicardStatsController.class);
