@@ -174,7 +174,7 @@ public class CellRangerController {
         // Parse
         final String filePath = getWebSummaryPath(run, sample, project, type);
         File input = new File(filePath);
-        Document doc = Jsoup.parse(input, "UTF-8", ""); // TODO - throws warning
+        Document doc = Jsoup.parse(input, "UTF-8", "");
 
         String value, htmlElement, htmlField;
         Element element;
