@@ -1,14 +1,19 @@
 package org.mskcc.cellranger.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Field;
 
 public class CellRangerDataRecord {
+    private static Logger log = LoggerFactory.getLogger(CellRangerDataRecord.class);
+
     public void setField(String fieldName, String value, Class type){
         Field field;
         try{
             field = this.getClass().getField(fieldName);
         } catch(NoSuchFieldException e){
-            System.out.println(e);
+            log.error(String.format("Data record does not have field - %s. Error: %s", fieldName, e.getMessage()));
             return;
         }
 
@@ -25,19 +30,18 @@ public class CellRangerDataRecord {
 
     private void setFloat(Field field, String value){
         Float castValue;
+
         try {
             castValue = Float.parseFloat(value);
-        } catch (Exception e){
-            // TODO - logging
-            System.out.println(e);
+        } catch (NumberFormatException e){
+            log.error(String.format("Error setting Float field: %s. Non-parsable value: %s. Error: %s", field.getName(), value, e.getMessage()));
             return;
         }
 
         try {
             field.set(this, castValue);
         } catch (IllegalAccessException e){
-            // TODO - logging
-            System.out.println(e);
+            log.error(String.format("Error setting Float field: %s. Error: %s", field.getName(), e.getMessage()));
             return;
         }
     }
@@ -47,16 +51,14 @@ public class CellRangerDataRecord {
         try {
             castValue = Long.parseLong(value);
         } catch (Exception e){
-            System.out.println(e);
-            // TODO - logging
+            log.error(String.format("Error setting Long field: %s. Non-parsable value: %s. Error: %s", field.getName(), value, e.getMessage()));
             return;
         }
 
         try {
             field.set(this, castValue);
         } catch (IllegalAccessException e){
-            System.out.println(e);
-            // TODO - logging
+            log.error(String.format("Error setting Long field: %s. Error: %s", field.getName(), e.getMessage()));
             return;
         }
     }
@@ -65,8 +67,7 @@ public class CellRangerDataRecord {
         try {
             field.set(this, value);
         } catch (IllegalAccessException e){
-            System.out.println(e);
-            // TODO - logging
+            log.error(String.format("Error setting String field: %s. Error: %s", field.getName(), e.getMessage()));
             return;
         }
     }
