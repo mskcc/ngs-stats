@@ -1,4 +1,5 @@
 #CellRangerSummaryCount
+
 | Html Element | Html Label | Table Field | Table Type |
 | ------------ | ---------- | ----------- | ---------- |
 | h1 | Estimated Number of Cells | EstimatedNumberOfCells | class java.lang.Long |
@@ -27,6 +28,7 @@
 | td | Cell Ranger Version | CellRangerVersion | class java.lang.String |
 
 #CellRangerSummaryVdj
+
 | Html Element | Html Label | Table Field | Table Type |
 | ------------ | ---------- | ----------- | ---------- |
 | h1 | Estimated Number of Cells | EstimatedNumberOfCells | class java.lang.Long |
