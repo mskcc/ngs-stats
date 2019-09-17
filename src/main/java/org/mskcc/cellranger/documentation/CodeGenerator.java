@@ -24,7 +24,7 @@ public class CodeGenerator {
         classToFieldModelMap.put("CellRangerSummaryCount", new CellRangerSummaryCountModel());
         classToFieldModelMap.put("CellRangerSummaryVdj", new CellRangerSummaryVDJModel());
 
-        SCHEMA_FILE_PATH = String.format("%s/Schema.md", getDocumentationPath());
+        SCHEMA_FILE_PATH = String.format("%s/README.md", getDocumentationPath());
         MODEL_PKG_NAME = getModelPkgName();
     }
 
