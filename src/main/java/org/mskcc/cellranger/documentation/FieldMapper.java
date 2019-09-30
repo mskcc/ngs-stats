@@ -8,7 +8,7 @@ public class FieldMapper {
 
     /**
      * Identifies HTML elements to parse relevant fields from and map to database fields
-     *  e.g. new FieldMapper("h1", "Estimated Number of Cells", "EstimatedNumberOfCells", Long.class)
+     *  e.g. new FieldMapper("h1", "Estimated Number of Cells", "EstimatedNumberOfCells", Double.class)
      *          HTML
      *              <h1>Estimated Number of Cells</h1>  <- HTML Element
      *              <div>3,457</div>                    (Should be able to look to neighboring div for value)
