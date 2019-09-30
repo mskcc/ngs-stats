@@ -1,7 +1,6 @@
 package org.mskcc.cellranger.model;
 
-import java.lang.Float;
-import java.lang.Long;
+import java.lang.Double;
 import java.lang.String;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -56,45 +55,55 @@ public class CellRangerSummaryCount extends CellRangerDataRecord {
     )
     public String id;
 
-    public Long EstimatedNumberOfCells;
+    @Column(
+            length = 128
+    )
+    public String run;
 
-    public Long MeanReadsPerCell;
+    @Column(
+            length = 128
+    )
+    public String project;
 
-    public Long MedianGenesPerCell;
+    public Double EstimatedNumberOfCells;
 
-    public Long NumberOfReads;
+    public Double MeanReadsPerCell;
 
-    public Float ValidBarcodes;
+    public Double MedianGenesPerCell;
 
-    public Float SequencingSaturation;
+    public Double NumberOfReads;
 
-    public Float Q30BasesInBarcode;
+    public Double ValidBarcodes;
 
-    public Float Q30BasesinRNARead;
+    public Double SequencingSaturation;
 
-    public Float Q30BasesInSampleIndex;
+    public Double Q30BasesInBarcode;
 
-    public Float Q30BasesInUMI;
+    public Double Q30BasesinRNARead;
 
-    public Float ReadsMappedToGenome;
+    public Double Q30BasesInSampleIndex;
 
-    public Float ReadsMappedConfidentlyToGenome;
+    public Double Q30BasesInUMI;
 
-    public Float ReadsMappedToIntergenicRegions;
+    public Double ReadsMappedToGenome;
 
-    public Float ReadsMappedToIntronicRegions;
+    public Double ReadsMappedConfidentlyToGenome;
 
-    public Float ReadsMappedToExonicRegions;
+    public Double ReadsMappedToIntergenicRegions;
 
-    public Float ReadsMappedToTranscriptome;
+    public Double ReadsMappedToIntronicRegions;
 
-    public Float ReadsMappedAntisenseToGene;
+    public Double ReadsMappedToExonicRegions;
 
-    public Float FractionReadsInCells;
+    public Double ReadsMappedToTranscriptome;
 
-    public Long TotalGenesDetected;
+    public Double ReadsMappedAntisenseToGene;
 
-    public Long MedianUMICountsPerCell;
+    public Double FractionReadsInCells;
+
+    public Double TotalGenesDetected;
+
+    public Double MedianUMICountsPerCell;
 
     @Column(
             length = 64
@@ -115,4 +124,9 @@ public class CellRangerSummaryCount extends CellRangerDataRecord {
             length = 64
     )
     public String CellRangerVersion;
+
+    @Column(
+            length = 2097152
+    )
+    public String CompressedGraphData;
 }

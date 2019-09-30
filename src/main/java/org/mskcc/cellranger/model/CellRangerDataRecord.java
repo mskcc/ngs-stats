@@ -8,6 +8,13 @@ import java.lang.reflect.Field;
 public class CellRangerDataRecord {
     private static Logger log = LoggerFactory.getLogger(CellRangerDataRecord.class);
 
+    /**
+     * Sets the field value by the Class type passed in
+     *
+     * @param fieldName
+     * @param value
+     * @param type
+     */
     public void setField(String fieldName, String value, Class type){
         Field field;
         try{
@@ -19,46 +26,27 @@ public class CellRangerDataRecord {
 
         final String typeString = type.toString();
 
-        if(typeString.equals(Float.class.toString())){
-            setFloat(field,value);
-        } else if(typeString.equals(Long.class.toString())){
-            setLong(field,value);
+        if(typeString.equals(Double.class.toString())){
+            setDouble(field, value);
         } else if(typeString.equals(String.class.toString())){
-            setString(field,value);
+            setString(field, value);
         }
     }
 
-    private void setFloat(Field field, String value){
-        Float castValue;
+    private void setDouble(Field field, String value){
+        Double castValue;
 
         try {
-            castValue = Float.parseFloat(value);
+            castValue = Double.parseDouble(value);
         } catch (NumberFormatException e){
-            log.error(String.format("Error setting Float field: %s. Non-parsable value: %s. Error: %s", field.getName(), value, e.getMessage()));
+            log.error(String.format("Error setting Double field: %s. Non-parsable value: %s. Error: %s", field.getName(), value, e.getMessage()));
             return;
         }
 
         try {
             field.set(this, castValue);
         } catch (IllegalAccessException e){
-            log.error(String.format("Error setting Float field: %s. Error: %s", field.getName(), e.getMessage()));
-            return;
-        }
-    }
-
-    private void setLong(Field field, String value){
-        Long castValue;
-        try {
-            castValue = Long.parseLong(value);
-        } catch (Exception e){
-            log.error(String.format("Error setting Long field: %s. Non-parsable value: %s. Error: %s", field.getName(), value, e.getMessage()));
-            return;
-        }
-
-        try {
-            field.set(this, castValue);
-        } catch (IllegalAccessException e){
-            log.error(String.format("Error setting Long field: %s. Error: %s", field.getName(), e.getMessage()));
+            log.error(String.format("Error setting Double field: %s. Error: %s", field.getName(), e.getMessage()));
             return;
         }
     }

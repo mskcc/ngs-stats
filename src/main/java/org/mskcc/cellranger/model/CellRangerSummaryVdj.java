@@ -1,7 +1,6 @@
 package org.mskcc.cellranger.model;
 
-import java.lang.Float;
-import java.lang.Long;
+import java.lang.Double;
 import java.lang.String;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -56,35 +55,45 @@ public class CellRangerSummaryVdj extends CellRangerDataRecord {
     )
     public String id;
 
-    public Long EstimatedNumberOfCells;
+    @Column(
+            length = 128
+    )
+    public String run;
 
-    public Long MeanReadsPerCell;
+    @Column(
+            length = 128
+    )
+    public String project;
 
-    public Long NumCellsWithVDJSpanningPair;
+    public Double EstimatedNumberOfCells;
 
-    public Float ReadsMappedToAnyVDJGene;
+    public Double MeanReadsPerCell;
 
-    public Float ReadsMappedToTRA;
+    public Double NumCellsWithVDJSpanningPair;
 
-    public Float ReadsMappedToTRB;
+    public Double ReadsMappedToAnyVDJGene;
 
-    public Float MedianTRAUMIsPerCell;
+    public Double ReadsMappedToTRA;
 
-    public Float MedianTRBUMIsPerCell;
+    public Double ReadsMappedToTRB;
 
-    public Long NumberOfReadPairs;
+    public Double MedianTRAUMIsPerCell;
 
-    public Float ValidBarcodes;
+    public Double MedianTRBUMIsPerCell;
 
-    public Float Q30BasesInBarcode;
+    public Double NumberOfReadPairs;
 
-    public Float Q30BasesInRNARead1;
+    public Double ValidBarcodes;
 
-    public Float Q30BasesInRNARead2;
+    public Double Q30BasesInBarcode;
 
-    public Float Q30BasesInSampleIndex;
+    public Double Q30BasesInRNARead1;
 
-    public Float Q30BasesInUMI;
+    public Double Q30BasesInRNARead2;
+
+    public Double Q30BasesInSampleIndex;
+
+    public Double Q30BasesInUMI;
 
     @Column(
             length = 64
@@ -105,4 +114,9 @@ public class CellRangerSummaryVdj extends CellRangerDataRecord {
             length = 64
     )
     public String CellRangerVersion;
+
+    @Column(
+            length = 2097152
+    )
+    public String CompressedGraphData;
 }
