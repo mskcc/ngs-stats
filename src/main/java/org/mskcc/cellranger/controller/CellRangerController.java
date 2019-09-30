@@ -10,34 +10,33 @@ import org.mskcc.cellranger.documentation.CellRangerSummaryCountModel;
 import org.mskcc.cellranger.documentation.CellRangerSummaryVDJModel;
 import org.mskcc.cellranger.documentation.FieldMapper;
 import org.mskcc.cellranger.documentation.FieldMapperModel;
+import org.mskcc.cellranger.model.CellRangerDataRecord;
 import org.mskcc.cellranger.model.CellRangerSummaryCount;
 import org.mskcc.cellranger.model.CellRangerSummaryVdj;
-import org.mskcc.cellranger.model.CellRangerDataRecord;
 import org.mskcc.cellranger.repository.CellRangerSummaryCountRepository;
 import org.mskcc.cellranger.repository.CellRangerSummaryVdjRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 public class CellRangerController {
-    final String API_TYPE_VDJ = "vdj";
-    final String API_TYPE_COUNT = "count";
-    final String API_TYPE = "type";
-    final String API_SAMPLE = "sample";
-    final String API_PROJECT = "project";
-    final String API_RUN = "run";
+    final static String API_TYPE_VDJ = "vdj";
+    final static String API_TYPE_COUNT = "count";
+    final static String API_TYPE = "type";
+    final static String API_ID = "sample";
+    final static String API_PROJECT = "project";
+    final static String API_RUN = "run";
 
     private static Logger log = LoggerFactory.getLogger(CellRangerController.class);
 
@@ -57,20 +56,6 @@ public class CellRangerController {
     private String WEB_SUMMARY_PATH;
 
     /**
-     * Returns Map of Request's Post Body. Supports nested fields
-     *
-     * @param request
-     * @return Map<String,String>
-     * @throws IOException
-     */
-    private Map getParamMap(HttpServletRequest request) throws IOException {
-        JSONParser parser = JsonParserFactory.getInstance().newJsonParser();
-        String payloadRequest = getBody(request);
-
-        return parser.parseJson(payloadRequest);
-    }
-
-    /**
      * Saves Cell Ranger record to database. Parses file from path determined from input parameters
      *
      *  Sample Request,
@@ -87,46 +72,81 @@ public class CellRangerController {
      * @return
      */
     @RequestMapping(value = "/saveCellRangerSample",
-                    method = RequestMethod.POST,
-                    produces = "application/json")
-    public Map<String,String> saveCellRangerSample(final HttpServletRequest request) {
+            method = RequestMethod.POST,
+            produces = "application/json")
+    public Map<String,Object> saveCellRangerSample(final HttpServletRequest request) {
         Map jsonMap;
         try{
             jsonMap = getParamMap(request);
         } catch(IOException e){
             String error = "Failed to parse post body from request";
             log.error(String.format("%s. Error: %s", error, e.getMessage()));
-            return mapResponse(error, false);
+            return createStandardResponse(error, false);
         }
 
-        final String sample = (String) jsonMap.get(API_SAMPLE);
+        final String id = (String) jsonMap.get(API_ID);
         final String type = (String) jsonMap.get(API_TYPE);
         final String project = (String) jsonMap.get(API_PROJECT);
         final String run = (String) jsonMap.get(API_RUN);
-        if( sample == null || type == null || project == null || run == null){
+        if( id == null || type == null || project == null || run == null){
             final String error = String.format("ERROR: Bad Parameters. Type: %s, Sample: %s, Project: %s, Run: %s",
-                    type, sample, project, run);
+                    type, id, project, run);
             log.error(error);
-            return mapResponse(error, false);
+            return createStandardResponse(error, false);
         }
 
         CellRangerDataRecord dataRecord;
         try {
-            log.info(String.format("Creating entry for Sample %s (Project: %s, Run: %s, Type: %s)",
-                    sample, project, run, type));
-            dataRecord = createDataRecordFromWebSummary(run, sample, project, type);
-        } catch(IOException e){
-            final String error = String.format("Failed to read file for sample %s", sample);
+            log.info(String.format("Creating entry for file 'id' %s (Project: %s, Run: %s, Type: %s)",
+                    id, project, run, type));
+            dataRecord = createDataRecordFromWebSummary(run, id, project, type);
+        } catch(IOException | NullPointerException e){
+            final String error = String.format("Failed to read file for w/ name '%s' (Project: '%s', Run: '%s', Type: '%s')", id, project, run, type);
             log.error(String.format("%s. Error: %s", error, e.getMessage()));
-            return mapResponse(error, false);
+            return createStandardResponse(error, false);
         }
 
-        putRecordIntoDB(dataRecord, type);
+        // Save record to database
+        CrudRepository repo = getRepository(type);
+        String status = String.format("Saved entry for file id '%s' (Project: '%s', Run: '%s', Type: '%s')", id, project, run, type);
+        if(repo.existsById(id)){
+            status = String.format("Overwrote entry for id '%s'. %s", id, status);
+        }
+        repo.save(dataRecord);
+        return createStandardResponse(status, true);
+    }
 
-        final String status = String.format("Saved entry for Sample %s (Project: %s, Run: %s, Type: %s)",
-                sample, project, run, type);
-        log.info(status);
-        return mapResponse(status, true);
+    @CrossOrigin(origins = "*", maxAge = 3600)
+    @RequestMapping(value = "/getCellRangerSample", method = RequestMethod.GET)
+    public Map<String, Object> getCellRangerSample(@RequestParam("sampleId") String sampleId,
+                                                   @RequestParam("type") String type) {
+        log.info("Querying for CellRangerSample: " + sampleId);
+
+        Optional<? extends CellRangerDataRecord> entry = getEntry(type, sampleId);
+        String status;
+        if (!entry.isPresent()){
+            status = String.format("No data found for %s id '%s'", type, sampleId);
+            log.error(status);
+            return createStandardResponse(status, false);
+        }
+        status = String.format("Found entry for id", sampleId);
+        Map<String, Object> resp = createStandardResponse(status, true);
+        resp.put("data", entry.get());
+        return resp;
+    }
+
+    /**
+     * Returns Map of Request's Post Body. Supports nested fields
+     *
+     * @param request
+     * @return Map<String,String>
+     * @throws IOException
+     */
+    private Map getParamMap(HttpServletRequest request) throws IOException {
+        JSONParser parser = JsonParserFactory.getInstance().newJsonParser();
+        String payloadRequest = getBody(request);
+
+        return parser.parseJson(payloadRequest);
     }
 
     /**
@@ -138,7 +158,6 @@ public class CellRangerController {
      * @throws IOException
      */
     private static String getBody(HttpServletRequest request) throws IOException {
-        String body = null;
         StringBuilder stringBuilder = new StringBuilder();
         BufferedReader bufferedReader = null;
 
@@ -165,9 +184,7 @@ public class CellRangerController {
                 }
             }
         }
-
-        body = stringBuilder.toString();
-        return body;
+        return stringBuilder.toString();
     }
 
     /**
@@ -175,21 +192,23 @@ public class CellRangerController {
      * dependent upon the parameters passed to it, specifically the "type", which can be either vdj or count.
      *
      * @param run, String - Run of the sample
-     * @param sample, String - Name of the sample
+     * @param id, String - Name of file containing the sample
      * @param project, String - Project of the sample
      * @param type, String - cellranger output type. Must have an associated model in org.mskcc.cellranger.model
      *
      * @return, CellRangerDataRecord - Field populated from web_summary file
      * @throws IOException
      */
-    private CellRangerDataRecord createDataRecordFromWebSummary(String run, String sample, String project, String type) throws IOException {
-        // Create Entity w/ sample-id
+    private CellRangerDataRecord createDataRecordFromWebSummary(String run, String id, String project, String type) throws IOException {
+        // Create Entity w/ id
         final FieldMapperModel fieldMapperModel = getFieldMapperModel(type);
         final CellRangerDataRecord dataRecord = getDataRecord(type);
-        dataRecord.setField("id", sample, String.class);
+        dataRecord.setField("id", id, String.class);
+        dataRecord.setField("project", project, String.class);
+        dataRecord.setField("run", run, String.class);
 
         // Parse
-        final String filePath = getWebSummaryPath(run, sample, project, type);
+        final String filePath = getWebSummaryPath(run, id, project, type);
         File input = new File(filePath);
         Document doc = Jsoup.parse(input, "UTF-8", "");
 
@@ -216,7 +235,27 @@ public class CellRangerController {
             }
         }
 
+        String compressedGraphData = getCompressedGraphData(doc);
+        dataRecord.setField("CompressedGraphData", compressedGraphData, String.class);
         return dataRecord;
+    }
+
+    private String getCompressedGraphData(Document doc){
+        // Get Graph Data, which has different parsing logic
+        String identifier = String.format("script[type='text/javascript']");
+        Elements graphData = doc.select(identifier);
+        String contents;
+        for(Element match : graphData){
+            contents = match.data();
+            Pattern pattern = Pattern.compile("'(.*?)'");
+            Matcher matcher = pattern.matcher(contents);
+            if (matcher.find())
+            {
+                return matcher.group(1);
+            }
+        }
+        log.error("Could not extract graph data");
+        return "";
     }
 
     /**
@@ -232,20 +271,18 @@ public class CellRangerController {
         return doc.select(identifier);
     }
 
-    private void putRecordIntoDB(CellRangerDataRecord dataRecord, String type){
+    private Optional<? extends CellRangerDataRecord> getEntry(String type, String id) {
         switch (type.toLowerCase()) {
             case API_TYPE_VDJ:
-                CellRangerSummaryVdj cellRangerSummaryVdj = (CellRangerSummaryVdj) dataRecord;
-                cellRangerSummaryVdjRepository.save(cellRangerSummaryVdj);
-                break;
+                return cellRangerSummaryVdjRepository.findById(id);
             case API_TYPE_COUNT:
-                CellRangerSummaryCount cellRangerSummaryCountModel = (CellRangerSummaryCount) dataRecord;
-                cellRangerSummaryCountRepository.save(cellRangerSummaryCountModel);
-                break;
+                return cellRangerSummaryCountRepository.findById(id);
             default:
                 break;
         }
+        return Optional.empty();
     }
+
 
     /**
      * Returns the CellRangerDataRecord model that will be saved directly to the database
@@ -259,6 +296,19 @@ public class CellRangerController {
                 return new CellRangerSummaryVdj();
             case API_TYPE_COUNT:
                 return new CellRangerSummaryCount();
+            default:
+                break;
+        }
+        return null;
+    }
+
+
+    private CrudRepository getRepository(String type){
+        switch (type.toLowerCase()) {
+            case API_TYPE_VDJ:
+                return cellRangerSummaryVdjRepository;
+            case API_TYPE_COUNT:
+                return cellRangerSummaryCountRepository;
             default:
                 break;
         }
@@ -357,10 +407,15 @@ public class CellRangerController {
      * @param success, boolean - Whether request succeeded or not
      * @return
      */
-    private Map<String,String> mapResponse(String status, boolean success){
-        Map<String, String> map = new HashMap<>();
+    private Map<String,Object> createStandardResponse(String status, boolean success){
+        Map<String, Object> map = new HashMap<>();
         map.put("status", status);
         map.put("success", success ? "true" : "false");
+
+        // Failures can log info that shouldn't be returned to user, e.g. Exception messages/stack traces/etc
+        if(success){
+            log.info(status);
+        }
 
         return map;
     }

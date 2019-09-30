@@ -84,7 +84,24 @@ public class ModelCodeGenerator {
                         .build())
                 .addModifiers(Modifier.PUBLIC)
                 .build();
+        FieldSpec runSpec = FieldSpec
+                .builder(String.class, "run")
+                .addAnnotation(AnnotationSpec.builder(Column.class)
+                        .addMember("length", "128")
+                        .build())
+                .addModifiers(Modifier.PUBLIC)
+                .build();
+        FieldSpec projectSpec = FieldSpec
+                .builder(String.class, "project")
+                .addAnnotation(AnnotationSpec.builder(Column.class)
+                        .addMember("length", "128")
+                        .build())
+                .addModifiers(Modifier.PUBLIC)
+                .build();
+
         builder.addField(idSpec);
+        builder.addField(runSpec);
+        builder.addField(projectSpec);
 
         for(FieldMapper fm : fieldMappers)
             builder.addField(getFieldSpec(fm));
@@ -104,9 +121,16 @@ public class ModelCodeGenerator {
 
         // No string field should exceed 64 characters
         if(type == String.class){
-            fieldBuilder.addAnnotation(AnnotationSpec.builder(Column.class)
-                    .addMember("length", "64")
-                    .build());
+            // TODO - If more exceptional cases are needed, move this to a seperate field in the FieldMapper
+            if(fieldMapper.getTableField().equals("CompressedGraphData")){
+                fieldBuilder.addAnnotation(AnnotationSpec.builder(Column.class)
+                        .addMember("length", "2097152")
+                        .build());
+            } else {
+                fieldBuilder.addAnnotation(AnnotationSpec.builder(Column.class)
+                        .addMember("length", "64")
+                        .build());
+            }
         }
 
         return fieldBuilder.build();

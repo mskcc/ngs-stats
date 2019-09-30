@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
@@ -111,11 +112,8 @@ public class CellRangerControllerTest {
     }
 
     @Test
-    public void updateDatabaseFileFilterTest() {
-        CellRangerType[] types = new CellRangerType[2];
-        types[0] = CellRangerType.COUNT;
-        types[1] = CellRangerType.VDJ;
-
+    public void saveCellRangerSampleTest_success() {
+        CellRangerType[] types = getCellRangerTypes();
         for(CellRangerType type : types){
             try {
                 testSaveCellRangerSample(type);
@@ -125,16 +123,100 @@ public class CellRangerControllerTest {
         }
     }
 
-    private void testSaveCellRangerSample(CellRangerType type) throws IOException {
-        copyFileUsingStream(getMockWebSummaryFile(type), WEB_SUMMARY_PATH.toFile());
-        String requestBody = String.format("{\"sample\": \"%s\",", SAMPLE) +
-                String.format("\"type\": \"%s\",", type.toString()) +
-                String.format("\"project\": \"%s\",", PROJECT) +
-                String.format("\"run\": \"%s\"}", RUN);
+    @Test
+    public void saveCellRangerSampleTest_fail() {
+        CellRangerType[] types = getCellRangerTypes();
+        for(CellRangerType type : types){
+            try {
+                String[] params = new String[]{type.toString(), SAMPLE, PROJECT, RUN};
+                String temp;
+                for(int i = 0; i<params.length; i++){
+                    temp = params[i];
+                    params[i] = "INVALID_PARAM";
+                    setupSaveRequest(params[0], params[1], params[2], params[3]);
+                    Map<String,Object> response = cellRangerController.saveCellRangerSample(request);
+                    assertEquals(response.get("success"), "false");
+
+                    params[i] = temp;
+                }
+            } catch(IOException e){
+                log.error(String.format("Failed to test %s. Error: %s", type, e.getMessage()));
+            }
+        }
+    }
+
+    @Test
+    public void getCellRangerSampleTest_success() {
+        final String id = "REQUEST_ID";
+
+        // Setup database get calls
+        CellRangerSummaryVdj mockVdjEntry = new CellRangerSummaryVdj();
+        mockVdjEntry.setField("id", "TEST_VDJ_ID", String.class);
+        CellRangerSummaryCount mockCountEntry = new CellRangerSummaryCount();
+        mockCountEntry.setField("id", "TEST_COUNT_ID", String.class);
+        when(cellRangerSummaryVdjRepository.findById(id)).thenReturn(Optional.of(mockVdjEntry));
+        when(cellRangerSummaryCountRepository.findById(id)).thenReturn(Optional.of(mockCountEntry));
+
+        CellRangerType[] types = getCellRangerTypes();
+        for(CellRangerType type : types){
+            Map<String,Object> response = cellRangerController.getCellRangerSample(id, type.toString());
+            assertEquals(response.get("success"), "true");
+            assertNotNull(response.get("data"));
+        }
+    }
+
+    @Test
+    public void getCellRangerSampleTest_fail() {
+        final String id = "REQUEST_ID";
+
+        // Setup database get calls
+        when(cellRangerSummaryVdjRepository.findById(id)).thenReturn(Optional.empty());
+        when(cellRangerSummaryCountRepository.findById(id)).thenReturn(Optional.empty());
+
+        CellRangerType[] types = getCellRangerTypes();
+        for(CellRangerType type : types){
+            Map<String,Object> response = cellRangerController.getCellRangerSample(id, type.toString());
+            assertEquals(response.get("success"), "false");
+            assertNull(response.get("data"));
+        }
+    }
+
+    /**
+     * Return all available cell ranger data types
+     * @return
+     */
+    private CellRangerType[] getCellRangerTypes() {
+        CellRangerType[] types = new CellRangerType[2];
+        types[0] = CellRangerType.COUNT;
+        types[1] = CellRangerType.VDJ;
+
+        return types;
+    }
+
+    /**
+     * Creates request body as it would be sent in request. Mocks it as the input stream of the HttpServletRequest
+     *
+     * @param type, String
+     * @param sample, String
+     * @param project, String
+     * @param run, String
+     * @throws IOException
+     */
+    private void setupSaveRequest(String type, String sample, String project, String run) throws IOException {
+        String requestBody = String.format("{\"sample\": \"%s\",", sample) +
+                String.format("\"type\": \"%s\",", type) +
+                String.format("\"project\": \"%s\",", project) +
+                String.format("\"run\": \"%s\"}", run);
         when(request.getInputStream()).thenReturn(
                 new DelegatingServletInputStream(
                         new ByteArrayInputStream(requestBody.getBytes(StandardCharsets.UTF_8))));
-        Map<String,String> response = cellRangerController.saveCellRangerSample(request);
+    }
+
+    private void testSaveCellRangerSample(CellRangerType type) throws IOException {
+        copyFileUsingStream(getMockWebSummaryFile(type), WEB_SUMMARY_PATH.toFile());
+        setupSaveRequest(type.toString(), SAMPLE, PROJECT, RUN);
+
+        Map<String,Object> response = cellRangerController.saveCellRangerSample(request);
         assertEquals(response.get("success"), "true");
 
         if(type.equals(CellRangerType.COUNT)){
