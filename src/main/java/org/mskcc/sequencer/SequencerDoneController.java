@@ -57,6 +57,15 @@ public class SequencerDoneController {
     @Value("${lims.rest.password}")
     private String limsPass;
 
+    @GetMapping(value = "/getpoolednormals/{request}")
+    public List<ArchivedFastq> getPooledNormals(@PathVariable String request) {
+        log.info("Finding pooled normals for request:" + request);
+        if (request.length() < 5 || request.length() > 10)
+            return null;
+
+        return archivedFastqRepository.findAllPooledNormals(request);
+    }
+
     /**
      * For external IGO Customers to determine when a fastq is ready and they can start their pipeline.
      * @param sample
@@ -155,8 +164,7 @@ public class SequencerDoneController {
         return startStop.toString();
     }
 
-    //TODO make this endpoint name clearer
-    @GetMapping(value = {"/{sequencer}/{run}/{lastFile}", "/{sequencer}/{run}/{lastFile}/{useArchive}"})
+    @GetMapping(value = {"/sequencerstartstop/{sequencer}/{run}/{lastFile}", "/sequencerstartstop/{sequencer}/{run}/{lastFile}/{useArchive}"})
     public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile,
                               @PathVariable(required = false) String useArchive) {
         String baseDir;
