@@ -116,7 +116,8 @@ public class CellRangerSummaryVdj extends CellRangerDataRecord {
     public String CellRangerVersion;
 
     @Column(
-            length = 2097152
+            length = 2097152,
+            columnDefinition = "TEXT"
     )
     public String CompressedGraphData;
 }
