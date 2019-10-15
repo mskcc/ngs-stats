@@ -75,9 +75,8 @@ public class CellRangerController {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/saveCellRangerSample",
-            method = RequestMethod.POST,
-            produces = "application/json")
+    @PostMapping(value = "/saveCellRangerSample",
+                 produces = "application/json")
     public Map<String, Object> saveCellRangerSample(final HttpServletRequest request) {
         Map jsonMap;
         try {
@@ -120,7 +119,7 @@ public class CellRangerController {
     }
 
     @CrossOrigin(origins = "*", maxAge = 3600)
-    @RequestMapping(value = "/getCellRangerSample", method = RequestMethod.GET)
+    @GetMapping(value = "/getCellRangerSample")
     public Map<String, Object> getCellRangerSample(@RequestParam("project") String project,
                                                    @RequestParam("type") String type) {
         log.info("Querying for CellRangerSample: " + project);
