@@ -22,9 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
@@ -147,19 +145,23 @@ public class CellRangerControllerTest {
 
     @Test
     public void getCellRangerSampleTest_success() {
-        final String id = "REQUEST_ID";
+        final String project = "REQUEST_PROJECT";
 
         // Setup database get calls
-        CellRangerSummaryVdj mockVdjEntry = new CellRangerSummaryVdj();
-        mockVdjEntry.setField("id", "TEST_VDJ_ID", String.class);
-        CellRangerSummaryCount mockCountEntry = new CellRangerSummaryCount();
-        mockCountEntry.setField("id", "TEST_COUNT_ID", String.class);
-        when(cellRangerSummaryVdjRepository.findById(id)).thenReturn(Optional.of(mockVdjEntry));
-        when(cellRangerSummaryCountRepository.findById(id)).thenReturn(Optional.of(mockCountEntry));
+        CellRangerSummaryVdj mockVdjSample = new CellRangerSummaryVdj();
+        mockVdjSample.setField("id", "TEST_VDJ_ID", String.class);
+        ArrayList<CellRangerSummaryVdj> vdjSamples = new ArrayList<>(Arrays.asList(mockVdjSample));
+
+        CellRangerSummaryCount mockCountSample = new CellRangerSummaryCount();
+        mockCountSample.setField("id", "TEST_COUNT_ID", String.class);
+        ArrayList<CellRangerSummaryCount> countSamples = new ArrayList<>(Arrays.asList(mockCountSample));
+
+        when(cellRangerSummaryVdjRepository.findByProject(project)).thenReturn(vdjSamples);
+        when(cellRangerSummaryCountRepository.findByProject(project)).thenReturn(countSamples);
 
         CellRangerType[] types = getCellRangerTypes();
         for(CellRangerType type : types){
-            Map<String,Object> response = cellRangerController.getCellRangerSample(id, type.toString());
+            Map<String,Object> response = cellRangerController.getCellRangerSample(project, type.toString());
             assertEquals(response.get("success"), "true");
             assertNotNull(response.get("data"));
         }
@@ -167,15 +169,18 @@ public class CellRangerControllerTest {
 
     @Test
     public void getCellRangerSampleTest_fail() {
-        final String id = "REQUEST_ID";
+        final String project = "REQUEST_PROJECT";
+
+        List<CellRangerSummaryVdj> vdjEmptyList = new ArrayList<>();
+        List<CellRangerSummaryCount> countEmptyList = new ArrayList<>();
 
         // Setup database get calls
-        when(cellRangerSummaryVdjRepository.findById(id)).thenReturn(Optional.empty());
-        when(cellRangerSummaryCountRepository.findById(id)).thenReturn(Optional.empty());
+        when(cellRangerSummaryVdjRepository.findByProject(project)).thenReturn(vdjEmptyList);
+        when(cellRangerSummaryCountRepository.findByProject(project)).thenReturn(countEmptyList);
 
         CellRangerType[] types = getCellRangerTypes();
         for(CellRangerType type : types){
-            Map<String,Object> response = cellRangerController.getCellRangerSample(id, type.toString());
+            Map<String,Object> response = cellRangerController.getCellRangerSample(project, type.toString());
             assertEquals(response.get("success"), "false");
             assertNull(response.get("data"));
         }
