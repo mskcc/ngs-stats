@@ -20,10 +20,10 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class ModelCodeGenerator {
+    private static final String FOUR_WHITESPACES = "    ";
     private static Logger log = LoggerFactory.getLogger(ModelCodeGenerator.class);
-
     private static String WARNING =
-                    "─────────────────▄████▄\n" +
+            "─────────────────▄████▄\n" +
                     "─────▄▄▄▄▄▄▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▄▄▄▄▄▄▄\n" +
                     "───▄▀░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▀▄\n" +
                     "──▐░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▌\n" +
@@ -58,14 +58,31 @@ public class ModelCodeGenerator {
                     "─────────────────█▀▀▀▀█\n" +
                     "─────────────────▀████▀ \n" +
                     "\n" +
-    "******************************************************************************\n" +
-    "******************************** DO NOT EDIT *********************************\n" +
-    "******************************************************************************";
-
-    private static final String FOUR_WHITESPACES = "    ";
+                    "******************************************************************************\n" +
+                    "***************************** DO NOT EDIT/DELETE *****************************\n" +
+                    "******************************************************************************";
 
     /**
-     * Creates representation of java class. See javapoet
+     * Generates Model file, org.mskcc.cellranger.model.[CLASS_NAME]
+     *
+     * @param javaRoot, String - path to java directory, e.g. "./src/main/java"
+     * @param pkgName, String, - package name for models, e.g. "org.mskcc.cellranger.model"
+     * @param className, String - Name of class to be created, e.g. "CellRangerSummaryCount"
+     * @param fieldMapperModel, FieldMapperModel - Implemented Model file, e.g. CellRangerSummaryCountModel
+     * @throws IOException
+     */
+    public static void generateModelFile(String javaRoot, String pkgName, String className, FieldMapperModel fieldMapperModel) throws IOException {
+        TypeSpec typeSpec = createTypeSpec(className, fieldMapperModel.getFieldMapperList());
+        writeToOutputFile(javaRoot, pkgName, typeSpec);
+        log.info(String.format("Created model class %s in package %s", className, pkgName));
+    }
+
+    /**
+     * Creates representation of java class using javapoet
+     *
+     * @param className, String - Name of class, e.g. "CellRangerSummaryCount"
+     * @param fieldMappers, List - List of fields that should be included in model
+     * @return
      */
     private static TypeSpec createTypeSpec(String className, List<FieldMapper> fieldMappers) {
         Builder builder = TypeSpec
@@ -103,7 +120,7 @@ public class ModelCodeGenerator {
         builder.addField(runSpec);
         builder.addField(projectSpec);
 
-        for(FieldMapper fm : fieldMappers)
+        for (FieldMapper fm : fieldMappers)
             builder.addField(getFieldSpec(fm));
 
         return builder.build();
@@ -111,8 +128,15 @@ public class ModelCodeGenerator {
 
     /**
      * Generates model field based on mapping described in documentation
+     *
+     * @param fieldMapper, FieldMapper - E.g. {
+     *      "htmlElement": "h1",
+     *      "htmlField": "Estimated Number of Cells",
+     *      "tableField": "EstimatedNumberOfCells"
+     * }
+     * @return, FieldSpec - javapoet class that can create field in java class
      */
-    private static FieldSpec getFieldSpec(FieldMapper fieldMapper){
+    private static FieldSpec getFieldSpec(FieldMapper fieldMapper) {
         final Class type = fieldMapper.getType();
 
         com.squareup.javapoet.FieldSpec.Builder fieldBuilder = FieldSpec
@@ -120,11 +144,13 @@ public class ModelCodeGenerator {
                 .addModifiers(Modifier.PUBLIC);
 
         // No string field should exceed 64 characters
-        if(type == String.class){
+        if (type == String.class) {
             // TODO - If more exceptional cases are needed, move this to a seperate field in the FieldMapper
-            if(fieldMapper.getTableField().equals("CompressedGraphData")){
+            if (fieldMapper.getTableField().equals("CompressedGraphData")) {
+                // Should generate text data type (Max-Length: 16,777,215 - 16 MB)
                 fieldBuilder.addAnnotation(AnnotationSpec.builder(Column.class)
                         .addMember("length", "2097152")
+                        .addMember("columnDefinition", "\"TEXT\"")
                         .build());
             } else {
                 fieldBuilder.addAnnotation(AnnotationSpec.builder(Column.class)
@@ -134,12 +160,6 @@ public class ModelCodeGenerator {
         }
 
         return fieldBuilder.build();
-    }
-
-    public static void generateModelFile(String javaRoot, String pkgName, String className, FieldMapperModel fieldMapperModel) throws IOException {
-        TypeSpec typeSpec = createTypeSpec(className, fieldMapperModel.getFieldMapperList());
-        writeToOutputFile(javaRoot, pkgName, typeSpec);
-        log.info(String.format("Created model class %s in package %s", className, pkgName));
     }
 
     private static void writeToOutputFile(String javaRoot, String packageName, TypeSpec typeSpec) throws IOException {

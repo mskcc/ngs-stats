@@ -1,11 +1,10 @@
 package org.mskcc.cellranger.model;
 
-import java.lang.Double;
-import java.lang.String;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import lombok.NoArgsConstructor;
 
 /**
  * ─────────────────▄████▄
@@ -44,7 +43,7 @@ import lombok.NoArgsConstructor;
  * ─────────────────▀████▀ 
  *
  * ******************************************************************************
- * ******************************** DO NOT EDIT *********************************
+ * ***************************** DO NOT EDIT/DELETE *****************************
  * ****************************************************************************** */
 @Entity
 @NoArgsConstructor

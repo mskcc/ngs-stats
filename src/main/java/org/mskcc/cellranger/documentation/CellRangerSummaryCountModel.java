@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * SOURCE OF TRUTH - THIS CREATES THE DAO & DOCUMENTATION.
- * If there are changes to the schema or CellRanger output, MODIFY THIS
+ * CREATES THE DAO & DOCUMENTATION
+ *      MODIFY          When there are changes to the schema or CellRanger output
+ *      DO NOT MODIFY   org.mskcc.cellranger.model files or /java/org/mskcc/cellranger/documentation/README.md
  */
 public class CellRangerSummaryCountModel extends FieldMapperModel {
     public CellRangerSummaryCountModel() {

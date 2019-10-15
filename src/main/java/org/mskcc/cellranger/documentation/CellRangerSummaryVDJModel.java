@@ -3,11 +3,16 @@ package org.mskcc.cellranger.documentation;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * CREATES THE DAO & DOCUMENTATION
+ *      MODIFY          When there are changes to the schema or CellRanger output
+ *      DO NOT MODIFY   org.mskcc.cellranger.model files or /java/org/mskcc/cellranger/documentation/README.md
+ */
 public class CellRangerSummaryVDJModel extends FieldMapperModel {
     public CellRangerSummaryVDJModel() {
         fieldMapperList = new ArrayList<FieldMapper>(Arrays.asList(
                 new FieldMapper("h1", "Estimated Number of Cells", "EstimatedNumberOfCells", Double.class),
-                new FieldMapper("h2", "Mean Read Pairs per Cell", "MeanReadsPerCell",Double.class),
+                new FieldMapper("h2", "Mean Read Pairs per Cell", "MeanReadsPerCell", Double.class),
                 new FieldMapper("h2", "Number of Cells With Productive V-J Spanning Pair", "NumCellsWithVDJSpanningPair", Double.class),
                 new FieldMapper("td", "Reads Mapped to Any V(D)J Gene", "ReadsMappedToAnyVDJGene", Double.class),
                 new FieldMapper("td", "Reads Mapped to TRA", "ReadsMappedToTRA", Double.class),
