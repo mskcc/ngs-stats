@@ -1,6 +1,10 @@
 package org.mskcc.cellranger.repository;
 
-import org.springframework.data.repository.CrudRepository;
 import org.mskcc.cellranger.model.CellRangerSummaryCount;
+import org.springframework.data.repository.CrudRepository;
 
-public interface CellRangerSummaryCountRepository extends CrudRepository<CellRangerSummaryCount, String>{ }
+import java.util.List;
+
+public interface CellRangerSummaryCountRepository extends CrudRepository<CellRangerSummaryCount, String> {
+    List<CellRangerSummaryCount> findByProject(String project);
+}
