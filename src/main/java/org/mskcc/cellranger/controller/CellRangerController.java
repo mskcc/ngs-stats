@@ -118,7 +118,6 @@ public class CellRangerController {
         return createStandardResponse(status, true);
     }
 
-    @CrossOrigin(origins = "*", maxAge = 3600)
     @GetMapping(value = "/getCellRangerSample")
     public Map<String, Object> getCellRangerSample(@RequestParam("project") String project,
                                                    @RequestParam("type") String type) {
