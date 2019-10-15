@@ -1,4 +1,4 @@
-package org.mskcc.cellranger.controller;
+package org.mskcc;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
