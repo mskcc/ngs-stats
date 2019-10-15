@@ -2,7 +2,6 @@ package org.mskcc.picardstats;
 
 import org.mskcc.picardstats.model.*;
 import org.mskcc.picardstats.repository.*;
-import org.mskcc.sequencer.SequencerDoneController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,7 @@ import java.util.*;
 
 @RestController
 public class PicardStatsController {
-    private static Logger log = LoggerFactory.getLogger(SequencerDoneController.class);
+    private static Logger log = LoggerFactory.getLogger(PicardStatsController.class);
 
     private static final String BASE_STATS_DIR = "/ifs/data/BIC/Stats/hiseq/DONE/";  // "/Users/mcmanamd/Downloads/DONE/DONE/";
 

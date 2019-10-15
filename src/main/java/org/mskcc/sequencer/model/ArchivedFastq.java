@@ -33,7 +33,7 @@ public class ArchivedFastq {
     private String sample; // from Jan. 2016 format example: A123456_V3_IGO_07973_8 ie sampleId_IGO_igoId
 
     @Id
-    @Column(length = 500)
+    @Column(length = 250) // Cause of "Specified key was too long; max key length is 1000 bytes" error? Fix: <=250
     private String fastq;
 
     private Date fastqLastModified;
