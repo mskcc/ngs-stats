@@ -34,12 +34,14 @@ import java.util.regex.Pattern;
 
 @RestController
 public class CellRangerController {
+    final static String API_SAMPLES = "samples";
     final static String API_TYPE_VDJ = "vdj";
     final static String API_TYPE_COUNT = "count";
     final static String API_TYPE = "type";
     final static String API_ID = "sample";
     final static String API_PROJECT = "project";
     final static String API_RUN = "run";
+    final static String API_DATA = "data";
 
     private static Logger log = LoggerFactory.getLogger(CellRangerController.class);
 
@@ -49,11 +51,8 @@ public class CellRangerController {
     @Autowired
     private CellRangerSummaryVdjRepository cellRangerSummaryVdjRepository;
 
-    @Value("${cellranger.countdir}")
-    private String CELL_RANGER_COUNT_DIR;
-
-    @Value("${cellranger.vdjdir}")
-    private String CELL_RANGER_VDJ_DIR;
+    @Value("${cellranger.dir}")
+    private String CELL_RANGER_DIR;
 
     @Value("${cellranger.websummarypath}")
     private String WEB_SUMMARY_PATH;
@@ -82,40 +81,81 @@ public class CellRangerController {
         try {
             jsonMap = getParamMap(request);
         } catch (IOException e) {
-            String error = "Failed to parse post body from request";
-            log.error(String.format("%s. Error: %s", error, e.getMessage()));
-            return createStandardResponse(error, false);
+            final String error = "Failed to parse post body from request";
+            return createErrorResponse(error, true);
         }
 
-        final String id = (String) jsonMap.get(API_ID);
-        final String type = (String) jsonMap.get(API_TYPE);
-        final String project = (String) jsonMap.get(API_PROJECT);
-        final String run = (String) jsonMap.get(API_RUN);
-        if (id == null || type == null || project == null || run == null) {
-            final String error = String.format("ERROR: Bad Parameters. Type: %s, Sample: %s, Project: %s, Run: %s",
-                    type, id, project, run);
-            log.error(error);
-            return createStandardResponse(error, false);
+        // Check for valid samples parameter
+        if( !jsonMap.containsKey(API_SAMPLES) ||
+            !(jsonMap.get(API_SAMPLES) instanceof List) ||
+            ((List) jsonMap.get(API_SAMPLES)).size() == 0
+        ) {
+            final String error = String.format("Invalid '%s' parameter. '%s' should be a non-empty list of objects",
+                    API_SAMPLES, API_SAMPLES);
+            return createErrorResponse(error, true);
         }
 
-        CellRangerDataRecord dataRecord;
-        try {
-            log.info(String.format("Creating entry for file 'id' %s (Project: %s, Run: %s, Type: %s)", id, project, run, type));
-            dataRecord = createDataRecordFromWebSummary(run, id, project, type);
-        } catch (IOException | NullPointerException e) {
-            final String error = String.format("Failed to read file for w/ name '%s' (Project: '%s', Run: '%s', Type: '%s')", id, project, run, type);
-            log.error(String.format("%s. Error: %s", error, e.getMessage()));
-            return createStandardResponse(error, false);
+        List<Map<String,String>> samples = (List<Map<String,String>>)jsonMap.get(API_SAMPLES);
+
+        // Check that all samples contain all required fields
+        List<String> invalidSamples = getInvalidSamples(samples);
+        if(invalidSamples.size() > 0){
+            final String error = String.format("All samples need to contain fields for %s, %s, %s, & %s. Invalid Samples: %s",
+                    API_ID, API_RUN, API_PROJECT, API_TYPE, invalidSamples.toString());
+            return createErrorResponse(error, true);
         }
 
-        // Save record to database
-        CrudRepository repo = getRepository(type);
-        String status = String.format("Saved entry for file id '%s' (Project: '%s', Run: '%s', Type: '%s')", id, project, run, type);
-        if (repo.existsById(id)) {
-            status = String.format("Overwrote entry for id '%s'. %s", id, status);
+        for(Map<String,String> sample : samples){
+            final String id = (String) sample.get(API_ID);
+            final String type = (String) sample.get(API_TYPE);
+            final String project = (String) sample.get(API_PROJECT);
+            final String run = (String) sample.get(API_RUN);
+
+            CellRangerDataRecord dataRecord;
+            try {
+                log.info(String.format("Creating entry for file 'id' %s (Project: %s, Run: %s, Type: %s)", id, project, run, type));
+                dataRecord = createDataRecordFromWebSummary(run, id, project, type);
+            } catch (IOException | NullPointerException e) {
+                final String error = String.format("Failed to read file for w/ name '%s' (Project: '%s', Run: '%s', Type: '%s')", id, project, run, type);
+                return createErrorResponse(error, true);
+            }
+            CrudRepository repo = getRepository(type);
+            if (repo.existsById(id)) {
+                log.info(String.format("Overwrote entry for id '%s'", id));
+            }
+            repo.save(dataRecord);
         }
-        repo.save(dataRecord);
-        return createStandardResponse(status, true);
+        return createSuccessResponse(String.format("Saved %d Samples", samples.size()));
+    }
+
+    /**
+     * Returns invalid samples in the list of samples. E.g.
+     *      INPUT: [
+     *          { ID: A, TYPE: ..., PROJECT: ..., RUN: ... },     // VALID
+     *          { ID: B, TYPE: ..., RUN: ... },                   // INVALID
+     *      ]
+     *
+     *      RETURNS: [ 'B' ]
+     *
+     * @param samples, List of samples represented by java objects
+     * @return
+     */
+    private List<String> getInvalidSamples(List<Map<String, String>> samples) {
+        String[] requiredKeys = new String[]{API_TYPE, API_PROJECT, API_RUN};
+        List<String> invalidSamples = new ArrayList<>();
+        for(Map<String, String> sample : samples){
+            if(!sample.containsKey(API_ID)){
+                invalidSamples.add(sample.toString());
+            } else {
+                for(String key : requiredKeys){
+                    if(!sample.containsKey(key)){
+                        invalidSamples.add(sample.get(API_ID));
+                    }
+                }
+            }
+        }
+
+        return invalidSamples;
     }
 
     @GetMapping(value = "/getCellRangerSample")
@@ -127,12 +167,11 @@ public class CellRangerController {
         String status;
         if (samples.isEmpty()) {
             status = String.format("No samples found for %s project '%s'", type, project);
-            log.error(status);
-            return createStandardResponse(status, false);
+            return createErrorResponse(status, true);
         }
         status = String.format("Found %d samples for project '%s'", samples.size(), project);
-        Map<String, Object> resp = createStandardResponse(status, true);
-        resp.put("data", samples);
+        Map<String, Object> resp = createSuccessResponse(status);
+        resp.put(API_DATA, samples);
         return resp;
     }
 
@@ -346,20 +385,8 @@ public class CellRangerController {
      * Returns path to where field cell ranger output for input parameters can be found
      */
     private String getWebSummaryPath(String run, String sample, String project, String type) {
-        final String baseDir;
-        switch (type.toLowerCase()) {
-            case API_TYPE_VDJ:
-                baseDir = CELL_RANGER_VDJ_DIR;
-                break;
-            case API_TYPE_COUNT:
-                baseDir = CELL_RANGER_COUNT_DIR;
-                break;
-            default:
-                return String.format("ERROR: No corresponding web summary path for %s", type);
-        }
         final String samplePath = String.format("/%s/%s/%s", project, run, sample);
-        final String runPath = String.format("%s%s/%s", baseDir, samplePath, WEB_SUMMARY_PATH);
-
+        final String runPath = String.format("%s%s/%s", CELL_RANGER_DIR, samplePath, WEB_SUMMARY_PATH);
         log.info(String.format("Using Web Summary path %s", runPath));
         return runPath;
     }
@@ -411,20 +438,35 @@ public class CellRangerController {
     }
 
     /**
-     * Creates a map w/ status and response to be returned to the client
+     * Creates a map w/ status and response to be returned to the client. Includes logging
      *
      * @param status,  String - Informative message about the request status
-     * @param success, boolean - Whether request succeeded or not
      * @return
      */
-    private Map<String, Object> createStandardResponse(String status, boolean success) {
+    private Map<String, Object> createSuccessResponse(String status) {
         Map<String, Object> map = new HashMap<>();
         map.put("status", status);
-        map.put("success", success ? "true" : "false");
+        map.put("success", "true");
+        log.info(status);
+        return map;
+    }
 
-        // Failures can log info that shouldn't be returned to user, e.g. Exception messages/stack traces/etc
-        if (success) {
-            log.info(status);
+    /**
+     * Creates a map w/ status and error response to be returned to the client. Includes logging
+     *
+     * @param status, String - Message to log
+     * @param returnToClient, boolean - Whether the status should be returned to client
+     * @return
+     */
+    private Map<String, Object> createErrorResponse(String status, boolean returnToClient) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("success", "false");
+        log.error(status);
+
+        if(returnToClient){
+            map.put("status", status);
+        } else {
+            map.put("status", "Server Error. Email streidd@mskcc.org");
         }
 
         return map;

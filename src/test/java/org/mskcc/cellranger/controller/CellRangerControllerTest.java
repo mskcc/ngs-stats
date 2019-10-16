@@ -83,8 +83,7 @@ public class CellRangerControllerTest {
         String tmpDir = System.getProperty("java.io.tmpdir");
 
         CELL_RANGER_DIR = Files.createTempDirectory(Paths.get(tmpDir), "mockCellRanger");
-        ReflectionTestUtils.setField(cellRangerController, "CELL_RANGER_COUNT_DIR", CELL_RANGER_DIR.toString());
-        ReflectionTestUtils.setField(cellRangerController, "CELL_RANGER_VDJ_DIR", CELL_RANGER_DIR.toString());
+        ReflectionTestUtils.setField(cellRangerController, "CELL_RANGER_DIR", CELL_RANGER_DIR.toString());
 
         Path currPath = CELL_RANGER_DIR;
         currPath = Files.createTempDirectory(currPath, "project");
@@ -208,10 +207,10 @@ public class CellRangerControllerTest {
      * @throws IOException
      */
     private void setupSaveRequest(String type, String sample, String project, String run) throws IOException {
-        String requestBody = String.format("{\"sample\": \"%s\",", sample) +
+        String requestBody = String.format("{\"samples\": [{\"sample\": \"%s\",", sample) +
                 String.format("\"type\": \"%s\",", type) +
                 String.format("\"project\": \"%s\",", project) +
-                String.format("\"run\": \"%s\"}", run);
+                String.format("\"run\": \"%s\"}]}", run);
         when(request.getInputStream()).thenReturn(
                 new DelegatingServletInputStream(
                         new ByteArrayInputStream(requestBody.getBytes(StandardCharsets.UTF_8))));
@@ -222,7 +221,7 @@ public class CellRangerControllerTest {
         setupSaveRequest(type.toString(), SAMPLE, PROJECT, RUN);
 
         Map<String,Object> response = cellRangerController.saveCellRangerSample(request);
-        assertEquals(response.get("success"), "true");
+        assertEquals("true", response.get("success"));
 
         if(type.equals(CellRangerType.COUNT)){
             testCountSummaryContent();
