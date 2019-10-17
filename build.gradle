@@ -80,7 +80,7 @@ uploadArchives {
 	}
 }
 
-task generateDocs(type: JavaExec) {
+task buildModels(type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	main = 'org.mskcc.cellranger.documentation.CodeGenerator'
 }
