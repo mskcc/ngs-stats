@@ -385,7 +385,7 @@ public class CellRangerController {
      * Returns path to where field cell ranger output for input parameters can be found
      */
     private String getWebSummaryPath(String run, String sample, String project, String type) {
-        final String samplePath = String.format("/%s/%s/%s", project, run, sample);
+        final String samplePath = String.format("/%s/%s/%s__%s", run, project, sample, type.toLowerCase());
         final String runPath = String.format("%s%s/%s", CELL_RANGER_DIR, samplePath, WEB_SUMMARY_PATH);
         log.info(String.format("Using Web Summary path %s", runPath));
         return runPath;
