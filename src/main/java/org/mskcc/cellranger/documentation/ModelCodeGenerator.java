@@ -149,8 +149,7 @@ public class ModelCodeGenerator {
             if (fieldMapper.getTableField().equals("CompressedGraphData")) {
                 // Should generate text data type (Max-Length: 16,777,215 - 16 MB)
                 fieldBuilder.addAnnotation(AnnotationSpec.builder(Column.class)
-                        .addMember("length", "2097152")
-                        .addMember("columnDefinition", "\"TEXT\"")
+                        .addMember("columnDefinition", "\"MEDIUMTEXT\"")
                         .build());
             } else {
                 fieldBuilder.addAnnotation(AnnotationSpec.builder(Column.class)

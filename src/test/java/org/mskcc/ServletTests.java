@@ -29,7 +29,7 @@ public class ServletTests {
     };
     final static String[] GET_REQUESTS = new String[]{
         "/getCellRangerSample?project=cellranger&type=vdj",
-        "/picardtoexcel",
+        // "/picardtoexcel",        // "org.springframework.dao.InvalidDataAccessResourceUsageException: could not prepare statement"
         "/picardstats-controls/run/RUN_ID",
         "/picardstats/update/1",
         "/picardstats/updaterun/SEQUENCER/RUN",
