@@ -2,7 +2,6 @@ package org.mskcc.cellranger.controller;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
@@ -39,6 +38,8 @@ public class CellRangerControllerTest {
     private static String PROJECT;
     private static String SAMPLE;
     private static String RUN;
+    private static String SAMPLE_COUNT;
+    private static String SAMPLE_VDJ;
 
     @Captor
     ArgumentCaptor<CellRangerSummaryCount> cellRangerSummaryCountCaptor;
@@ -58,7 +59,7 @@ public class CellRangerControllerTest {
     @Mock
     HttpServletRequest request;
 
-    private static Path WEB_SUMMARY_PATH;
+    private static Map<String,Path> WEB_SUMMARY_PATH = new HashMap<>();
 
     private enum CellRangerType {
         VDJ("vdj"),
@@ -74,30 +75,91 @@ public class CellRangerControllerTest {
         }
     }
 
+    /**
+     * Sets up Test
+     *      1) application.properties - [ WEB_SUMMARY_PATH ]
+     *      2) Adds web_summary.html files,
+     *          e.g.
+     *              /var/folders/x7/5dxp7t9573d7jyx8mv1g8zx1mwnqpr/T/mockCellRanger.../run.../project..
+     *              ├── sample...__count
+     *                  └── outs
+     *                      └── web_summary.html.
+     *              └── sample...__vdj
+     *                  └── outs
+     *                      └── web_summary.html.
+     *
+     * @throws IOException
+     */
     @Before
     public void createMockCellRangerDir() throws IOException {
         MockitoAnnotations.initMocks(this);
 
-        final String samplePath = "project/run/sample";
-        final String webSummaryFile = "web_summary";
+        // Setup application.properties
+        ReflectionTestUtils.setField(cellRangerController, "WEB_SUMMARY_PATH", "outs/web_summary.html");
 
-        String tmpDir = System.getProperty("java.io.tmpdir");
-
+        // Create web_summary.html files
+        String tmpDir = System.getProperty("java.io.tmpdir");   // e.g. /var/folders/x7/5dxp7t9573d7jyx8mv1g8zx1mwnqpr/T/
         CELL_RANGER_DIR = Files.createTempDirectory(Paths.get(tmpDir), "mockCellRanger");
         ReflectionTestUtils.setField(cellRangerController, "CELL_RANGER_DIR", CELL_RANGER_DIR.toString());
 
         Path currPath = CELL_RANGER_DIR;
         currPath = Files.createTempDirectory(currPath, "run");
-        PROJECT = currPath.getFileName().toString();
-        currPath = Files.createTempDirectory(currPath, "project");
         RUN = currPath.getFileName().toString();
-        // TODO - This needs to be sample[RAND_NUM]_[TYPE]...
-        currPath = Files.createTempDirectory(currPath, "sample");
-        SAMPLE = currPath.getFileName().toString();
+        currPath = Files.createTempDirectory(currPath, "project");
+        PROJECT = currPath.getFileName().toString();
+        Path samplePath = Files.createTempDirectory(currPath, "sample");
+        SAMPLE = samplePath.getFileName().toString();
 
-        Path webSummaryPath = Files.createTempFile(currPath, "web_summary", ".html");
-        WEB_SUMMARY_PATH = webSummaryPath;
-        ReflectionTestUtils.setField(cellRangerController, "WEB_SUMMARY_PATH", WEB_SUMMARY_PATH.getFileName().toString());
+        String[] types = new String[]{"vdj", "count"};
+        Path typePath;
+        for(String type : types){
+            typePath = createTypeDirectories(samplePath,type);
+            WEB_SUMMARY_PATH.put(type, typePath);
+        }
+    }
+
+    /**
+     * Given the current directory for a sample in tmp directory, create the corresponding sample__type folder
+     * structure that mimics how the web_summary.html files are saved
+     *
+     * E.g.
+     *      INPUT:
+     *          path: /var/folders/x7/5dxp7t9573d7jyx8mv1g8zx1mwnqpr/T/mockCellRanger.../run.../project../sample...
+     *          type: count
+     *      (Create):
+     *      /var/folders/x7/5dxp7t9573d7jyx8mv1g8zx1mwnqpr/T/mockCellRanger.../run.../project../sample...
+     *          ├── sample...__[TYPE]
+     *              └── outs
+     *                  └── web_summary.html
+     *      RETURN: Path(/PATH/TO/run.../project../sample...__count/outs/web_summary.html)
+     *
+     * @param samplePath, Path
+     * @param type, String - CellRanger type of output
+     * @return
+     * @throws IOException
+     */
+    private Path createTypeDirectories(Path samplePath, String type) throws IOException {
+        Path runPath = samplePath.getParent();
+        String sampleType = String.format("%s__%s", samplePath.toString(), type);
+        Path tmpPath = Files.createTempDirectory(runPath, "tmp");
+        File typeDir = new File(sampleType);
+
+        tmpPath.toFile().renameTo(typeDir);
+        Path typePath = Paths.get(sampleType);
+
+        Path outPathTmp = Files.createTempDirectory(typePath,"outs");
+        String outPathParent = outPathTmp.getParent().toString();
+        String outPath = String.format("%s/outs",outPathParent);
+
+        File outDir = new File(outPath);
+        outPathTmp.toFile().renameTo(outDir);
+
+        Path webSummaryPath = Files.createTempFile(Paths.get(outPath), "web_summary", ".html");
+
+        String webSummaryName =  String.format("%s/%s", outDir.toString(), "web_summary.html");
+        webSummaryPath.toFile().renameTo(new File(webSummaryName));
+
+        return Paths.get(webSummaryName);
     }
 
     @After
@@ -110,7 +172,6 @@ public class CellRangerControllerTest {
         }
     }
 
-    @Ignore
     @Test
     public void saveCellRangerSampleTest_success() {
         CellRangerType[] types = getCellRangerTypes();
@@ -220,7 +281,7 @@ public class CellRangerControllerTest {
     }
 
     private void testSaveCellRangerSample(CellRangerType type) throws IOException {
-        copyFileUsingStream(getMockWebSummaryFile(type), WEB_SUMMARY_PATH.toFile());
+        copyFileUsingStream(getMockWebSummaryFile(type), WEB_SUMMARY_PATH.get(type.toString()).toFile());
         setupSaveRequest(type.toString(), SAMPLE, PROJECT, RUN);
 
         Map<String,Object> response = cellRangerController.saveCellRangerSample(request);
