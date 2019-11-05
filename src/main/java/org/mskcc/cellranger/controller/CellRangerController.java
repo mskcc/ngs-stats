@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@CrossOrigin(origins = "https://igo.mskcc.org/", maxAge = 3600)
 @RestController
 public class CellRangerController {
     final static String API_SAMPLES = "samples";
@@ -159,6 +158,7 @@ public class CellRangerController {
         return invalidSamples;
     }
 
+    @CrossOrigin
     @GetMapping(value = "/getCellRangerSample")
     public Map<String, Object> getCellRangerSample(@RequestParam("project") String project,
                                                    @RequestParam("type") String type) {
