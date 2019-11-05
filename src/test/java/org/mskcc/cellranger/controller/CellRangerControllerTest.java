@@ -105,7 +105,7 @@ public class CellRangerControllerTest {
         Path currPath = CELL_RANGER_DIR;
         currPath = Files.createTempDirectory(currPath, "run");
         RUN = currPath.getFileName().toString();
-        currPath = Files.createTempDirectory(currPath, "project");
+        currPath = Files.createTempDirectory(currPath, "Project_");
         PROJECT = currPath.getFileName().toString();
         Path samplePath = Files.createTempDirectory(currPath, "sample");
         SAMPLE = samplePath.getFileName().toString();
@@ -302,6 +302,10 @@ public class CellRangerControllerTest {
 
         assertThat(cellRangerSummaryVdj).isNotNull();
 
+        // Verify that the Project was saved w/o the "Project_" prefix
+        String processedProjectName = PROJECT.replaceAll("\\D+","");
+        assertTrue(processedProjectName.equals(cellRangerSummaryVdj.project));
+
         assertTrue(cellRangerSummaryVdj.EstimatedNumberOfCells == 2464D);
         assertTrue(cellRangerSummaryVdj.MeanReadsPerCell == 14900D);
         assertTrue(cellRangerSummaryVdj.NumCellsWithVDJSpanningPair == 1958D);
@@ -329,6 +333,10 @@ public class CellRangerControllerTest {
         CellRangerSummaryCount cellRangerSummaryCount = cellRangerSummaryCountCaptor.<CellRangerSummaryCount>getValue();
 
         assertThat(cellRangerSummaryCount).isNotNull();
+
+        // Verify that the Project was saved w/o the "Project_" prefix
+        String processedProjectName = PROJECT.replaceAll("\\D+","");
+        assertTrue(processedProjectName.equals(cellRangerSummaryCount.project));
 
         assertTrue(cellRangerSummaryCount.EstimatedNumberOfCells == 3457D);
         assertTrue(cellRangerSummaryCount.MeanReadsPerCell == 54846D);

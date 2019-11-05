@@ -243,7 +243,7 @@ public class CellRangerController {
         final FieldMapperModel fieldMapperModel = getFieldMapperModel(type);
         final CellRangerDataRecord dataRecord = getDataRecord(type);
         dataRecord.setField("id", id, String.class);
-        dataRecord.setField("project", project, String.class);
+        dataRecord.setField("project", getProjectId(project), String.class);
         dataRecord.setField("run", run, String.class);
 
         // Parse
@@ -277,6 +277,20 @@ public class CellRangerController {
         String compressedGraphData = getCompressedGraphData(doc);
         dataRecord.setField("CompressedGraphData", compressedGraphData, String.class);
         return dataRecord;
+    }
+
+    /**
+     * Remove the "Project_" prefix if it exists
+     * @param projectParam, String -            e.g. "Project_09666H"   "09666H"
+     *                                                      |               |
+     * @return Processed Param                          "09666H"        "09666H"
+     */
+    private String getProjectId(String projectParam){
+        String[] prjSplit = projectParam.split("Project_", 2);
+        if(prjSplit.length > 1){
+            return prjSplit[1];
+        }
+        return projectParam;
     }
 
     /**
