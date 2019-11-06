@@ -105,6 +105,16 @@ public class SequencerDoneController {
         return false;
     }
 
+    @GetMapping(value = "/fastqsbyigoid/{igoid}")
+    public List<ArchivedFastq> findFastqsByIGOId(@PathVariable String igoid) {
+        log.info("/fastqsbyigoid/" + igoid);
+        if (igoid == null || igoid.length() < 7)
+            return null;
+
+        List<ArchivedFastq> fastqs = archivedFastqRepository.findBySampleEndsWith(igoid);
+        return fastqs;
+    }
+
     @GetMapping(value = "/search/most/recent/fastqpath/{run}/{sampleAndigoid}")
     public List<ArchivedFastq> findMostRecentFastqDir(@PathVariable String run, @PathVariable String sampleAndigoid) {
         log.info("/search/most/recent/fastqpath/ for run:" + run + " sampleAndigoid:" + sampleAndigoid);
