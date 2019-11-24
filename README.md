@@ -1,6 +1,8 @@
 Paths to over 900k IGO fastq.gz files.
 
-Sequencer start-stop information.
+Sequencer start-stop times.
+
+Cell Ranger Stats.
 
 Picard.jar statistics (HS Metrics, Duplication Metrics, Alignment Summary Metrics, RNA Seq Metrics & WGS Metrics)
 
