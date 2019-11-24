@@ -1,7 +1,10 @@
+Paths to over 800k IGO fastq.gz files.
 
-Parses Picard stats files and stores the values in a database.
+Sequencer start-stop information.
 
-Naming conventions follow the Picard Metrics Definitions:
+Picard.jar statistics (HS Metrics, Duplication Metrics, Alignment Summary Metrics, RNA Seq Metrics & WGS Metrics)
+
+Picard naming conventions follow the Picard Metrics Definitions:
 
 https://broadinstitute.github.io/picard/picard-metric-definitions.html
 
