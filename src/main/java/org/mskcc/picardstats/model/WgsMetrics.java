@@ -1,5 +1,7 @@
 package org.mskcc.picardstats.model;
 
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,10 +9,11 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Scanner;
 
-@Entity
 /*
 https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/CollectWgsMetrics.java
  */
+@Entity
+@ToString
 public class WgsMetrics {
     public static int headerRow = 6;
     @Id
@@ -19,7 +22,6 @@ public class WgsMetrics {
     @Column(length = 32)
     public String md5RRS;
 
-    /** The number of non-N bases in the genome reference over which coverage will be evaluated. */
     /**
      * The number of non-N bases in the genome reference over which coverage will be evaluated.
      */

@@ -2,6 +2,10 @@ package org.mskcc.picardstats.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mskcc.picardstats.model.AlignmentSummaryMetrics.Category;
 
@@ -18,5 +22,12 @@ class AlignmentSummaryMetricsTest {
         AlignmentSummaryMetrics am2 = AlignmentSummaryMetrics.parseLine(line2, "", null);
         assertEquals(Category.SECOND_OF_PAIR, am2.CATEGORY);
         assertEquals(0.016767d, am2.PCT_CHIMERAS);
+    }
+
+    @Test
+    void readFilePicardVersion2_21_2() throws FileNotFoundException, IllegalAccessException {
+        File f = new File("src/test/resources/AYYAN_0014_000000000-CNBRK___P10457__16S_IGO_10457_1___sccer___2_21_2___AM.txt");
+        List<AlignmentSummaryMetrics> am = AlignmentSummaryMetrics.readFile(f, "x");
+        assertEquals(3, am.size());
     }
 }

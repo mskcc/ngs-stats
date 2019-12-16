@@ -1,5 +1,7 @@
 package org.mskcc.picardstats.model;
 
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,6 +13,7 @@ import java.util.Scanner;
 https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/RnaSeqMetrics.java
  */
 @Entity
+@ToString
 public class RnaSeqMetrics {
     @Id
     @Column(length = 150)
