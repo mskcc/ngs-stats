@@ -36,6 +36,8 @@ public class HsMetrics {
     public double PCT_PF_UQ_READS;
     public long PF_UQ_READS_ALIGNED;
     public double PCT_PF_UQ_READS_ALIGNED;
+    /** The number of bases in the PF_READS of a SAM or BAM file */
+    public Long PF_BASES;
     public long PF_BASES_ALIGNED;
     public long PF_UQ_BASES_ALIGNED;
     public long ON_BAIT_BASES;
@@ -49,6 +51,10 @@ public class HsMetrics {
     public double MEAN_TARGET_COVERAGE;
     public double MEDIAN_TARGET_COVERAGE;
     public long MAX_TARGET_COVERAGE;
+    /** The minimum coverage of reads that mapped to target regions of an experiment. */
+    public Long MIN_TARGET_COVERAGE;
+    /** The fraction of aligned bases in reads that have MQ=0 and whose 5' end consists of adapter sequence. */
+    public Double PCT_EXC_ADAPTER;
     public double PCT_USABLE_BASES_ON_BAIT;
     public double PCT_USABLE_BASES_ON_TARGET;
     public double FOLD_ENRICHMENT;

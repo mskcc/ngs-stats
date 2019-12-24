@@ -308,7 +308,7 @@ public class PicardStatsController {
 
         System.out.println("Saving: " + name);
         if (pf == null) {
-            pf = new PicardFile(name, null, null, null, null, null, null, false);
+            pf = new PicardFile(name, null, null, null, null, null, null, false, null);
             picardFileRepository.save(pf);
             return;
         }
