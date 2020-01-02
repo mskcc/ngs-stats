@@ -50,7 +50,7 @@ public class PicardStatsController {
     private PicardFileRepository picardFileRepository;
 
     @GetMapping(value = "/get-picard-run-excel/{run}")
-    public @ResponseBody byte[] getFile(@PathVariable String run, HttpServletResponse response) throws IOException {
+    public @ResponseBody byte[] getRunExcelFile(@PathVariable String run, HttpServletResponse response) throws IOException {
         String filename = "AutoReport_" + run + ".xls";
         response.addHeader("Content-disposition", "attachment;filename=" + filename);
         String fileType = "xls";
@@ -58,6 +58,19 @@ public class PicardStatsController {
 
         System.out.println("Reading Excel file: " + filename);
         Path path = Paths.get(RUN_REPORTS_SHARED_DIR + filename);
+        byte[] bArray = Files.readAllBytes(path);
+        return bArray;
+    }
+
+    @GetMapping(value = "/get-picard-project-excel/{project}")
+    public @ResponseBody byte[] getProjectExcelFile(@PathVariable String project, HttpServletResponse response) throws IOException {
+        String filename = "AutoReport_P" + project + ".xls";
+        response.addHeader("Content-disposition", "attachment;filename=" + filename);
+        String fileType = "xls";
+        response.setContentType(fileType);
+
+        System.out.println("Reading Excel file: " + filename);
+        Path path = Paths.get(PROJ_REPORTS_SHARED_DIR + filename);
         byte[] bArray = Files.readAllBytes(path);
         return bArray;
     }
