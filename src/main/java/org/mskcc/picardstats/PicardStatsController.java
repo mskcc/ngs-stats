@@ -5,9 +5,14 @@ import org.mskcc.picardstats.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -17,9 +22,9 @@ public class PicardStatsController {
 
     private static final String BASE_STATS_DIR = "/ifs/data/BIC/Stats/hiseq/DONE/";  // "/Users/mcmanamd/Downloads/DONE/DONE/";
 
-    // directories where Picard stats Excel files are written
-    final String RUN_REPORTS_SHARED_DIR = "/ifs/data/bio/LIMS/stats/run_reports/";
-    final String PROJ_REPORTS_SHARED_DIR = "/ifs/data/bio/LIMS/stats/project_reports/";
+    // directories where Picard stats Excel files are written, formerly "/ifs/data/bio/LIMS/stats/run_reports/"
+    final String RUN_REPORTS_SHARED_DIR = "/data/picardExcel/run_reports/";
+    final String PROJ_REPORTS_SHARED_DIR = "/data/picardExcel/project_reports/";
 
     private static final String [] ACTIVE_SEQUENCERS =
             {"DIANA", "JAX", "JOHNSAWYERS", "KIM", "LIZ", "MICHELLE", "MOMO", "PITT", "SCOTT", "TOMS", "VIC"};
@@ -44,51 +49,63 @@ public class PicardStatsController {
     @Autowired
     private PicardFileRepository picardFileRepository;
 
+    @GetMapping(value = "/get-picard-run-excel/{run}")
+    public @ResponseBody byte[] getFile(@PathVariable String run, HttpServletResponse response) throws IOException {
+        String filename = "AutoReport_" + run + ".xls";
+        response.addHeader("Content-disposition", "attachment;filename=" + filename);
+        String fileType = "xls";
+        response.setContentType(fileType);
+
+        System.out.println("Reading Excel file: " + filename);
+        Path path = Paths.get(RUN_REPORTS_SHARED_DIR + filename);
+        byte[] bArray = Files.readAllBytes(path);
+        return bArray;
+    }
 
     @RequestMapping(value = "/picardtoexcel", method = RequestMethod.GET)
     // generate the Excel files on demand or via crontab? (can be a bit slow so use crontab?)
     public String writeRecentStatsToExcel() {
-        try {
-            // store to the shared location if the directories exist on the computer where we are running
-            String runBasePath = "";
-            if (new File(RUN_REPORTS_SHARED_DIR).exists()) {
-                runBasePath = RUN_REPORTS_SHARED_DIR;
-            }
-            String projBasePath = "";
-            if (new File(PROJ_REPORTS_SHARED_DIR).exists()) {
-                projBasePath = PROJ_REPORTS_SHARED_DIR;
-            }
-            System.out.println("Writing Picard Excel files.");
+        // store to the shared location if the directories exist on the computer where we are running
+        String runBasePath = "";
+        if (new File(RUN_REPORTS_SHARED_DIR).exists()) {
+            runBasePath = RUN_REPORTS_SHARED_DIR;
+        }
+        String projBasePath = "";
+        if (new File(PROJ_REPORTS_SHARED_DIR).exists()) {
+            projBasePath = PROJ_REPORTS_SHARED_DIR;
+        }
+        System.out.println("Writing Picard Excel files.");
 
-            // historically the excel files have the date appended to them
-            String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        // historically the excel files have the date appended to them
+        String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
 
-            List<String> recentRequests = picardFileRepository.findRecentRequests();
-            for (String request : recentRequests) {
-                File projectFileName = new File(projBasePath + "AutoReport_P" + request + ".xls");
-                System.out.println("Writing: " + projectFileName.getAbsolutePath());
-                try {
-                    PicardToExcel.writeExcel(projectFileName, picardFileRepository.findByRequest(request));
-                    projectFileName.setReadable(true, false);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.err.println("Failed to write: " + projectFileName);
-                }
+        List<String> recentRequests = picardFileRepository.findRecentRequests();
+        for (String request : recentRequests) {
+            File projectFileName = new File(projBasePath + "AutoReport_P" + request + ".xls");
+            System.out.println("Writing: " + projectFileName.getAbsolutePath());
+            try {
+                PicardToExcel.writeExcel(projectFileName, picardFileRepository.findByRequest(request));
+                projectFileName.setReadable(true, false);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("Failed to write: " + projectFileName);
             }
+        }
 
-            List<String> recentRuns = picardFileRepository.findRecentRuns();
-            for (String run : recentRuns) {
-                // TODO add sequencer name to directory path as previously done http://seq.cbio.mskcc.org/lims/stats/run_reports/?
-                File runFileName = new File(runBasePath + "AutoReport_" + run + ".xls");
-                System.out.println("Writing: " + runFileName.getAbsolutePath());
+        List<String> recentRuns = picardFileRepository.findRecentRuns();
+        for (String run : recentRuns) {
+            File runFileName = new File(runBasePath + "AutoReport_" + run + ".xls");
+            System.out.println("Writing: " + runFileName.getAbsolutePath());
+            try {
                 PicardToExcel.writeExcel(runFileName, picardFileRepository.findByRun(run));
                 runFileName.setReadable(true, false);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("Failed to write: " + runFileName);
             }
-
-            System.out.println("Picard to Excel complete.");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
+        System.out.println("Picard to Excel complete.");
         return "Request and Run Excel files Generated.";
     }
 
