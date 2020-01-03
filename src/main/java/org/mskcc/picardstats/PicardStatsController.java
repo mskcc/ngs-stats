@@ -5,7 +5,6 @@ import org.mskcc.picardstats.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -22,7 +21,8 @@ public class PicardStatsController {
 
     private static final String BASE_STATS_DIR = "/ifs/data/BIC/Stats/hiseq/DONE/";  // "/Users/mcmanamd/Downloads/DONE/DONE/";
 
-    // directories where Picard stats Excel files are written, formerly "/ifs/data/bio/LIMS/stats/run_reports/"
+    // directories where Picard stats Excel files are written
+    // previously for about 5 years "/ifs/data/bio/LIMS/stats/run_reports/" was used
     final String RUN_REPORTS_SHARED_DIR = "/data/picardExcel/run_reports/";
     final String PROJ_REPORTS_SHARED_DIR = "/data/picardExcel/project_reports/";
 
@@ -50,27 +50,26 @@ public class PicardStatsController {
     private PicardFileRepository picardFileRepository;
 
     @GetMapping(value = "/get-picard-run-excel/{run}")
-    public @ResponseBody byte[] getRunExcelFile(@PathVariable String run, HttpServletResponse response) throws IOException {
+    public @ResponseBody byte[] getRunExcelFile(@PathVariable String run, HttpServletResponse response)
+            throws IOException {
         String filename = "AutoReport_" + run + ".xls";
-        response.addHeader("Content-disposition", "attachment;filename=" + filename);
-        String fileType = "xls";
-        response.setContentType(fileType);
-
-        System.out.println("Reading Excel file: " + filename);
-        Path path = Paths.get(RUN_REPORTS_SHARED_DIR + filename);
-        byte[] bArray = Files.readAllBytes(path);
-        return bArray;
+        return readExcelFile(RUN_REPORTS_SHARED_DIR, filename, response);
     }
 
     @GetMapping(value = "/get-picard-project-excel/{project}")
-    public @ResponseBody byte[] getProjectExcelFile(@PathVariable String project, HttpServletResponse response) throws IOException {
+    public @ResponseBody byte[] getProjectExcelFile(@PathVariable String project, HttpServletResponse response)
+            throws IOException {
         String filename = "AutoReport_P" + project + ".xls";
+        return readExcelFile(PROJ_REPORTS_SHARED_DIR, filename, response);
+    }
+
+    protected static byte[] readExcelFile(String baseDir, String filename, HttpServletResponse response)
+            throws IOException {
         response.addHeader("Content-disposition", "attachment;filename=" + filename);
-        String fileType = "xls";
-        response.setContentType(fileType);
+        response.setContentType("xls");
 
         System.out.println("Reading Excel file: " + filename);
-        Path path = Paths.get(PROJ_REPORTS_SHARED_DIR + filename);
+        Path path = Paths.get(baseDir + filename);
         byte[] bArray = Files.readAllBytes(path);
         return bArray;
     }
