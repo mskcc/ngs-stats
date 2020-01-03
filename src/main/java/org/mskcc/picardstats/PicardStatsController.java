@@ -49,6 +49,7 @@ public class PicardStatsController {
     @Autowired
     private PicardFileRepository picardFileRepository;
 
+    @CrossOrigin
     @GetMapping(value = "/get-picard-run-excel/{run}")
     public @ResponseBody byte[] getRunExcelFile(@PathVariable String run, HttpServletResponse response)
             throws IOException {
@@ -56,6 +57,7 @@ public class PicardStatsController {
         return readExcelFile(RUN_REPORTS_SHARED_DIR, filename, response);
     }
 
+    @CrossOrigin
     @GetMapping(value = "/get-picard-project-excel/{project}")
     public @ResponseBody byte[] getProjectExcelFile(@PathVariable String project, HttpServletResponse response)
             throws IOException {
