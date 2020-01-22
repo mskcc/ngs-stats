@@ -26,12 +26,14 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.mskcc.constants.API_DATA;
+import static org.mskcc.utils.ApiUtil.createErrorResponse;
+import static org.mskcc.utils.ApiUtil.createSuccessResponse;
 @RestController
 public class CellRangerController {
     final static String API_SAMPLES = "samples";
@@ -41,7 +43,6 @@ public class CellRangerController {
     final static String API_ID = "sample";
     final static String API_PROJECT = "project";
     final static String API_RUN = "run";
-    final static String API_DATA = "data";
 
     private static Logger log = LoggerFactory.getLogger(CellRangerController.class);
 
@@ -452,38 +453,5 @@ public class CellRangerController {
         return bd.toString();
     }
 
-    /**
-     * Creates a map w/ status and response to be returned to the client. Includes logging
-     *
-     * @param status,  String - Informative message about the request status
-     * @return
-     */
-    private Map<String, Object> createSuccessResponse(String status) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("status", status);
-        map.put("success", "true");
-        log.info(status);
-        return map;
-    }
 
-    /**
-     * Creates a map w/ status and error response to be returned to the client. Includes logging
-     *
-     * @param status, String - Message to log
-     * @param returnToClient, boolean - Whether the status should be returned to client
-     * @return
-     */
-    private Map<String, Object> createErrorResponse(String status, boolean returnToClient) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("success", "false");
-        log.error(status);
-
-        if(returnToClient){
-            map.put("status", status);
-        } else {
-            map.put("status", "Server Error. Email streidd@mskcc.org");
-        }
-
-        return map;
-    }
 }
