@@ -152,7 +152,7 @@ public class CrossCheckMetricsController {
             return new String[]{"", "", "", ""};
         }
         values[3] = values[3].replaceAll(".bam", "")
-                .replaceAll("_headers", "");
+                             .replaceAll("_headers", "");
         return values;
     }
 

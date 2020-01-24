@@ -1,5 +1,6 @@
 package org.mskcc.crosscheckmetrics.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.ToString;
 
 import javax.persistence.Column;
@@ -33,8 +34,13 @@ public class CrosscheckMetrics {
     @Column(length = 32)
     public String patientIdB;
 
-    public String tumorNormalA;
-    public String tumorNormalB;
+    public TumorNormal tumorNormalA;
+    public TumorNormal tumorNormalB;
+
+    @JsonInclude
+    public boolean isExpected() {
+        return result.isExpected();
+    }
 
     public CrosscheckMetrics(Double lod, Double lodAlt1, Double lodAlt2, String project, String result, String[] projectAInfo, String[] projectBInfo){
         int SI_IGO_IDX = 1;
@@ -50,7 +56,7 @@ public class CrosscheckMetrics {
         this.igoIdB = projectBInfo[SI_IGO_IDX];
         this.patientIdA = projectAInfo[SI_PID_IDX];
         this.patientIdB = projectBInfo[SI_PID_IDX];
-        this.tumorNormalA = projectAInfo[SI_TN_IDX];
-        this.tumorNormalB = projectBInfo[SI_TN_IDX];
+        this.tumorNormalA = TumorNormal.getEnum(projectAInfo[SI_TN_IDX]);
+        this.tumorNormalB = TumorNormal.getEnum(projectBInfo[SI_TN_IDX]);
     }
 }
