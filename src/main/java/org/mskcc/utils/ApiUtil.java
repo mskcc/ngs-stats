@@ -12,7 +12,7 @@ public class ApiUtil {
     /**
      * Creates a map w/ status and response to be returned to the client. Includes logging
      *
-     * @param status,  String - Informative message about the request status
+     * @param status, String - Informative message about the request status
      * @return
      */
     public static Map<String, Object> createSuccessResponse(String status) {
@@ -26,7 +26,7 @@ public class ApiUtil {
     /**
      * Creates a map w/ status and error response to be returned to the client. Includes logging
      *
-     * @param status, String - Message to log
+     * @param status,         String - Message to log
      * @param returnToClient, boolean - Whether the status should be returned to client
      * @return
      */
@@ -35,7 +35,7 @@ public class ApiUtil {
         map.put("success", "false");
         log.error(status);
 
-        if(returnToClient){
+        if (returnToClient) {
             map.put("status", status);
         } else {
             map.put("status", "Server Error. Email streidd@mskcc.org");

@@ -10,44 +10,47 @@ import javax.persistence.Id;
 @Entity
 @ToString
 public class CrosscheckMetrics {
-    public CrosscheckMetrics(Float lod, String result, String[] projectAInfo, String[] projectBInfo){
-        int SI_PRJ_IDX = 0;
-        int SI_IGO_IDX = 1;
-        int SI_PID_IDX = 2;
-
-        this.lod = lod;
-        this.result = result;
-        this.project_A = projectAInfo[SI_PRJ_IDX];
-        this.project_B = projectBInfo[SI_PRJ_IDX];
-        this.igoId_A = projectAInfo[SI_IGO_IDX];
-        this.igoId_B = projectBInfo[SI_IGO_IDX];
-        this.patientId_A = projectAInfo[SI_PID_IDX];
-        this.patientId_B = projectBInfo[SI_PID_IDX];
-    }
-
     @Id
     @GeneratedValue
-    @Column(updatable = false, nullable = false)
     private Long id;
 
-    @Column()
-    public Float lod;               // LOD score from picard CrosscheckFingerprints
+    public Double lod;                // LOD score from picard CrosscheckFingerprints
+    public Double lodAlt1;
+    public Double lodAlt2;
 
-    @Column()
-    public String result;           // Result from picard CrosscheckFingerprints
+    public FingerprintResult result;
 
     @Column(length=64)
-    public String project_A;
-    @Column(length=64)
-    public String project_B;        // If comparing across projects, project_B is the source of *_B fields
+    public String project;
 
     @Column(length = 32)
-    public String igoId_A;
+    public String igoIdA;
     @Column(length = 32)
-    public String igoId_B;
+    public String igoIdB;
 
     @Column(length = 32)
-    public String patientId_A;
+    public String patientIdA;
     @Column(length = 32)
-    public String patientId_B;
+    public String patientIdB;
+
+    public String tumorNormalA;
+    public String tumorNormalB;
+
+    public CrosscheckMetrics(Double lod, Double lodAlt1, Double lodAlt2, String project, String result, String[] projectAInfo, String[] projectBInfo){
+        int SI_IGO_IDX = 1;
+        int SI_PID_IDX = 2;
+        int SI_TN_IDX = 3;
+
+        this.lod = lod;
+        this.lodAlt1 = lodAlt1;
+        this.lodAlt2 = lodAlt2;
+        this.result = FingerprintResult.valueOf(result);
+        this.project = project;
+        this.igoIdA = projectAInfo[SI_IGO_IDX];
+        this.igoIdB = projectBInfo[SI_IGO_IDX];
+        this.patientIdA = projectAInfo[SI_PID_IDX];
+        this.patientIdB = projectBInfo[SI_PID_IDX];
+        this.tumorNormalA = projectAInfo[SI_TN_IDX];
+        this.tumorNormalB = projectBInfo[SI_TN_IDX];
+    }
 }
