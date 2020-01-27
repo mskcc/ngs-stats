@@ -1,5 +1,7 @@
 package org.mskcc.picardstats.model;
 
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,6 +14,7 @@ This file has ten columns and a histogram.
 https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/sam/DuplicationMetrics.java
  */
 @Entity
+@ToString
 public class DuplicationMetrics {
     @Id
     @Column(length = 150)

@@ -15,4 +15,5 @@ public interface ArchivedFastqRepository extends CrudRepository<ArchivedFastq, S
     
     List<ArchivedFastq> findByRunStartsWithAndSampleOrderByFastqLastModifiedDesc(String run, String sample);
     List<ArchivedFastq> findBySampleStartsWith(String sample);
+    List<ArchivedFastq> findBySampleEndsWith(String sample);
 }

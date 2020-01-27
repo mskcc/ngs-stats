@@ -192,10 +192,14 @@ public class AlignmentSummaryMetrics {
         am.MEAN_READ_LENGTH = Double.parseDouble(parts[15]);
         am.READS_ALIGNED_IN_PAIRS = Long.parseLong(parts[16]);
         am.PCT_READS_ALIGNED_IN_PAIRS = Double.parseDouble(parts[17]);
-        am.BAD_CYCLES = Long.parseLong(parts[18]);
-        am.STRAND_BALANCE = Double.parseDouble(parts[19]);
-        am.PCT_CHIMERAS = Double.parseDouble(parts[20]);
-        am.PCT_ADAPTER = Double.parseDouble(parts[21]);
+        // TODO read both Picard v2.9 & v2.21 with two extra columns
+        am.PF_READS_IMPROPER_PAIRS = Long.parseLong(parts[18]);
+        am.PCT_PF_READS_IMPROPER_PAIRS = Double.parseDouble(parts[19]);
+
+        am.BAD_CYCLES = Long.parseLong(parts[20]);
+        am.STRAND_BALANCE = Double.parseDouble(parts[21]);
+        am.PCT_CHIMERAS = Double.parseDouble(parts[22]);
+        am.PCT_ADAPTER = Double.parseDouble(parts[23]);
 
         return am;
     }
