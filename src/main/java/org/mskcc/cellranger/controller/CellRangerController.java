@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.mskcc.constants.API_DATA;
+import static org.mskcc.Constants.API_DATA;
 import static org.mskcc.utils.ApiUtil.createErrorResponse;
 import static org.mskcc.utils.ApiUtil.createSuccessResponse;
 @RestController
