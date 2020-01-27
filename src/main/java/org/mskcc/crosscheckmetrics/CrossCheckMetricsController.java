@@ -1,6 +1,7 @@
 package org.mskcc.crosscheckmetrics;
 
 import org.mskcc.crosscheckmetrics.model.CrosscheckMetrics;
+import org.mskcc.crosscheckmetrics.model.SampleInfo;
 import org.mskcc.crosscheckmetrics.respository.CrossCheckMetricsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +25,12 @@ import static org.mskcc.utils.ParserUtil.parseDouble;
 
 @RestController
 public class CrossCheckMetricsController {
-    private static Logger log = LoggerFactory.getLogger(CrossCheckMetricsController.class);
-
-    private final String LAST_METADATA_LINE = "## METRICS CLASS";
-    private final String LOD_SCORE = "LOD_SCORE";
     private static final String RESULT = "RESULT";
     private static final String LEFT_FILE = "LEFT_FILE";
     private static final String RIGHT_FILE = "RIGHT_FILE";
-
+    private static Logger log = LoggerFactory.getLogger(CrossCheckMetricsController.class);
+    private final String LAST_METADATA_LINE = "## METRICS CLASS";
+    private final String LOD_SCORE = "LOD_SCORE";
     @Autowired
     private CrossCheckMetricsRepository crossCheckMetricsRepository;
 
@@ -63,14 +62,12 @@ public class CrossCheckMetricsController {
     @RequestMapping(value = "/writeCrosscheckMetrics", method = RequestMethod.GET)
     public Map<String, Object> writeCrosscheckMetrics(@RequestParam("project") String project, @RequestParam("run") String run) {
         // Crosscheck metrics are stored on the filesystem ngs-stats runs on
-        final String fileName = String.format("%s_%s.crosscheck_metrics", project, run);
+        final String fileName = String.format("%s_%s.crosscheck_metrics", run, project);
         final String filePath = String.format("%s/%s/%s/%s", CROSSCHECK_METRICS_DIR, run, project, fileName);
         try {
             saveCrossCheckMetricsFile(filePath);
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
             String status = String.format("Failed to read %s: %s", filePath, e.getMessage());
-
-            log.error(status);
             return createErrorResponse(status, true);
         }
         return createSuccessResponse(String.format("Saved CrossCheckMetrics for Run: %s, Project: %s", run, project));
@@ -82,11 +79,11 @@ public class CrossCheckMetricsController {
      * @param filePath, String - e.g. /PATH/TO/{PROJECT}_{RUN}.crosscheck_metrics
      * @throws IOException
      */
-    private void saveCrossCheckMetricsFile(String filePath) throws IOException {
+    private void saveCrossCheckMetricsFile(String filePath) throws IOException, IllegalStateException {
         BufferedReader TSVFile = new BufferedReader(new FileReader(filePath));
         String line = TSVFile.readLine(); // Read first line.
 
-        // Skip all irrelevant header lines
+        // Skip Metadata lines
         boolean readingMetadata = true;
         while (readingMetadata && line != null) {
             String[] metadataValues = line.split(TAB);
@@ -97,25 +94,48 @@ public class CrossCheckMetricsController {
             }
         }
 
+        // Parse columns from next header line
         line = TSVFile.readLine();
-        final String[] headers = line.split(TAB);
-        int lodIndex = getColumnIndex(headers, LOD_SCORE);
-        int resultIndex = getColumnIndex(headers, RESULT);
-        int sampleInfoAIndex = getColumnIndex(headers, LEFT_FILE);
-        int sampleInfoBIndex = getColumnIndex(headers, RIGHT_FILE);
 
-        line = TSVFile.readLine();
-        while (line != null) {
-            createCrosscheckMetricsEntry(line, lodIndex, resultIndex, sampleInfoAIndex, sampleInfoBIndex);
+        if (line != null) {
+            final String[] headers = line.split(TAB);
+            int lodIndex = getColumnIndex(headers, LOD_SCORE);
+            int resultIndex = getColumnIndex(headers, RESULT);
+            int sampleInfoAIndex = getColumnIndex(headers, LEFT_FILE);
+            int sampleInfoBIndex = getColumnIndex(headers, RIGHT_FILE);
+
             line = TSVFile.readLine();
+            while (line != null) {
+                createCrosscheckMetricsEntry(line, lodIndex, resultIndex, sampleInfoAIndex, sampleInfoBIndex);
+                line = TSVFile.readLine();
+            }
+        } else {
+            final String status = String.format("Failed to find entries in %s", filePath);
+            throw new IllegalStateException(status);
         }
         TSVFile.close();
     }
 
-    private void createCrosscheckMetricsEntry(String line, int lodIndex, int resultIndex, int sampleInfoAIndex, int sampleInfoBIndex) {
+    /**
+     * Parses CrosscheckMetrics info from line and saves to database
+     *
+     * @param line,             String - Line from cross_check metrics file containing values
+     * @param lodIndex,         int - Index of deliminted line w/ lodIndex information
+     * @param resultIndex,      int - Index of results
+     * @param sampleInfoAIndex, int - Index of first sample
+     * @param sampleInfoBIndex, int - Index of second sample
+     */
+    private void createCrosscheckMetricsEntry(String line, int lodIndex, int resultIndex, int sampleInfoAIndex, int sampleInfoBIndex) throws IllegalStateException {
         if (line.equals("")) return;
-
         final String[] values = line.split(TAB);
+
+        int[] indices = new int[]{lodIndex + 2, resultIndex, sampleInfoAIndex, sampleInfoBIndex};
+        for (int idx : indices) {
+            if (values.length <= idx) {
+                String status = String.format("Entry not saved. Could not parse from line: %s", line);
+                throw new IllegalStateException(status);
+            }
+        }
 
         // LOD columns are together, the first one being named "LOD_SCORE"
         // Example Headers: "...DATA_TYPE   LOD_SCORE   LOD_SCORE_TUMOR_NORMAL  LOD_SCORE_NORMAL_TUMOR..."
@@ -127,17 +147,18 @@ public class CrossCheckMetricsController {
         final String pathB = values[sampleInfoBIndex];
 
         // PATH -> [ PROJECT_ID, IGO_ID, PATIENT_ID, TUMOR/NORMAL ]
-        final String[] sampleInfoA = getSampleInfo(pathA);
-        final String[] sampleInfoB = getSampleInfo(pathB);
+        final SampleInfo sampleInfoA = getSampleInfo(pathA);
+        final SampleInfo sampleInfoB = getSampleInfo(pathB);
 
-        String project = sampleInfoA[0];
-        if (!sampleInfoA[0].equals(sampleInfoB[0])) {
+        String project = sampleInfoA.getProject();
+        if (!project.equals(sampleInfoB.getProject())) {
+            String differentProject = sampleInfoB.getProject();
             log.error("Detected samples from two different projects: %s & %s. Saving entry with project: %s_%s",
-                    sampleInfoA[0], sampleInfoB[0], sampleInfoA[0], sampleInfoB[0]);
-            project = String.format("%s__%s", sampleInfoA[0], sampleInfoB[0]);
+                    project, differentProject, project, differentProject);
+            project = String.format("%s__%s", project, differentProject);
         }
 
-        // Save to databse
+        // Save to database
         CrosscheckMetrics metrics = new CrosscheckMetrics(lod, lodAlt1, lodAlt2, project, result, sampleInfoA, sampleInfoB);
         crossCheckMetricsRepository.save(metrics);
     }
@@ -145,28 +166,28 @@ public class CrossCheckMetricsController {
     /**
      * Extracts the info from the BAM name used in the picard CrossCheckFingerprint command
      * {BAM_NAME} -> [ PROJECT_ID, IGO_ID, PATIENT_ID, TUMOR/NORMAL ]
-     * e.g.
-     * PATH/TO/P04969_N__09455_S_1__C-7JJ452__Tumor_headers.bam -> ["P04969_N", "09455_S_1", "C-7JJ452", "Tumor"]
+     *  e.g.
+     *      PATH/TO/P04969_N__09455_S_1__C-7JJ452__Tumor_headers.bam -> ["P04969_N", "09455_S_1", "C-7JJ452", "Tumor"]
      *
      * @param pathName, e.g. "PATH/TO/09455_S_1__C-7JJ452__Tumor_headers.bam"
      */
-    private String[] getSampleInfo(String pathName) {
+    private SampleInfo getSampleInfo(String pathName) {
         String bamName = getBamName(pathName);
         String[] values = bamName.split(BAM_DELIMITER);
         if (values.length != 4) {
             log.error(String.format("Failed to parse out sampleInfo from bamName: %s", bamName));
-            return new String[]{"", "", "", ""};
+            return new SampleInfo("", "", "", "");
         }
         values[3] = values[3].replaceAll(".bam", "")
                              .replaceAll("_headers", "");
-        return values;
+        return new SampleInfo(values[0], values[1], values[2], values[3]);
     }
 
     /**
      * Retrieves BAM name from the input path name
      *
      * @param pathName, e.g. "PATH/TO/P04969_N__04969_N_5__C-000238__Tumor_headers.bam"
-     * @return,         e.g. "P04969_N__04969_N_5__C-000238__Tumor_headers.bam"
+     * @return, e.g. "P04969_N__04969_N_5__C-000238__Tumor_headers.bam"
      */
     private String getBamName(String pathName) {
         String[] values = pathName.split(BACKSLASH);

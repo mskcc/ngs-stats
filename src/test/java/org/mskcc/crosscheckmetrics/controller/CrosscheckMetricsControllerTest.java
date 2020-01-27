@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mskcc.crosscheckmetrics.CrossCheckMetricsController;
 import org.mskcc.crosscheckmetrics.model.CrosscheckMetrics;
-import org.mskcc.crosscheckmetrics.model.FingerprintResult;
 import org.mskcc.crosscheckmetrics.respository.CrossCheckMetricsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,10 +73,10 @@ public class CrosscheckMetricsControllerTest {
      */
     private void setupRequest(Map<String, String> values) throws IOException {
         String fields = "";
-        for (Map.Entry<String,String> entry : values.entrySet()){
+        for (Map.Entry<String, String> entry : values.entrySet()) {
             fields = String.format("\"%s\": \"%s\"", entry.getKey(), entry.getValue());
         }
-        String requestBody = String.format("{%s}", fields.join(",", fields));
+        String requestBody = String.format("{%s}", String.join(",", fields));
         when(request.getInputStream()).thenReturn(
                 new DelegatingServletInputStream(
                         new ByteArrayInputStream(requestBody.getBytes(StandardCharsets.UTF_8))));
@@ -132,6 +131,44 @@ public class CrosscheckMetricsControllerTest {
         assertEquals("true", response.get("success"));
 
         verifySavedCrossCheckValues();
+    }
+
+    @Test
+    public void writeCrosscheckMetrics_fail() {
+        /**
+         * Names should come from the hierarchy structure
+         *      ./src/test/java/org/mskcc/crosscheckmetrics/controller/mocks/
+         *          \-RUN
+         *              \-PROJECT
+         */
+
+        // 1) Bad Header
+        final String TEST_RUN = "RUN";
+        String testProject = "BAD_PROJECT_HEADER";      // Missing marker for end of metadata lines
+        Map<String, String> request = new HashMap<>();
+        request.put("run", TEST_RUN);
+        request.put("project", testProject);
+        try {
+            setupRequest(request);
+        } catch (IOException e) {
+            log.error(String.format("Error with test setup. %s", e.getMessage()));
+            return;
+        }
+        Map<String, Object> response = crossCheckMetricsController.writeCrosscheckMetrics(testProject, TEST_RUN);
+        assertEquals("false", response.get("success"));
+
+        // 2) Bad Values
+        testProject = "BAD_PROJECT_VALUES";      // Missing all columns for header
+        request = new HashMap<>();
+        request.put("project", testProject);
+        try {
+            setupRequest(request);
+        } catch (IOException e) {
+            log.error(String.format("Error with test setup. %s", e.getMessage()));
+            return;
+        }
+        response = crossCheckMetricsController.writeCrosscheckMetrics(testProject, TEST_RUN);
+        assertEquals("false", response.get("success"));
     }
 
     private void verifySavedCrossCheckValues() {
@@ -201,8 +238,8 @@ public class CrosscheckMetricsControllerTest {
             assertEquals(metric.lodScore, lodScores[i]);
             assertEquals(metric.lodScoreTumorNormal, lodScoreTumorNormal[i]);
             assertEquals(metric.lodScoreNormalTumor, lodScoreNormalTumor[i]);
-            assertEquals(metric.result, FingerprintResult.valueOf(results[i]));
-            assertEquals(metric.result, FingerprintResult.valueOf(results[i]));
+            assertEquals(metric.result, results[i]);
+            assertEquals(metric.result, results[i]);
             assertEquals(metric.igoIdA, igoIdAValues[i]);
         }
     }

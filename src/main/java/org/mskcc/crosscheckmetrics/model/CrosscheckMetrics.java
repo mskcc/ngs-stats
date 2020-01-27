@@ -10,55 +10,47 @@ import javax.persistence.Id;
 @Entity
 @ToString
 public class CrosscheckMetrics {
-    @Id
-    @Column(length=127)
-    private String id;
-
     public Double lodScore;                  // lodScore scores from picard CrosscheckFingerprints
     public Double lodScoreTumorNormal;       // ... lodScore lodScoreTumorNormal lodScoreNormalTumor ...
     public Double lodScoreNormalTumor;
-
-    public FingerprintResult result;
-
-    @Column(length=63)
+    public String result;
+    @Column(length = 63)
     public String project;
-
     @Column(length = 31)
     public String igoIdA;
     @Column(length = 31)
     public String igoIdB;
-
     @Column(length = 31)
     public String patientIdA;
     @Column(length = 31)
     public String patientIdB;
+    public String tumorNormalA;
+    public String tumorNormalB;
+    @Id
+    @Column(length = 127)
+    private String id;
 
-    public TumorNormal tumorNormalA;
-    public TumorNormal tumorNormalB;
-
-    @JsonInclude
-    public boolean isExpected() {
-        return result.isExpected();
+    public CrosscheckMetrics() {
     }
 
-    public CrosscheckMetrics() {}
-    public CrosscheckMetrics(Double lodScore, Double lodScoreTumorNormal, Double lodScoreNormalTumor, String project, String result, String[] projectAInfo, String[] projectBInfo){
-        int SI_IGO_IDX = 1;
-        int SI_PID_IDX = 2;
-        int SI_TN_IDX = 3;
-
+    public CrosscheckMetrics(Double lodScore, Double lodScoreTumorNormal, Double lodScoreNormalTumor, String project, String result, SampleInfo sampleAInfo, SampleInfo sampleBInfo) {
         this.lodScore = lodScore;
         this.lodScoreTumorNormal = lodScoreTumorNormal;
         this.lodScoreNormalTumor = lodScoreNormalTumor;
-        this.result = FingerprintResult.valueOf(result);
+        this.result = result;
         this.project = project;
-        this.igoIdA = projectAInfo[SI_IGO_IDX];
-        this.igoIdB = projectBInfo[SI_IGO_IDX];
-        this.patientIdA = projectAInfo[SI_PID_IDX];
-        this.patientIdB = projectBInfo[SI_PID_IDX];
-        this.tumorNormalA = TumorNormal.getEnum(projectAInfo[SI_TN_IDX]);
-        this.tumorNormalB = TumorNormal.getEnum(projectBInfo[SI_TN_IDX]);
+        this.igoIdA = sampleAInfo.getIgoId();
+        this.igoIdB = sampleBInfo.getIgoId();
+        this.patientIdA = sampleAInfo.getPatientId();
+        this.patientIdB = sampleBInfo.getPatientId();
+        this.tumorNormalA = sampleAInfo.getTumorNormal();
+        this.tumorNormalB = sampleBInfo.getTumorNormal();
 
         this.id = String.format("%s%s%s", project, this.igoIdA, this.igoIdB);
+    }
+
+    @JsonInclude
+    public boolean isExpected() {
+        return FingerprintResult.valueOf(result).isExpected();
     }
 }
