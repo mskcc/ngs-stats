@@ -39,7 +39,7 @@ public class CrossCheckMetricsController {
 
     @RequestMapping(value = "/getCrosscheckMetrics", method = RequestMethod.GET)
     public Map<String, Object> getCrosscheckMetrics(@RequestParam("project") String project) {
-        List<CrosscheckMetrics> metrics = crossCheckMetricsRepository.findByProject(project);
+        List<CrosscheckMetrics> metrics = crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(project);
         String status;
         if (metrics.isEmpty()) {
             status = String.format("No crosscheckmetrics found for project: '%s'", project);
