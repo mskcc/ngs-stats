@@ -5,15 +5,14 @@ import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
 @ToString
 public class CrosscheckMetrics {
     @Id
-    @GeneratedValue
-    private Long id;
+    @Column(length=127)
+    private String id;
 
     public Double lodScore;                  // lodScore scores from picard CrosscheckFingerprints
     public Double lodScoreTumorNormal;       // ... lodScore lodScoreTumorNormal lodScoreNormalTumor ...
@@ -21,17 +20,17 @@ public class CrosscheckMetrics {
 
     public FingerprintResult result;
 
-    @Column(length=64)
+    @Column(length=63)
     public String project;
 
-    @Column(length = 32)
+    @Column(length = 31)
     public String igoIdA;
-    @Column(length = 32)
+    @Column(length = 31)
     public String igoIdB;
 
-    @Column(length = 32)
+    @Column(length = 31)
     public String patientIdA;
-    @Column(length = 32)
+    @Column(length = 31)
     public String patientIdB;
 
     public TumorNormal tumorNormalA;
@@ -42,6 +41,7 @@ public class CrosscheckMetrics {
         return result.isExpected();
     }
 
+    public CrosscheckMetrics() {}
     public CrosscheckMetrics(Double lodScore, Double lodScoreTumorNormal, Double lodScoreNormalTumor, String project, String result, String[] projectAInfo, String[] projectBInfo){
         int SI_IGO_IDX = 1;
         int SI_PID_IDX = 2;
@@ -58,5 +58,7 @@ public class CrosscheckMetrics {
         this.patientIdB = projectBInfo[SI_PID_IDX];
         this.tumorNormalA = TumorNormal.getEnum(projectAInfo[SI_TN_IDX]);
         this.tumorNormalB = TumorNormal.getEnum(projectBInfo[SI_TN_IDX]);
+
+        this.id = String.format("%s%s%s", project, this.igoIdA, this.igoIdB);
     }
 }
