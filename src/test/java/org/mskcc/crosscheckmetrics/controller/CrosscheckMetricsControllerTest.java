@@ -20,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,24 +69,59 @@ public class CrosscheckMetricsControllerTest {
     /**
      * Creates request body as it would be sent in request. Mocks it as the input stream of the HttpServletRequest
      *
-     * @param run
-     * @param project
+     * @param values, map of "field" -> "value" entries that should be put into the mocked request
      * @throws IOException
      */
-    private void setupWriteCrosscheckMetricsRequest(String run, String project) throws IOException {
-        String requestBody = String.format("{\"project\": \"%s\",", project) +
-                String.format("\"run\": \"%s\"}]}", run);
+    private void setupRequest(Map<String, String> values) throws IOException {
+        String fields = "";
+        for (Map.Entry<String,String> entry : values.entrySet()){
+            fields = String.format("\"%s\": \"%s\"", entry.getKey(), entry.getValue());
+        }
+        String requestBody = String.format("{%s}", fields.join(",", fields));
         when(request.getInputStream()).thenReturn(
                 new DelegatingServletInputStream(
                         new ByteArrayInputStream(requestBody.getBytes(StandardCharsets.UTF_8))));
     }
 
+    public void readCrosscheckMetrics_success() {
+        final String TEST_PROJECT = "PROJECT";
+        Map<String, String> request = new HashMap<>();
+        request.put("project", TEST_PROJECT);
+        try {
+            setupRequest(request);
+        } catch (IOException e) {
+            log.error(String.format("Error with test setup. %s", e.getMessage()));
+            return;
+        }
+
+        // Setup database get calls
+        List<CrosscheckMetrics> mockResponse = new ArrayList<>();
+        CrosscheckMetrics mockCrosscheckMetrics = Mockito.mock(CrosscheckMetrics.class);
+        mockResponse.add(mockCrosscheckMetrics);
+        when(crossCheckMetricsRepository.findByProject(TEST_PROJECT)).thenReturn(mockResponse);
+        Map<String, Object> response = crossCheckMetricsController.getCrosscheckMetrics(TEST_PROJECT);
+
+        // Verify a successful response
+        assertEquals("true", response.get("success"));
+    }
+
     @Test
     public void writeCrosscheckMetrics_success() {
+        /**
+         * Names should come from the hierarchy structure
+         *      ./src/test/java/org/mskcc/crosscheckmetrics/controller/mocks/
+         *          \-RUN
+         *              \-PROJECT
+         */
         final String TEST_RUN = "RUN";
         final String TEST_PROJECT = "PROJECT";
+
+        Map<String, String> request = new HashMap<>();
+        request.put("run", TEST_RUN);
+        request.put("project", TEST_PROJECT);
+
         try {
-            setupWriteCrosscheckMetricsRequest(TEST_RUN, TEST_PROJECT);
+            setupRequest(request);
         } catch (IOException e) {
             log.error(String.format("Error with test setup. %s", e.getMessage()));
             return;
