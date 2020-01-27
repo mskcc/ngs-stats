@@ -1,6 +1,7 @@
 package org.mskcc.crosscheckmetrics.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.Column;
@@ -8,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
+@NoArgsConstructor
 @ToString
 public class CrosscheckMetrics {
     public Double lodScore;                  // lodScore scores from picard CrosscheckFingerprints
@@ -29,9 +31,6 @@ public class CrosscheckMetrics {
     @Id
     @Column(length = 127)
     private String id;
-
-    public CrosscheckMetrics() {
-    }
 
     public CrosscheckMetrics(Double lodScore, Double lodScoreTumorNormal, Double lodScoreNormalTumor, String project, String result, SampleInfo sampleAInfo, SampleInfo sampleBInfo) {
         this.lodScore = lodScore;
