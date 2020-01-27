@@ -15,9 +15,9 @@ public class CrosscheckMetrics {
     @GeneratedValue
     private Long id;
 
-    public Double lod;                // LOD score from picard CrosscheckFingerprints
-    public Double lodAlt1;
-    public Double lodAlt2;
+    public Double lodScore;                  // lodScore scores from picard CrosscheckFingerprints
+    public Double lodScoreTumorNormal;       // ... lodScore lodScoreTumorNormal lodScoreNormalTumor ...
+    public Double lodScoreNormalTumor;
 
     public FingerprintResult result;
 
@@ -42,14 +42,14 @@ public class CrosscheckMetrics {
         return result.isExpected();
     }
 
-    public CrosscheckMetrics(Double lod, Double lodAlt1, Double lodAlt2, String project, String result, String[] projectAInfo, String[] projectBInfo){
+    public CrosscheckMetrics(Double lodScore, Double lodScoreTumorNormal, Double lodScoreNormalTumor, String project, String result, String[] projectAInfo, String[] projectBInfo){
         int SI_IGO_IDX = 1;
         int SI_PID_IDX = 2;
         int SI_TN_IDX = 3;
 
-        this.lod = lod;
-        this.lodAlt1 = lodAlt1;
-        this.lodAlt2 = lodAlt2;
+        this.lodScore = lodScore;
+        this.lodScoreTumorNormal = lodScoreTumorNormal;
+        this.lodScoreNormalTumor = lodScoreNormalTumor;
         this.result = FingerprintResult.valueOf(result);
         this.project = project;
         this.igoIdA = projectAInfo[SI_IGO_IDX];

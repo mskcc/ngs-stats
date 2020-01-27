@@ -114,7 +114,7 @@ public class CrosscheckMetricsControllerTest {
                 28.646621,
                 50.528243
         };
-        Double[] lodAlt1Scores = new Double[]{
+        Double[] lodScoreTumorNormal = new Double[]{
                 42.817292,
                 17.139747,
                 27.896047,
@@ -125,7 +125,7 @@ public class CrosscheckMetricsControllerTest {
                 -3.591111,
                 41.098012
         };
-        Double[] lodAlt2Scores = new Double[]{
+        Double[] lodScoreNormalTumor = new Double[]{
                 42.817292,
                 29.998769,
                 27.235856,
@@ -161,9 +161,9 @@ public class CrosscheckMetricsControllerTest {
 
         for (int i = 0; i < numEntries; i++) {
             CrosscheckMetrics metric = capturedMetrics.get(i);
-            assertEquals(metric.lod, lodScores[i]);
-            assertEquals(metric.lodAlt1, lodAlt1Scores[i]);
-            assertEquals(metric.lodAlt2, lodAlt2Scores[i]);
+            assertEquals(metric.lodScore, lodScores[i]);
+            assertEquals(metric.lodScoreTumorNormal, lodScoreTumorNormal[i]);
+            assertEquals(metric.lodScoreNormalTumor, lodScoreNormalTumor[i]);
             assertEquals(metric.result, FingerprintResult.valueOf(results[i]));
             assertEquals(metric.result, FingerprintResult.valueOf(results[i]));
             assertEquals(metric.igoIdA, igoIdAValues[i]);

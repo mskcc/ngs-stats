@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static org.mskcc.constants.*;
+import static org.mskcc.Constants.*;
 import static org.mskcc.utils.ApiUtil.createErrorResponse;
 import static org.mskcc.utils.ApiUtil.createSuccessResponse;
 import static org.mskcc.utils.ParserUtil.parseDouble;
@@ -25,6 +25,12 @@ import static org.mskcc.utils.ParserUtil.parseDouble;
 @RestController
 public class CrossCheckMetricsController {
     private static Logger log = LoggerFactory.getLogger(CrossCheckMetricsController.class);
+
+    private final String LAST_METADATA_LINE = "## METRICS CLASS";
+    private final String LOD_SCORE = "LOD_SCORE";
+    private static final String RESULT = "RESULT";
+    private static final String LEFT_FILE = "LEFT_FILE";
+    private static final String RIGHT_FILE = "RIGHT_FILE";
 
     @Autowired
     private CrossCheckMetricsRepository crossCheckMetricsRepository;

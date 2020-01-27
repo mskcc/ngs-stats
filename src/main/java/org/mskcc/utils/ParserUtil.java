@@ -14,6 +14,7 @@ public class ParserUtil {
             Double val = Double.parseDouble(st);
             return val;
         } catch (NumberFormatException e) {
+            // TODO - Add splunk alert for this error in the logs
             log.error(String.format("Failed to convert %s to float: %s", st, e.getMessage()));
         }
         return null;
