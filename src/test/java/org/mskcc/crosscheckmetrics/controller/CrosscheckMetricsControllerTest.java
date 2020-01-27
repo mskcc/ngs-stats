@@ -97,7 +97,7 @@ public class CrosscheckMetricsControllerTest {
         List<CrosscheckMetrics> mockResponse = new ArrayList<>();
         CrosscheckMetrics mockCrosscheckMetrics = Mockito.mock(CrosscheckMetrics.class);
         mockResponse.add(mockCrosscheckMetrics);
-        when(crossCheckMetricsRepository.findByProject(TEST_PROJECT)).thenReturn(mockResponse);
+        when(crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(TEST_PROJECT)).thenReturn(mockResponse);
         Map<String, Object> response = crossCheckMetricsController.getCrosscheckMetrics(TEST_PROJECT);
 
         // Verify a successful response
@@ -240,7 +240,7 @@ public class CrosscheckMetricsControllerTest {
             assertEquals(metric.lodScoreNormalTumor, lodScoreNormalTumor[i]);
             assertEquals(metric.result, results[i]);
             assertEquals(metric.result, results[i]);
-            assertEquals(metric.igoIdA, igoIdAValues[i]);
+            assertEquals(metric.getId().getIgoIdA(), igoIdAValues[i]);
         }
     }
 }
