@@ -42,7 +42,7 @@ public class CrosscheckMetrics {
     }
 
     @JsonInclude
-    public boolean isExpected() {
+    public Boolean isExpected() {
         return FingerprintResult.valueOf(result).isExpected();
     }
 }
