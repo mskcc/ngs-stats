@@ -68,7 +68,7 @@ public class CrossCheckMetricsController {
             saveCrossCheckMetricsFile(filePath);
         } catch (IOException | IllegalStateException e) {
             String status = String.format("Failed to read %s: %s", filePath, e.getMessage());
-            return createErrorResponse(status, true);
+            return createErrorResponse(status, false);
         }
         return createSuccessResponse(String.format("Saved CrossCheckMetrics for Run: %s, Project: %s", run, project));
     }
