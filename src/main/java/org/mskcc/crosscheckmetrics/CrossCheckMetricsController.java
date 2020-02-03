@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -38,14 +39,15 @@ public class CrossCheckMetricsController {
     private String CROSSCHECK_METRICS_DIR;
 
     @RequestMapping(value = "/getCrosscheckMetrics", method = RequestMethod.GET)
-    public Map<String, Object> getCrosscheckMetrics(@RequestParam("project") String project) {
-        List<CrosscheckMetrics> metrics = crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(project);
+    public Map<String, Object> getCrosscheckMetrics(@RequestParam("projects") String projects) {
+        List<String> projectList = Arrays.asList(projects.split(","));
+        List<CrosscheckMetrics> metrics = crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(projectList);
         String status;
         if (metrics.isEmpty()) {
-            status = String.format("No crosscheckmetrics found for project: '%s'", project);
+            status = String.format("No crosscheckmetrics found for projects: '%s'", projects);
             return createErrorResponse(status, true);
         }
-        status = String.format("Found %d samples for project '%s'", metrics.size(), project);
+        status = String.format("Found %d samples for projects '%s'", metrics.size(), projects);
         Map<String, Object> resp = createSuccessResponse(status);
         resp.put(API_DATA, metrics);
         return resp;

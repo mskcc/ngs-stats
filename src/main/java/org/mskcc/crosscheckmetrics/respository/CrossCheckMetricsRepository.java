@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface CrossCheckMetricsRepository extends CrudRepository<CrosscheckMetrics, String> {
-    List<CrosscheckMetrics> findByCrosscheckMetricsId_Project(String project);
+    List<CrosscheckMetrics> findByCrosscheckMetricsId_Project(List<String> projects);
 }

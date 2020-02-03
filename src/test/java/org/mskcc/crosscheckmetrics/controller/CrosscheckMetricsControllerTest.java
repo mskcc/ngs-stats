@@ -19,10 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -97,7 +94,7 @@ public class CrosscheckMetricsControllerTest {
         List<CrosscheckMetrics> mockResponse = new ArrayList<>();
         CrosscheckMetrics mockCrosscheckMetrics = Mockito.mock(CrosscheckMetrics.class);
         mockResponse.add(mockCrosscheckMetrics);
-        when(crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(TEST_PROJECT)).thenReturn(mockResponse);
+        when(crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(new ArrayList<>(Arrays.asList(TEST_PROJECT)))).thenReturn(mockResponse);
         Map<String, Object> response = crossCheckMetricsController.getCrosscheckMetrics(TEST_PROJECT);
 
         // Verify a successful response
