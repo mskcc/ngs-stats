@@ -28,7 +28,8 @@ public class CrosscheckMetrics {
     public CrosscheckMetricsId getId(){
         return this.crosscheckMetricsId;
     }
-
+    public String getProject() { return this.crosscheckMetricsId.getProject(); }
+    public String getResult() { return this.result; }
     public CrosscheckMetrics(Double lodScore, Double lodScoreTumorNormal, Double lodScoreNormalTumor, String project, String result, SampleInfo sampleAInfo, SampleInfo sampleBInfo) {
         this.lodScore = lodScore;
         this.lodScoreTumorNormal = lodScoreTumorNormal;

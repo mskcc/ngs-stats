@@ -1,6 +1,7 @@
 package org.mskcc.crosscheckmetrics;
 
 import org.mskcc.crosscheckmetrics.model.CrosscheckMetrics;
+import org.mskcc.crosscheckmetrics.model.ProjectEntries;
 import org.mskcc.crosscheckmetrics.model.SampleInfo;
 import org.mskcc.crosscheckmetrics.respository.CrossCheckMetricsRepository;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,15 +43,26 @@ public class CrossCheckMetricsController {
     @RequestMapping(value = "/getCrosscheckMetrics", method = RequestMethod.GET)
     public Map<String, Object> getCrosscheckMetrics(@RequestParam("projects") String projects) {
         List<String> projectList = Arrays.asList(projects.split(","));
-        List<CrosscheckMetrics> metrics = crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(projectList);
+        List<CrosscheckMetrics> results = crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(projectList);
         String status;
-        if (metrics.isEmpty()) {
+        if (results.isEmpty()) {
             status = String.format("No crosscheckmetrics found for projects: '%s'", projects);
             return createErrorResponse(status, true);
         }
-        status = String.format("Found %d samples for projects '%s'", metrics.size(), projects);
+
+        final Map<String, ProjectEntries> response = new HashMap<>();
+        for(CrosscheckMetrics entry : results){
+            String project = entry.getProject();
+            if(response.containsKey(project)){
+                response.get(project).addEntry(entry);
+            } else {
+                response.put(project, new ProjectEntries(project, entry));
+            }
+        }
+
+        status = String.format("Found %d samples for %d projects '%s'", results.size(), response.size(), projects);
         Map<String, Object> resp = createSuccessResponse(status);
-        resp.put(API_DATA, metrics);
+        resp.put(API_DATA, response);
         return resp;
     }
 

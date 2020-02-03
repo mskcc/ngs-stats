@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mskcc.crosscheckmetrics.CrossCheckMetricsController;
 import org.mskcc.crosscheckmetrics.model.CrosscheckMetrics;
+import org.mskcc.crosscheckmetrics.model.CrosscheckMetricsId;
+import org.mskcc.crosscheckmetrics.model.ProjectEntries;
 import org.mskcc.crosscheckmetrics.respository.CrossCheckMetricsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,8 +81,10 @@ public class CrosscheckMetricsControllerTest {
                         new ByteArrayInputStream(requestBody.getBytes(StandardCharsets.UTF_8))));
     }
 
+    @Test
     public void readCrosscheckMetrics_success() {
         final String TEST_PROJECT = "PROJECT";
+        final String TEST_RESULT = "EXPECTED_MATCH";
         Map<String, String> request = new HashMap<>();
         request.put("project", TEST_PROJECT);
         try {
@@ -92,13 +96,23 @@ public class CrosscheckMetricsControllerTest {
 
         // Setup database get calls
         List<CrosscheckMetrics> mockResponse = new ArrayList<>();
-        CrosscheckMetrics mockCrosscheckMetrics = Mockito.mock(CrosscheckMetrics.class);
+        CrosscheckMetrics mockCrosscheckMetrics = new CrosscheckMetrics();
+        mockCrosscheckMetrics.crosscheckMetricsId = new CrosscheckMetricsId(TEST_PROJECT, "dummy1", "dummy2");
+        mockCrosscheckMetrics.result = TEST_RESULT;
         mockResponse.add(mockCrosscheckMetrics);
         when(crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(new ArrayList<>(Arrays.asList(TEST_PROJECT)))).thenReturn(mockResponse);
         Map<String, Object> response = crossCheckMetricsController.getCrosscheckMetrics(TEST_PROJECT);
 
         // Verify a successful response
         assertEquals("true", response.get("success"));
+
+        Map<String, ProjectEntries> data = (Map<String, ProjectEntries >)response.get("data");
+        ProjectEntries pe = data.get(TEST_PROJECT);
+        Set<String> results = pe.getResults();
+
+        assertEquals(1, pe.getEntries().size());
+        assertTrue(results.contains(TEST_RESULT));
+        assertTrue(results.size() == 1);
     }
 
     @Test
