@@ -109,14 +109,11 @@ public class CrosscheckMetricsControllerTest {
         /**
          * Names should come from the hierarchy structure
          *      ./src/test/java/org/mskcc/crosscheckmetrics/controller/mocks/
-         *          \-RUN
-         *              \-PROJECT
+         *          \-PROJECT
          */
-        final String TEST_RUN = "RUN";
         final String TEST_PROJECT = "PROJECT";
 
         Map<String, String> request = new HashMap<>();
-        request.put("run", TEST_RUN);
         request.put("project", TEST_PROJECT);
 
         try {
@@ -125,7 +122,7 @@ public class CrosscheckMetricsControllerTest {
             log.error(String.format("Error with test setup. %s", e.getMessage()));
             return;
         }
-        Map<String, Object> response = crossCheckMetricsController.writeCrosscheckMetrics(TEST_PROJECT, TEST_RUN);
+        Map<String, Object> response = crossCheckMetricsController.writeCrosscheckMetrics(TEST_PROJECT);
 
         // Verify a successful response
         assertEquals("true", response.get("success"));
@@ -146,7 +143,6 @@ public class CrosscheckMetricsControllerTest {
         final String TEST_RUN = "RUN";
         String testProject = "BAD_PROJECT_HEADER";      // Missing marker for end of metadata lines
         Map<String, String> request = new HashMap<>();
-        request.put("run", TEST_RUN);
         request.put("project", testProject);
         try {
             setupRequest(request);
@@ -154,7 +150,7 @@ public class CrosscheckMetricsControllerTest {
             log.error(String.format("Error with test setup. %s", e.getMessage()));
             return;
         }
-        Map<String, Object> response = crossCheckMetricsController.writeCrosscheckMetrics(testProject, TEST_RUN);
+        Map<String, Object> response = crossCheckMetricsController.writeCrosscheckMetrics(testProject);
         assertEquals("false", response.get("success"));
 
         // 2) Bad Values
@@ -167,7 +163,7 @@ public class CrosscheckMetricsControllerTest {
             log.error(String.format("Error with test setup. %s", e.getMessage()));
             return;
         }
-        response = crossCheckMetricsController.writeCrosscheckMetrics(testProject, TEST_RUN);
+        response = crossCheckMetricsController.writeCrosscheckMetrics(testProject);
         assertEquals("false", response.get("success"));
     }
 

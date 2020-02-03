@@ -56,21 +56,20 @@ public class CrossCheckMetricsController {
      * filesystem and save its values to the DB
      *
      * @param project, e.g. "P10439_B"
-     * @param run,     e.g. "PITT_0439_BHFTCNBBXY"
      * @return, API response
      */
     @RequestMapping(value = "/writeCrosscheckMetrics", method = RequestMethod.GET)
-    public Map<String, Object> writeCrosscheckMetrics(@RequestParam("project") String project, @RequestParam("run") String run) {
+    public Map<String, Object> writeCrosscheckMetrics(@RequestParam("project") String project) {
         // Crosscheck metrics are stored on the filesystem ngs-stats runs on
-        final String fileName = String.format("%s_%s.crosscheck_metrics", run, project);
-        final String filePath = String.format("%s/%s/%s/%s", CROSSCHECK_METRICS_DIR, run, project, fileName);
+        final String fileName = String.format("%s.crosscheck_metrics", project);
+        final String filePath = String.format("%s/%s/%s", CROSSCHECK_METRICS_DIR, project, fileName);
         try {
             saveCrossCheckMetricsFile(filePath);
         } catch (IOException | IllegalStateException e) {
             String status = String.format("Failed to read %s: %s", filePath, e.getMessage());
             return createErrorResponse(status, false);
         }
-        return createSuccessResponse(String.format("Saved CrossCheckMetrics for Run: %s, Project: %s", run, project));
+        return createSuccessResponse(String.format("Saved CrossCheckMetrics for Project: %s", project));
     }
 
     /**
