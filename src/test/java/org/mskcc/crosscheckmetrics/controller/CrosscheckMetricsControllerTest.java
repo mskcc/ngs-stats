@@ -100,7 +100,7 @@ public class CrosscheckMetricsControllerTest {
         mockCrosscheckMetrics.crosscheckMetricsId = new CrosscheckMetricsId(TEST_PROJECT, "dummy1", "dummy2");
         mockCrosscheckMetrics.result = TEST_RESULT;
         mockResponse.add(mockCrosscheckMetrics);
-        when(crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(new ArrayList<>(Arrays.asList(TEST_PROJECT)))).thenReturn(mockResponse);
+        when(crossCheckMetricsRepository.findByCrosscheckMetrics_IdProject_IsIn(new ArrayList<>(Arrays.asList(TEST_PROJECT)))).thenReturn(mockResponse);
         Map<String, Object> response = crossCheckMetricsController.getCrosscheckMetrics(TEST_PROJECT);
 
         // Verify a successful response
