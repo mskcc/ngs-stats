@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -40,6 +37,7 @@ public class CrossCheckMetricsController {
     @Value("${crosscheckmetrics.dir}")
     private String CROSSCHECK_METRICS_DIR;
 
+    @CrossOrigin
     @RequestMapping(value = "/getCrosscheckMetrics", method = RequestMethod.GET)
     public Map<String, Object> getCrosscheckMetrics(@RequestParam("projects") String projects) {
         List<String> projectList = Arrays.asList(projects.split(","));
