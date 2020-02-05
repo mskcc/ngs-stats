@@ -81,6 +81,39 @@ public class CrosscheckMetricsControllerTest {
                         new ByteArrayInputStream(requestBody.getBytes(StandardCharsets.UTF_8))));
     }
 
+    private static class CrosscheckMetricsBuilder {
+        private String project;
+        private String igoIdA = "DEFAULT_IGO_ID_A";
+        private String igoIdB = "DEFAULT_IGO_ID_B";
+        private String result;
+        public CrosscheckMetrics build() {
+            CrosscheckMetrics metric = new CrosscheckMetrics();
+            CrosscheckMetricsId id = new CrosscheckMetricsId(this.project, this.igoIdA, this.igoIdB);
+            metric.result = this.result;
+            metric.crosscheckMetricsId = id;
+            return metric;
+        }
+        public static CrosscheckMetricsBuilder newInstance() {
+            return new CrosscheckMetricsBuilder();
+        }
+        public CrosscheckMetricsBuilder setProject(String project){
+            this.project = project;
+            return this;
+        }
+        public CrosscheckMetricsBuilder setIgoIdA(String igoIdA){
+            this.igoIdA = igoIdA;
+            return this;
+        }
+        public CrosscheckMetricsBuilder setIgoIdB(String igoIdB){
+            this.igoIdB = igoIdB;
+            return this;
+        }
+        public CrosscheckMetricsBuilder setResult(String result){
+            this.result = result;
+            return this;
+        }
+    }
+
     @Test
     public void readCrosscheckMetrics_success() {
         final String TEST_PROJECT = "PROJECT";
@@ -96,9 +129,10 @@ public class CrosscheckMetricsControllerTest {
 
         // Setup database get calls
         List<CrosscheckMetrics> mockResponse = new ArrayList<>();
-        CrosscheckMetrics mockCrosscheckMetrics = new CrosscheckMetrics();
-        mockCrosscheckMetrics.crosscheckMetricsId = new CrosscheckMetricsId(TEST_PROJECT, "dummy1", "dummy2");
-        mockCrosscheckMetrics.result = TEST_RESULT;
+        CrosscheckMetrics mockCrosscheckMetrics = CrosscheckMetricsBuilder.newInstance()
+                .setProject(TEST_PROJECT)
+                .setResult(TEST_RESULT)
+                .build();
         mockResponse.add(mockCrosscheckMetrics);
         when(crossCheckMetricsRepository.findByCrosscheckMetrics_IdProject_IsIn(new ArrayList<>(Arrays.asList(TEST_PROJECT)))).thenReturn(mockResponse);
         Map<String, Object> response = crossCheckMetricsController.getCrosscheckMetrics(TEST_PROJECT);
@@ -113,6 +147,52 @@ public class CrosscheckMetricsControllerTest {
         assertEquals(1, pe.getEntries().size());
         assertTrue(results.contains(TEST_RESULT));
         assertTrue(results.size() == 1);
+    }
+
+    @Test
+    public void readCrosscheckMetrics_successWithFlags() {
+        final String SUCCESS_PROJECT = "SUCCESS_PROJECT";
+        final String FAIL_PROJECT = "FAIL_PROJECT_1";
+        final String SUCCESS_RESULT = "EXPECTED_MATCH";
+        final String UNEXPECTED_MATCH = "UNEXPECTED_MATCH";
+        Map<String, String> request = new HashMap<>();
+
+        List<String> projectParamsList = new ArrayList<>(Arrays.asList(SUCCESS_PROJECT, FAIL_PROJECT));
+        String projectParams = String.join(",", projectParamsList);
+        request.put("project", projectParams);
+        try {
+            setupRequest(request);
+        } catch (IOException e) {
+            log.error(String.format("Error with test setup. %s", e.getMessage()));
+            return;
+        }
+
+        // Setup database get calls
+        List<CrosscheckMetrics> mockResponse = new ArrayList<>();
+        CrosscheckMetrics successCrosscheckMetrics = CrosscheckMetricsBuilder.newInstance()
+                .setProject(SUCCESS_PROJECT)
+                .setResult(SUCCESS_RESULT)
+                .build();
+        CrosscheckMetrics failCrosscheckMetrics = CrosscheckMetricsBuilder.newInstance()
+                .setProject(FAIL_PROJECT)
+                .setResult(UNEXPECTED_MATCH)
+                .build();
+        mockResponse.add(successCrosscheckMetrics);
+        mockResponse.add(failCrosscheckMetrics);
+        when(crossCheckMetricsRepository.findByCrosscheckMetrics_IdProject_IsIn(projectParamsList)).thenReturn(mockResponse);
+        Map<String, Object> response = crossCheckMetricsController.getCrosscheckMetrics(projectParams);
+
+        // Verify a successful response
+        assertEquals("true", response.get("success"));
+
+        Map<String, ProjectEntries> data = (Map<String, ProjectEntries >)response.get("data");
+        assertTrue(data.size() == 2);
+
+        ProjectEntries successEntry = data.get(SUCCESS_PROJECT);
+        ProjectEntries failEntry = data.get(FAIL_PROJECT);
+
+        assertTrue(failEntry.getFlag().contains(UNEXPECTED_MATCH));
+        assertEquals(successEntry.getFlag(), null);
     }
 
     @Test
