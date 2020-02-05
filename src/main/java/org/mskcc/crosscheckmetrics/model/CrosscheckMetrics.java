@@ -1,6 +1,7 @@
 package org.mskcc.crosscheckmetrics.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -11,6 +12,7 @@ import javax.persistence.Entity;
 @Entity
 @NoArgsConstructor
 @ToString
+@Getter
 public class CrosscheckMetrics {
     public Double lodScore;                  // lodScore scores from picard CrosscheckFingerprints
     public Double lodScoreTumorNormal;       // ... lodScore lodScoreTumorNormal lodScoreNormalTumor ...
@@ -25,11 +27,6 @@ public class CrosscheckMetrics {
     @EmbeddedId
     public CrosscheckMetricsId crosscheckMetricsId;
 
-    public CrosscheckMetricsId getId(){
-        return this.crosscheckMetricsId;
-    }
-    public String getProject() { return this.crosscheckMetricsId.getProject(); }
-    public String getResult() { return this.result; }
     public CrosscheckMetrics(Double lodScore, Double lodScoreTumorNormal, Double lodScoreNormalTumor, String project, String result, SampleInfo sampleAInfo, SampleInfo sampleBInfo) {
         this.lodScore = lodScore;
         this.lodScoreTumorNormal = lodScoreTumorNormal;

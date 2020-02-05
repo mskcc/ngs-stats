@@ -48,9 +48,10 @@ public class CrossCheckMetricsController {
             return createErrorResponse(status, true);
         }
 
+        // Create API response for each DB entry
         final Map<String, ProjectEntries> response = new HashMap<>();
         for(CrosscheckMetrics entry : results){
-            String project = entry.getProject();
+            String project = entry.getCrosscheckMetricsId().getProject();
             if(response.containsKey(project)){
                 response.get(project).addEntry(entry);
             } else {

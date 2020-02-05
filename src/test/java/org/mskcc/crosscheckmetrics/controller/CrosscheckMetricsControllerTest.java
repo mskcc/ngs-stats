@@ -327,7 +327,7 @@ public class CrosscheckMetricsControllerTest {
             assertEquals(metric.lodScoreNormalTumor, lodScoreNormalTumor[i]);
             assertEquals(metric.result, results[i]);
             assertEquals(metric.result, results[i]);
-            assertEquals(metric.getId().getIgoIdA(), igoIdAValues[i]);
+            assertEquals(metric.getCrosscheckMetricsId().getIgoIdA(), igoIdAValues[i]);
         }
     }
 }

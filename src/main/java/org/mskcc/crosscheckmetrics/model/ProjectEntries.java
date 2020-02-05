@@ -10,7 +10,7 @@ import java.util.*;
 @Getter
 public class ProjectEntries {
     private String project;
-    private List<CrosscheckMetrics> entries;
+    private List<Map<String,Object>> entries;       // Processed DB entries to return in service call
     private Set<String> results = new HashSet<>();  // Set of all results in the status of the projects
     private boolean pass;                           // Flag for unexpected/inconclusive results in project
     private String flag;
@@ -27,9 +27,10 @@ public class ProjectEntries {
      */
     public ProjectEntries(String project, CrosscheckMetrics entry){
         this.project = project;
-        this.entries = new ArrayList<>(Arrays.asList(entry));
+        this.entries = new ArrayList<>();
         this.pass = true;
-        updateStatus(entry);
+
+        addEntry(entry);
     }
 
     /**
@@ -38,7 +39,8 @@ public class ProjectEntries {
      * @param entry
      */
     public void addEntry(CrosscheckMetrics entry){
-        this.entries.add(entry);
+        final Map<String,Object> processed = procesEntry(entry);
+        this.entries.add(processed);
         updateStatus(entry);
     }
 
@@ -60,5 +62,24 @@ public class ProjectEntries {
             }
         }
         this.results.add(result);
+    }
+
+    /**
+     * Parses out values into cleaner API response
+     *
+     * @param entry, CrosscheckMetrics - DB entry
+     * @return, Map to be converted into JSON object
+     */
+    private Map<String,Object> procesEntry(CrosscheckMetrics entry){
+        final Map<String, Object> processed = new HashMap<>();
+        processed.put("lodScore", entry.getLodScore());
+        processed.put("lodScoreTumorNormal",entry.getLodScoreTumorNormal());
+        processed.put("lodScoreNormalTumor",entry.getLodScoreNormalTumor());
+        processed.put("result",entry.getResult());
+        processed.put("igoIdA",entry.getCrosscheckMetricsId().getIgoIdA());
+        processed.put("igoIdB",entry.getCrosscheckMetricsId().getIgoIdB());
+        processed.put("project", entry.getCrosscheckMetricsId().getProject());
+
+        return processed;
     }
 }
