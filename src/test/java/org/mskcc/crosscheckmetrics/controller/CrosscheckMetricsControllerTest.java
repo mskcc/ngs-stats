@@ -25,6 +25,7 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -193,6 +194,74 @@ public class CrosscheckMetricsControllerTest {
 
         assertTrue(failEntry.getFlag().contains(UNEXPECTED_MATCH));
         assertEquals(successEntry.getFlag(), null);
+    }
+
+    @Test
+    public void readCrosscheckMetrics_passingResults() {
+        final String SUCCESS_PROJECT = "SUCCESS_PROJECT";
+        final String FAIL_PROJECT = "FAIL_PROJECT";
+        final String EXPECTED_MATCH = "EXPECTED_MATCH";
+        final String EXPECTED_MISMATCH = "EXPECTED_MISMATCH";
+        final String UNEXPECTED_MATCH = "UNEXPECTED_MATCH";
+        final String UNEXPECTED_MISMATCH = "UNEXPECTED_MISMATCH";
+        final String INCONCLUSIVE = "INCONCLUSIVE";
+
+        Map<String, String> request = new HashMap<>();
+
+        List<String> projectParamsList = new ArrayList<>(Arrays.asList(SUCCESS_PROJECT, FAIL_PROJECT));
+        String projectParams = String.join(",", projectParamsList);
+        request.put("project", projectParams);
+        try {
+            setupRequest(request);
+        } catch (IOException e) {
+            log.error(String.format("Error with test setup. %s", e.getMessage()));
+            return;
+        }
+
+        // Setup database get calls
+        List<CrosscheckMetrics> mockResponse = new ArrayList<>();
+        CrosscheckMetrics expectedMatchMetric = CrosscheckMetricsBuilder.newInstance()
+                .setProject(SUCCESS_PROJECT)
+                .setResult(EXPECTED_MATCH)
+                .build();
+        CrosscheckMetrics expectedMismatchMetric = CrosscheckMetricsBuilder.newInstance()
+                .setProject(SUCCESS_PROJECT)
+                .setResult(EXPECTED_MISMATCH)
+                .build();
+        CrosscheckMetrics inconclusiveMetric = CrosscheckMetricsBuilder.newInstance()
+                .setProject(SUCCESS_PROJECT)
+                .setResult(INCONCLUSIVE)
+                .build();
+        CrosscheckMetrics inconclusiveMetricFail = CrosscheckMetricsBuilder.newInstance()
+                .setProject(FAIL_PROJECT)
+                .setResult(INCONCLUSIVE)
+                .build();
+        CrosscheckMetrics unexpectedMatchMetric = CrosscheckMetricsBuilder.newInstance()
+                .setProject(FAIL_PROJECT)
+                .setResult(UNEXPECTED_MATCH)
+                .build();
+        CrosscheckMetrics unexpectedMismatchMetric = CrosscheckMetricsBuilder.newInstance()
+                .setProject(FAIL_PROJECT)
+                .setResult(UNEXPECTED_MISMATCH)
+                .build();
+        mockResponse.add(expectedMatchMetric);
+        mockResponse.add(expectedMismatchMetric);
+        mockResponse.add(unexpectedMatchMetric);
+        mockResponse.add(unexpectedMismatchMetric);
+        mockResponse.add(inconclusiveMetric);
+        mockResponse.add(inconclusiveMetricFail);
+        when(crossCheckMetricsRepository.findByCrosscheckMetrics_IdProject_IsIn(projectParamsList)).thenReturn(mockResponse);
+        Map<String, Object> response = crossCheckMetricsController.getCrosscheckMetrics(projectParams);
+
+        assertEquals(response.get("success"), "true");
+        Map<String, ProjectEntries> data = (Map<String, ProjectEntries >)response.get("data");
+        assertTrue(data.size() == 2);
+
+        ProjectEntries failProjectResponse = data.get(FAIL_PROJECT);
+        ProjectEntries successProjectResponse = data.get(SUCCESS_PROJECT);
+
+        assertFalse(failProjectResponse.getPass());
+        assertTrue(successProjectResponse.getPass());
     }
 
     @Test

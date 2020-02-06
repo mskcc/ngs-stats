@@ -12,18 +12,28 @@ public class ProjectEntries {
     private String project;
     private List<Map<String,Object>> entries;       // Processed DB entries to return in service call
     private Set<String> results = new HashSet<>();  // Set of all results in the status of the projects
-    private boolean pass;                           // Flag for unexpected/inconclusive results in project
+    private Boolean pass;                           // Flag for unexpected/inconclusive results in project
     private String flag;
 
+    // Any entry in the project w/ a result not in passingResults is considered failed
+    private static Set<String> passingResults = new HashSet<>();
+    static {
+        passingResults.add(FingerprintResult.EXPECTED_MATCH.toString());
+        passingResults.add(FingerprintResult.EXPECTED_MISMATCH.toString());
+        passingResults.add(FingerprintResult.INCONCLUSIVE.toString());
+    }
+
     /**
-     * {
-     *     project: "PROJECT_ID",
-     *     entries: CrosscheckMetrics[],
-     *     status: Set<UNEXPECTED_MATCH, UNEXPECTED_MISMATCH, INCONCLUSIVE, ...>
-     * }
-     *
-     * @param project
-     * @param entry
+     * Model for JSON response object for the project w/ all entries for that project
+     *         {
+     *             "project": String
+     *             "entries": Map[],
+     *             "results": String[],
+     *             "pass": boolean,
+     *             "flag": String
+     *        }
+     * @param project, String
+     * @param entry, CrosscheckMetrics
      */
     public ProjectEntries(String project, CrosscheckMetrics entry){
         this.project = project;
@@ -49,7 +59,7 @@ public class ProjectEntries {
      */
     public void updateStatus(CrosscheckMetrics entry){
         final String result = entry.getResult();
-        final boolean entryPasses = result.equals(FingerprintResult.EXPECTED_MATCH.toString()) || result.equals(FingerprintResult.EXPECTED_MISMATCH.toString());
+        final boolean entryPasses = passingResults.contains(result);
 
         this.pass = this.pass && entryPasses;
         if(!entryPasses){
