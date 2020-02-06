@@ -38,7 +38,10 @@ public class ProjectEntries {
     public ProjectEntries(String project, CrosscheckMetrics entry){
         this.project = project;
         this.entries = new ArrayList<>();
+
+        // Initialized to passing w/ blank flag
         this.pass = true;
+        this.flag = "";
 
         addEntry(entry);
     }

@@ -193,7 +193,7 @@ public class CrosscheckMetricsControllerTest {
         ProjectEntries failEntry = data.get(FAIL_PROJECT);
 
         assertTrue(failEntry.getFlag().contains(UNEXPECTED_MATCH));
-        assertEquals(successEntry.getFlag(), null);
+        assertEquals(successEntry.getFlag(), "");
     }
 
     @Test
