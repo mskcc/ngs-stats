@@ -153,8 +153,10 @@ public class CrosscheckMetricsControllerTest {
     @Test
     public void readCrosscheckMetrics_successWithFlags() {
         final String SUCCESS_PROJECT = "SUCCESS_PROJECT";
-        final String FAIL_PROJECT = "FAIL_PROJECT_1";
+        final String INCONCLUSIVE_PROJECT = "INCONCLUSIVE_PROJECT";
+        final String FAIL_PROJECT = "FAIL_PROJECT";
         final String SUCCESS_RESULT = "EXPECTED_MATCH";
+        final String INCONCLUSIVE_RESULT = "INCONCLUSIVE";
         final String UNEXPECTED_MATCH = "UNEXPECTED_MATCH";
         Map<String, String> request = new HashMap<>();
 
@@ -178,8 +180,13 @@ public class CrosscheckMetricsControllerTest {
                 .setProject(FAIL_PROJECT)
                 .setResult(UNEXPECTED_MATCH)
                 .build();
+        CrosscheckMetrics inconclusiveCrosscheckMetrics = CrosscheckMetricsBuilder.newInstance()
+                .setProject(INCONCLUSIVE_PROJECT)
+                .setResult(INCONCLUSIVE_RESULT)
+                .build();
         mockResponse.add(successCrosscheckMetrics);
         mockResponse.add(failCrosscheckMetrics);
+        mockResponse.add(inconclusiveCrosscheckMetrics);
         when(crossCheckMetricsRepository.findByCrosscheckMetrics_IdProject_IsIn(projectParamsList)).thenReturn(mockResponse);
         Map<String, Object> response = crossCheckMetricsController.getCrosscheckMetrics(projectParams);
 
@@ -187,13 +194,15 @@ public class CrosscheckMetricsControllerTest {
         assertEquals("true", response.get("success"));
 
         Map<String, ProjectEntries> data = (Map<String, ProjectEntries >)response.get("data");
-        assertTrue(data.size() == 2);
+        assertTrue(data.size() == 3);
 
         ProjectEntries successEntry = data.get(SUCCESS_PROJECT);
         ProjectEntries failEntry = data.get(FAIL_PROJECT);
+        ProjectEntries inconclusiveEntry = data.get(INCONCLUSIVE_PROJECT);
 
-        assertTrue(failEntry.getFlag().contains(UNEXPECTED_MATCH));
-        assertEquals(successEntry.getFlag(), "");
+        assertEquals(failEntry.getFlag(),ProjectEntries.ProjectStatus.FAIL.toString());
+        assertEquals(successEntry.getFlag(), ProjectEntries.ProjectStatus.PASS.toString());
+        assertEquals(inconclusiveEntry.getFlag(), ProjectEntries.ProjectStatus.WARNING.toString());
     }
 
     @Test

@@ -15,6 +15,8 @@ public class ProjectEntries {
     private Boolean pass;                           // Flag for unexpected/inconclusive results in project
     private String flag;
 
+    public enum ProjectStatus { PASS, WARNING, FAIL }
+
     // Any entry in the project w/ a result not in passingResults is considered failed
     private static Set<String> passingResults = new HashSet<>();
     static {
@@ -41,7 +43,7 @@ public class ProjectEntries {
 
         // Initialized to passing w/ blank flag
         this.pass = true;
-        this.flag = "";
+        this.flag = ProjectStatus.PASS.toString();
 
         addEntry(entry);
     }
@@ -66,14 +68,11 @@ public class ProjectEntries {
 
         this.pass = this.pass && entryPasses;
         if(!entryPasses){
-            if(this.flag == null){
-                // Initialize message
-                this.flag = String.format("Invalid results: %s", result);
-            } else if (! this.results.contains(result)){
-                // Concatenate if flag has already been initialized and there is a new invalid result
-                this.flag = String.format("%s, %s", this.flag, result);
-            }
+            this.flag = ProjectStatus.FAIL.toString();
+        } else if (result.equals(FingerprintResult.INCONCLUSIVE.toString())){
+            this.flag = ProjectStatus.WARNING.toString();
         }
+
         this.results.add(result);
     }
 
@@ -92,6 +91,10 @@ public class ProjectEntries {
         processed.put("igoIdA",entry.getCrosscheckMetricsId().getIgoIdA());
         processed.put("igoIdB",entry.getCrosscheckMetricsId().getIgoIdB());
         processed.put("project", entry.getCrosscheckMetricsId().getProject());
+        processed.put("tumorNormalA", entry.getTumorNormalA());
+        processed.put("tumorNormalB", entry.getTumorNormalB());
+        processed.put("patientIdA", entry.getPatientIdA());
+        processed.put("patientIdB", entry.getPatientIdB());
 
         return processed;
     }
