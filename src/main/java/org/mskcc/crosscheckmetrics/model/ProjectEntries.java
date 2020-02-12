@@ -66,11 +66,14 @@ public class ProjectEntries {
         final String result = entry.getResult();
         final boolean entryPasses = passingResults.contains(result);
 
+        // todo - this deserves a test
         this.pass = this.pass && entryPasses;
-        if(!entryPasses){
+        if(this.pass){
+            if(result.equals(FingerprintResult.INCONCLUSIVE.toString())){
+                this.flag = ProjectStatus.WARNING.toString();
+            }
+        } else {
             this.flag = ProjectStatus.FAIL.toString();
-        } else if (result.equals(FingerprintResult.INCONCLUSIVE.toString())){
-            this.flag = ProjectStatus.WARNING.toString();
         }
 
         this.results.add(result);
