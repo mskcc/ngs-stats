@@ -41,7 +41,9 @@ public class CrossCheckMetricsController {
     @RequestMapping(value = "/getCrosscheckMetrics", method = RequestMethod.GET)
     public Map<String, Object> getCrosscheckMetrics(@RequestParam("projects") String projects) {
         List<String> projectList = Arrays.asList(projects.split(","));
-        List<CrosscheckMetrics> results = crossCheckMetricsRepository.findByCrosscheckMetrics_IdProject_IsIn(projectList);
+        List<CrosscheckMetrics> results = crossCheckMetricsRepository.findByCrosscheckMetrics_IdProject_IsIn(projectList);        log.info("/getCrosscheckMetrics");
+        log.info("/getCrosscheckMetrics");
+        log.info(String.format("Projects: %s", projects));
         String status;
         if (results.isEmpty()) {
             status = String.format("No crosscheckmetrics found for projects: '%s'", projects);
@@ -77,13 +79,15 @@ public class CrossCheckMetricsController {
         // Crosscheck metrics are stored on the filesystem ngs-stats runs on
         final String fileName = String.format("%s.crosscheck_metrics", project);
         final String filePath = String.format("%s/%s/%s", CROSSCHECK_METRICS_DIR, project, fileName);
+        log.info(String.format("/writeCrosscheckMetrics: Reading %s", fileName));
         try {
             saveCrossCheckMetricsFile(filePath);
         } catch (IOException | IllegalStateException e) {
             String status = String.format("Failed to read %s: %s", filePath, e.getMessage());
             return createErrorResponse(status, false);
         }
-        return createSuccessResponse(String.format("Saved CrossCheckMetrics for Project: %s", project));
+        final String status = String.format("Saved CrossCheckMetrics for Project: %s", project);
+        return createSuccessResponse(status);
     }
 
     /**
