@@ -1,20 +1,20 @@
 package org.mskcc.crosscheckmetrics;
 
 import org.mskcc.crosscheckmetrics.model.CrosscheckMetrics;
+import org.mskcc.crosscheckmetrics.model.ProjectEntries;
 import org.mskcc.crosscheckmetrics.model.SampleInfo;
 import org.mskcc.crosscheckmetrics.respository.CrossCheckMetricsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,17 +37,33 @@ public class CrossCheckMetricsController {
     @Value("${crosscheckmetrics.dir}")
     private String CROSSCHECK_METRICS_DIR;
 
+    @CrossOrigin
     @RequestMapping(value = "/getCrosscheckMetrics", method = RequestMethod.GET)
-    public Map<String, Object> getCrosscheckMetrics(@RequestParam("project") String project) {
-        List<CrosscheckMetrics> metrics = crossCheckMetricsRepository.findByCrosscheckMetricsId_Project(project);
+    public Map<String, Object> getCrosscheckMetrics(@RequestParam("projects") String projects) {
+        List<String> projectList = Arrays.asList(projects.split(","));
+        List<CrosscheckMetrics> results = crossCheckMetricsRepository.findByCrosscheckMetrics_IdProject_IsIn(projectList);        log.info("/getCrosscheckMetrics");
+        log.info("/getCrosscheckMetrics");
+        log.info(String.format("Projects: %s", projects));
         String status;
-        if (metrics.isEmpty()) {
-            status = String.format("No crosscheckmetrics found for project: '%s'", project);
+        if (results.isEmpty()) {
+            status = String.format("No crosscheckmetrics found for projects: '%s'", projects);
             return createErrorResponse(status, true);
         }
-        status = String.format("Found %d samples for project '%s'", metrics.size(), project);
+
+        // Create API response for each DB entry
+        final Map<String, ProjectEntries> response = new HashMap<>();
+        for(CrosscheckMetrics entry : results){
+            String project = entry.getCrosscheckMetricsId().getProject();
+            if(response.containsKey(project)){
+                response.get(project).addEntry(entry);
+            } else {
+                response.put(project, new ProjectEntries(project, entry));
+            }
+        }
+
+        status = String.format("Found %d samples for %d projects '%s'", results.size(), response.size(), projects);
         Map<String, Object> resp = createSuccessResponse(status);
-        resp.put(API_DATA, metrics);
+        resp.put(API_DATA, response);
         return resp;
     }
 
@@ -63,13 +79,15 @@ public class CrossCheckMetricsController {
         // Crosscheck metrics are stored on the filesystem ngs-stats runs on
         final String fileName = String.format("%s.crosscheck_metrics", project);
         final String filePath = String.format("%s/%s/%s", CROSSCHECK_METRICS_DIR, project, fileName);
+        log.info(String.format("/writeCrosscheckMetrics: Reading %s", fileName));
         try {
             saveCrossCheckMetricsFile(filePath);
         } catch (IOException | IllegalStateException e) {
             String status = String.format("Failed to read %s: %s", filePath, e.getMessage());
             return createErrorResponse(status, false);
         }
-        return createSuccessResponse(String.format("Saved CrossCheckMetrics for Project: %s", project));
+        final String status = String.format("Saved CrossCheckMetrics for Project: %s", project);
+        return createSuccessResponse(status);
     }
 
     /**
