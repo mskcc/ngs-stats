@@ -19,10 +19,10 @@ import java.util.*;
 public class PicardStatsController {
     private static Logger log = LoggerFactory.getLogger(PicardStatsController.class);
 
-    private static final String BASE_STATS_DIR = "/ifs/data/BIC/Stats/hiseq/DONE/";  // "/Users/mcmanamd/Downloads/DONE/DONE/";
+    // while /ifs and /igo storage are both active
+    private static final String [] BASE_STATS_DIR =  new String [] {"/igo/stats/DONE/", "/ifs/data/BIC/Stats/hiseq/DONE/"};
 
     // directories where Picard stats Excel files are written
-    // previously for about 5 years "/ifs/data/bio/LIMS/stats/run_reports/" was used
     final String RUN_REPORTS_SHARED_DIR = "/data/picardExcel/run_reports/";
     final String PROJ_REPORTS_SHARED_DIR = "/data/picardExcel/project_reports/";
 
@@ -202,23 +202,18 @@ public class PicardStatsController {
      */
     public String updateDatabase(@PathVariable Integer nDays) throws Exception {
         System.out.println("Updating the database for files written in the past " + nDays + " day(s).");
-        long startTime = System.currentTimeMillis(); // the NY Isilon RAID is slow so tack elapsed time
-
-        File baseDir = new File(BASE_STATS_DIR);
-        if (!baseDir.exists()) {
-            String msg = "Base directory does not exist: " + BASE_STATS_DIR;
-            System.err.println(msg);
-            return "ERROR: " + msg;
-        }
+        long startTime = System.currentTimeMillis(); // the NY Isilon RAID is slow so track elapsed time
 
         // for each active sequencer, list new files created within last n days
-        for (String sequencer : ACTIVE_SEQUENCERS) {
-            File f = new File(BASE_STATS_DIR + sequencer);
-            File [] statsFiles = f.listFiles(new DaysFileFilter(nDays));
-            long elapsedTime = System.currentTimeMillis() - startTime;
-            System.out.println("Processing sequencer: " + sequencer + " files to process: " + statsFiles.length + ", Elapsed time (ms): " + elapsedTime);
-            for (File statsFile: statsFiles) {
-                saveStats(statsFile, true);
+        for (String baseStatsDir : BASE_STATS_DIR ) {
+            for (String sequencer : ACTIVE_SEQUENCERS) {
+                File f = new File(baseStatsDir + sequencer);
+                File[] statsFiles = f.listFiles(new DaysFileFilter(nDays));
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                System.out.println("Processing sequencer: " + sequencer + " files to process: " + statsFiles.length + ", Elapsed time (ms): " + elapsedTime);
+                for (File statsFile : statsFiles) {
+                    saveStats(statsFile, true);
+                }
             }
         }
 
@@ -235,24 +230,29 @@ public class PicardStatsController {
         if (sequencer.contains(" ") || run.contains(" "))
             return "Error";
 
-        FilenameFilter prefixFilter = (dir, name) -> {
-            if (name.startsWith(run)) {
-                return true;
+        int filesParsed = 0;
+        for (String baseStatsDir : BASE_STATS_DIR) {
+            File statsDir = new File(BASE_STATS_DIR + sequencer);
+
+            FilenameFilter prefixFilter = (dir, name) -> {
+                if (name.startsWith(run)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            };
+            File[] statsFiles = statsDir.listFiles(prefixFilter);
+            if (statsFiles == null || statsFiles.length == 0) {
+                continue;
             } else {
-                return false;
+                filesParsed += statsFiles.length;
             }
-        };
 
-        File statsDir = new File(BASE_STATS_DIR + sequencer);
-        File [] statsFiles = statsDir.listFiles(prefixFilter);
-        if (statsFiles == null || statsFiles.length == 0) {
-            return "No files found in: " + statsDir.getAbsolutePath();
+            for (File statsFile : statsFiles) {
+                saveStats(statsFile, true);
+            }
         }
-
-        for (File statsFile: statsFiles) {
-            saveStats(statsFile, true);
-        }
-        return "Files parsed: " + statsFiles.length;
+        return "Files parsed: " + filesParsed;
     }
 
     @GetMapping(value = "/picardstats/run/{runId}")
@@ -314,7 +314,7 @@ public class PicardStatsController {
     public void buildDatabaseFromPicardFiles() throws Exception {
         System.out.println("Building entire database from all available Picard stats files.");
         for (String sequencer : ALL_SEQUENCERS) {
-            File f = new File(BASE_STATS_DIR + sequencer);
+            File f = new File(BASE_STATS_DIR[0] + sequencer);
             File [] statsFiles = f.listFiles();
             for (File statsFile: statsFiles) {
                 saveStats(statsFile, false);
