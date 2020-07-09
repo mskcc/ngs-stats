@@ -60,9 +60,9 @@ public class CrosscheckMetricsControllerTest {
         final String projectPath = FileSystems.getDefault().getPath(".").toAbsolutePath().toString();
         final String pkgName = new CrosscheckMetricsControllerTest().getClass().getPackage().getName();
         final String pkgPath = pkgName.replace(".", "/");
-        final String path = String.format("%s/src/test/java/%s/mocks", projectPath, pkgPath);
+        final String [] path = {String.format("%s/src/test/java/%s/mocks", projectPath, pkgPath)};
 
-        ReflectionTestUtils.setField(crossCheckMetricsController, "CROSSCHECK_METRICS_DIR", path);
+        ReflectionTestUtils.setField(crossCheckMetricsController, "CROSSCHECK_METRICS_DIRS", path);
     }
 
     /**

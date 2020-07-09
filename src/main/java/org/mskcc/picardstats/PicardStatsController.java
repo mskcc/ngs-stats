@@ -208,6 +208,8 @@ public class PicardStatsController {
         for (String baseStatsDir : BASE_STATS_DIR ) {
             for (String sequencer : ACTIVE_SEQUENCERS) {
                 File f = new File(baseStatsDir + sequencer);
+                if (!f.exists())
+                    continue;
                 File[] statsFiles = f.listFiles(new DaysFileFilter(nDays));
                 long elapsedTime = System.currentTimeMillis() - startTime;
                 System.out.println("Processing sequencer: " + sequencer + " files to process: " + statsFiles.length + ", Elapsed time (ms): " + elapsedTime);
