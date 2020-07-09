@@ -234,7 +234,8 @@ public class PicardStatsController {
 
         int filesParsed = 0;
         for (String baseStatsDir : BASE_STATS_DIR) {
-            File statsDir = new File(BASE_STATS_DIR + sequencer);
+            File statsDir = new File(baseStatsDir + sequencer);
+            System.out.println("Looking for stats files in directory: " + statsDir);
 
             FilenameFilter prefixFilter = (dir, name) -> {
                 if (name.startsWith(run)) {
