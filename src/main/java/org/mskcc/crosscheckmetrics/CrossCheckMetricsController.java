@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public class CrossCheckMetricsController {
     private CrossCheckMetricsRepository crossCheckMetricsRepository;
 
     @Value("${crosscheckmetrics.dir}")
-    private String CROSSCHECK_METRICS_DIR;
+    private String [] CROSSCHECK_METRICS_DIRS;
 
     @CrossOrigin
     @RequestMapping(value = "/getCrosscheckMetrics", method = RequestMethod.GET)
@@ -78,16 +79,24 @@ public class CrossCheckMetricsController {
     public Map<String, Object> writeCrosscheckMetrics(@RequestParam("project") String project) {
         // Crosscheck metrics are stored on the filesystem ngs-stats runs on
         final String fileName = String.format("%s.crosscheck_metrics", project);
-        final String filePath = String.format("%s/%s/%s", CROSSCHECK_METRICS_DIR, project, fileName);
-        log.info(String.format("/writeCrosscheckMetrics: Reading %s", fileName));
-        try {
-            saveCrossCheckMetricsFile(filePath);
-        } catch (IOException | IllegalStateException e) {
-            String status = String.format("Failed to read %s: %s", filePath, e.getMessage());
-            return createErrorResponse(status, false);
+        for (String crosscheckMetricsDir : CROSSCHECK_METRICS_DIRS) {
+            final String filePath = String.format("%s/%s/%s", crosscheckMetricsDir, project, fileName);
+            if (!new File(filePath).exists()) {
+                log.info("Skipping non-existent file: " + filePath);
+                continue;
+            }
+            log.info(String.format("/writeCrosscheckMetrics: Reading %s", fileName));
+
+            try {
+                saveCrossCheckMetricsFile(filePath);
+            } catch (IOException | IllegalStateException e) {
+                String status = String.format("Failed to read %s: %s", filePath, e.getMessage());
+                return createErrorResponse(status, false);
+            }
+            final String status = String.format("Saved CrossCheckMetrics for Project: %s", project);
+            return createSuccessResponse(status);
         }
-        final String status = String.format("Saved CrossCheckMetrics for Project: %s", project);
-        return createSuccessResponse(status);
+        return createErrorResponse("No file found", true);
     }
 
     /**

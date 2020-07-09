@@ -206,7 +206,7 @@ public class AlignmentSummaryMetrics {
 
     /**
      * UNPAIRED_READS_EXAMINED is a column in the mark duplicates stats file which is costly to run, the same result can
-     * be derived from the AM.txt file for PAIRED end runs by the caldulation: (TOTAL_READS - READS_ALIGNED_IN_PAIRS)
+     * be derived from the AM.txt file for PAIRED end runs by the calculation: (TOTAL_READS - READS_ALIGNED_IN_PAIRS)
      * / 2
      * For UNPAIRED this function just returns TOTAL_READS.
      *
