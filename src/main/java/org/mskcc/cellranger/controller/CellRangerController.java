@@ -8,7 +8,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.mskcc.cellranger.documentation.CellRangerSummaryCountModel;
 import org.mskcc.cellranger.documentation.CellRangerSummaryVDJModel;
-import org.mskcc.cellranger.documentation.FieldMapper;
 import org.mskcc.cellranger.documentation.FieldMapperModel;
 import org.mskcc.cellranger.model.CellRangerDataRecord;
 import org.mskcc.cellranger.model.CellRangerSummaryCount;
@@ -34,6 +33,8 @@ import java.util.regex.Pattern;
 import static org.mskcc.Constants.API_DATA;
 import static org.mskcc.utils.ApiUtil.createErrorResponse;
 import static org.mskcc.utils.ApiUtil.createSuccessResponse;
+import static org.mskcc.utils.ParserUtil.parseCellRangerCsvLine;
+
 @RestController
 public class CellRangerController {
     final static String API_SAMPLES = "samples";
@@ -57,6 +58,9 @@ public class CellRangerController {
 
     @Value("${cellranger.websummarypath}")
     private String WEB_SUMMARY_PATH;
+
+    @Value("${cellranger.metricspath}")
+    private String METRICS_PATH;
 
     /**
      * Saves Cell Ranger record to database. Parses file from path determined from input parameters
@@ -115,7 +119,7 @@ public class CellRangerController {
             CellRangerDataRecord dataRecord;
             try {
                 log.info(String.format("Creating entry for file 'id' %s (Project: %s, Run: %s, Type: %s)", id, project, run, type));
-                dataRecord = createDataRecordFromWebSummary(run, id, project, type);
+                dataRecord = createDataRecordFromCellRangerOutput(run, id, project, type);
             } catch (IOException | NullPointerException e) {
                 final String error = String.format("Failed to read file for w/ name '%s' (Project: '%s', Run: '%s', Type: '%s')", id, project, run, type);
                 return createErrorResponse(error, true);
@@ -239,7 +243,7 @@ public class CellRangerController {
      * @throws IOException
      * @return, CellRangerDataRecord - Field populated from web_summary file
      */
-    private CellRangerDataRecord createDataRecordFromWebSummary(String run, String id, String project, String type) throws IOException {
+    private CellRangerDataRecord createDataRecordFromCellRangerOutput(String run, String id, String project, String type) throws IOException {
         // Create Entity w/ id
         final FieldMapperModel fieldMapperModel = getFieldMapperModel(type);
         final CellRangerDataRecord dataRecord = getDataRecord(type);
@@ -247,35 +251,34 @@ public class CellRangerController {
         dataRecord.setField("project", getProjectId(project), String.class);
         dataRecord.setField("run", run, String.class);
 
-        // Parse
-        final String filePath = getWebSummaryPath(run, id, project, type);
-        File input = new File(filePath);
-        Document doc = Jsoup.parse(input, "UTF-8", "");
+        // Extract Statistics from the "metrics_summary.csv"
+        final String metricsPath = getCellRangerOutputPath(run, id, project, type, METRICS_PATH);
+        try (BufferedReader br = new BufferedReader(new FileReader(metricsPath))) {
+            String header = br.readLine();
+            String[] headerValues = header.split(",");
 
-        String value, htmlElement, htmlField;
-        Element element;
-        Class fieldType;
-        List<FieldMapper> fieldMapperList = fieldMapperModel.getFieldMapperList();
-        for (FieldMapper fm : fieldMapperList) {
-            htmlElement = fm.getHtmlElement();
-            htmlField = fm.getHtmlField();
-            Elements matches = findMatchesInHtml(doc, htmlElement, htmlField);
-            int numMatches = matches.size();
-            if (numMatches == 0) {
-                log.error(String.format("Field not parsed from CellRanger output. Match not found for %s:%s",
-                        htmlElement, htmlField));
-                continue;
-            }
-            for (Element label : matches) {
-                element = label.nextElementSibling();  // value follows field in html document
-                fieldType = fm.getType();
-                value = sanitize(element.text(), fieldType);
-
-                dataRecord.setField(fm.getTableField(), value, fm.getType());
+            List<String> values;
+            String line, field, headerVal, sqlColumn;
+            Class sqlType;
+            while ((line = br.readLine()) != null) {
+                values = parseCellRangerCsvLine(line);
+                if(values.size() == headerValues.length){
+                    for(int i = 0; i<values.size(); i++){
+                        headerVal = headerValues[i];
+                        field = values.get(i);
+                        sqlColumn = fieldMapperModel.getSqlColumn(headerVal);
+                        sqlType = fieldMapperModel.getSqlType(headerVal);
+                        dataRecord.setField(sqlColumn, field, sqlType);
+                    }
+                }
             }
         }
 
-        String compressedGraphData = getCompressedGraphData(doc);
+        // TODO - Extract graph from "web_summary.html"
+        final String webSummaryPath = getCellRangerOutputPath(run, id, project, type, WEB_SUMMARY_PATH);
+        File input = new File(webSummaryPath);
+        Document webSummary = Jsoup.parse(input, "UTF-8", "");
+        String compressedGraphData = getCompressedGraphData(webSummary);
         dataRecord.setField("CompressedGraphData", compressedGraphData, String.class);
         return dataRecord;
     }
@@ -400,10 +403,10 @@ public class CellRangerController {
     /**
      * Returns path to where field cell ranger output for input parameters can be found
      */
-    private String getWebSummaryPath(String run, String sample, String project, String type) {
+    private String getCellRangerOutputPath(String run, String sample, String project, String type, String path) {
         final String samplePath = String.format("/%s/%s/%s__%s", run, project, sample, type.toLowerCase());
-        final String runPath = String.format("%s%s/%s", CELL_RANGER_DIR, samplePath, WEB_SUMMARY_PATH);
-        log.info(String.format("Using Web Summary path %s", runPath));
+        final String runPath = String.format("%s%s/%s", CELL_RANGER_DIR, samplePath, path);
+        log.info(String.format("Cell Ranger Output path: %s", runPath));
         return runPath;
     }
 

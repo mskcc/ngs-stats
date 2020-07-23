@@ -9,4 +9,34 @@ public abstract class FieldMapperModel {
     public List<FieldMapper> getFieldMapperList() {
         return fieldMapperList;
     }
+
+    /**
+     * Returns the type (Double, String) of the input field as it is labeled in the HTML
+     *
+     * @param field
+     * @return
+     */
+    public Class getSqlType(String field) {
+        for(FieldMapper fm : fieldMapperList){
+            if(fm.getHtmlField().equals(field)){
+                return fm.getType();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the SQL column name of the input field as it is labeled in the HTML
+     * 
+     * @param field
+     * @return
+     */
+    public String getSqlColumn(String field) {
+        for(FieldMapper fm : fieldMapperList){
+            if(fm.getHtmlField().equals(field)){
+                return fm.getTableField();
+            }
+        }
+        return null;
+    }
 }
