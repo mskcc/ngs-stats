@@ -31,7 +31,7 @@ public class ParserUtil {
      * @return
      */
     public static List<String> parseCellRangerCsvLine(String line){
-        String[] values = line.split("[\"%],");
+        String[] values = line.split("[\"%],|,[\"%]");
         List<String> cleanedValues = new ArrayList<>();
         for(String value : values){
             value = value.replace(",", "");
