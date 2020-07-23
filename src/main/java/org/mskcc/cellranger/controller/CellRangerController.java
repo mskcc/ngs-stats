@@ -406,7 +406,7 @@ public class CellRangerController {
     private String getCellRangerOutputPath(String run, String sample, String project, String type, String path) {
         final String samplePath = String.format("/%s/%s/%s__%s", run, project, sample, type.toLowerCase());
         final String runPath = String.format("%s%s/%s", CELL_RANGER_DIR, samplePath, path);
-        log.info(String.format("Using Web Summary path %s", runPath));
+        log.info(String.format("Cell Ranger Output path: %s", runPath));
         return runPath;
     }
 
