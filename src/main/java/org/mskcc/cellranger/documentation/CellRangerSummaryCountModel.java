@@ -11,9 +11,9 @@ import java.util.Arrays;
 public class CellRangerSummaryCountModel extends FieldMapperModel {
     public CellRangerSummaryCountModel() {
         fieldMapperList = new ArrayList<FieldMapper>(Arrays.asList(
-                new FieldMapper("h1", "Estimated Number of Cells", "EstimatedNumberOfCells", Double.class),
-                new FieldMapper("h2", "Mean Reads per Cell", "MeanReadsPerCell", Double.class),
-                new FieldMapper("h2", "Median Genes per Cell", "MedianGenesPerCell", Double.class),
+                new FieldMapper("div", "Estimated Number of Cells", "EstimatedNumberOfCells", Double.class),
+                new FieldMapper("div", "Mean Reads per Cell", "MeanReadsPerCell", Double.class),
+                new FieldMapper("div", "Median Genes per Cell", "MedianGenesPerCell", Double.class),
                 new FieldMapper("td", "Number of Reads", "NumberOfReads", Double.class),
                 new FieldMapper("td", "Valid Barcodes", "ValidBarcodes", Double.class),
                 new FieldMapper("td", "Sequencing Saturation", "SequencingSaturation", Double.class),

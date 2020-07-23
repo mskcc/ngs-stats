@@ -59,6 +59,7 @@ public class CellRangerControllerTest {
     @Mock
     HttpServletRequest request;
 
+    private static Map<String,Path> METRICS_SUMMARY_PATH = new HashMap<>();
     private static Map<String,Path> WEB_SUMMARY_PATH = new HashMap<>();
 
     private enum CellRangerType {
@@ -96,6 +97,7 @@ public class CellRangerControllerTest {
 
         // Setup application.properties
         ReflectionTestUtils.setField(cellRangerController, "WEB_SUMMARY_PATH", "outs/web_summary.html");
+        ReflectionTestUtils.setField(cellRangerController, "METRICS_PATH", "outs/metrics_summary.csv");
 
         // Create web_summary.html files
         String tmpDir = System.getProperty("java.io.tmpdir");   // e.g. /var/folders/x7/5dxp7t9573d7jyx8mv1g8zx1mwnqpr/T/
@@ -111,10 +113,14 @@ public class CellRangerControllerTest {
         SAMPLE = samplePath.getFileName().toString();
 
         String[] types = new String[]{"vdj", "count"};
-        Path typePath;
+        Path metricsSummaryPath;
+        Path webSummaryPath;
         for(String type : types){
-            typePath = createTypeDirectories(samplePath,type);
-            WEB_SUMMARY_PATH.put(type, typePath);
+            metricsSummaryPath = createTypeDirectories(samplePath,type,"metrics_summary", ".csv");
+            METRICS_SUMMARY_PATH.put(type, metricsSummaryPath);
+
+            webSummaryPath = createTypeDirectories(samplePath,type,"web_summary", ".html");
+            WEB_SUMMARY_PATH.put(type, webSummaryPath);
         }
     }
 
@@ -138,7 +144,7 @@ public class CellRangerControllerTest {
      * @return
      * @throws IOException
      */
-    private Path createTypeDirectories(Path samplePath, String type) throws IOException {
+    private Path createTypeDirectories(Path samplePath, String type, String fileName, String extension) throws IOException {
         Path runPath = samplePath.getParent();
         String sampleType = String.format("%s__%s", samplePath.toString(), type);
         Path tmpPath = Files.createTempDirectory(runPath, "tmp");
@@ -154,9 +160,9 @@ public class CellRangerControllerTest {
         File outDir = new File(outPath);
         outPathTmp.toFile().renameTo(outDir);
 
-        Path webSummaryPath = Files.createTempFile(Paths.get(outPath), "web_summary", ".html");
+        Path webSummaryPath = Files.createTempFile(Paths.get(outPath), fileName, extension);
 
-        String webSummaryName =  String.format("%s/%s", outDir.toString(), "web_summary.html");
+        String webSummaryName =  String.format("%s/%s", outDir.toString(), String.format("%s%s", fileName, extension));
         webSummaryPath.toFile().renameTo(new File(webSummaryName));
 
         return Paths.get(webSummaryName);
@@ -281,11 +287,12 @@ public class CellRangerControllerTest {
     }
 
     private void testSaveCellRangerSample(CellRangerType type) throws IOException {
-        copyFileUsingStream(getMockWebSummaryFile(type), WEB_SUMMARY_PATH.get(type.toString()).toFile());
-        setupSaveRequest(type.toString(), SAMPLE, PROJECT, RUN);
+        copyFileUsingStream(getMockCellRangerOutputFile(type, "metrics_summary.csv"), METRICS_SUMMARY_PATH.get(type.toString()).toFile());
+        copyFileUsingStream(getMockCellRangerOutputFile(type, "web_summary.html"), WEB_SUMMARY_PATH.get(type.toString()).toFile());
 
+        setupSaveRequest(type.toString(), SAMPLE, PROJECT, RUN);
         Map<String,Object> response = cellRangerController.saveCellRangerSample(request);
-        assertEquals("true", response.get("success"));
+        assertEquals(String.format("Failed Response for Type: %s", type), "true", response.get("success"));
 
         if(type.equals(CellRangerType.COUNT)){
             testCountSummaryContent();
@@ -322,10 +329,13 @@ public class CellRangerControllerTest {
         assertTrue(cellRangerSummaryVdj.Q30BasesInRNARead2 == 0.924D);
         assertTrue(cellRangerSummaryVdj.Q30BasesInSampleIndex == 0.891D);
         assertTrue(cellRangerSummaryVdj.Q30BasesInUMI == 0.951D);
+        // TODO - These came from html. How to get back?
+        /*
         assertTrue(cellRangerSummaryVdj.Name.equals("TCRbp-ctl1-5f_IGO_09987_B_1"));
         assertTrue(cellRangerSummaryVdj.VDJReference.equals("vdj_GRCm38_alts_ensembl"));
         assertTrue(cellRangerSummaryVdj.Chemistry.equals("Single Cell V(D)J"));
         assertTrue(cellRangerSummaryVdj.CellRangerVersion.equals("3.0.2"));
+         */
     }
 
     private void testCountSummaryContent(){
@@ -338,41 +348,45 @@ public class CellRangerControllerTest {
         String processedProjectName = PROJECT.replaceAll("\\D+","");
         assertTrue(processedProjectName.equals(cellRangerSummaryCount.project));
 
-        assertTrue(cellRangerSummaryCount.EstimatedNumberOfCells == 3457D);
-        assertTrue(cellRangerSummaryCount.MeanReadsPerCell == 54846D);
-        assertTrue(cellRangerSummaryCount.MedianGenesPerCell == 2956D);
-        assertTrue(cellRangerSummaryCount.NumberOfReads == 189603485D);
-        assertTrue(cellRangerSummaryCount.ValidBarcodes == 0.977D);
-        assertTrue(cellRangerSummaryCount.SequencingSaturation == 0.371D);
-        assertTrue(cellRangerSummaryCount.Q30BasesInBarcode == 0.952D);
-        assertTrue(cellRangerSummaryCount.Q30BasesinRNARead == 0.926D);
-        assertTrue(cellRangerSummaryCount.Q30BasesInUMI == 0.951D);
-        assertTrue(cellRangerSummaryCount.ReadsMappedToGenome == 0.971D);
-        assertTrue(cellRangerSummaryCount.ReadsMappedConfidentlyToGenome == 0.938D);
-        assertTrue(cellRangerSummaryCount.ReadsMappedToIntergenicRegions == 0.082D);
-        assertTrue(cellRangerSummaryCount.ReadsMappedToIntronicRegions == 0.194D);
-        assertTrue(cellRangerSummaryCount.ReadsMappedToExonicRegions == 0.662D);
-        assertTrue(cellRangerSummaryCount.ReadsMappedToTranscriptome == 0.628D);
-        assertTrue(cellRangerSummaryCount.ReadsMappedAntisenseToGene == 0.012D);
-        assertTrue(cellRangerSummaryCount.FractionReadsInCells == 0.915D);
-        assertTrue(cellRangerSummaryCount.TotalGenesDetected == 23744D);
-        assertTrue(cellRangerSummaryCount.MedianUMICountsPerCell == 11512D);
+        assertTrue(cellRangerSummaryCount.EstimatedNumberOfCells == 2083D);
+        assertTrue(cellRangerSummaryCount.MeanReadsPerCell == 73429D);
+        assertTrue(cellRangerSummaryCount.MedianGenesPerCell == 2176D);
+        assertTrue(cellRangerSummaryCount.NumberOfReads == 152952980D);
+        assertTrue(cellRangerSummaryCount.ValidBarcodes == 0.971D);
+        assertTrue(cellRangerSummaryCount.SequencingSaturation == 0.815D);
+        assertTrue(cellRangerSummaryCount.Q30BasesInBarcode == 0.969D);
+        assertTrue(cellRangerSummaryCount.Q30BasesinRNARead == 0.945D);
+        assertTrue(cellRangerSummaryCount.Q30BasesInUMI == 0.967D);
+        assertTrue(cellRangerSummaryCount.ReadsMappedToGenome == 0.966D);
+        assertTrue(cellRangerSummaryCount.ReadsMappedConfidentlyToGenome == 0.919D);
+        assertTrue(cellRangerSummaryCount.ReadsMappedToIntergenicRegions == 0.071D);
+        assertTrue(cellRangerSummaryCount.ReadsMappedToIntronicRegions == 0.262D);
+        assertTrue(cellRangerSummaryCount.ReadsMappedToExonicRegions == 0.586D);
+        assertTrue(cellRangerSummaryCount.ReadsMappedToTranscriptome == 0.544D);
+        assertTrue(cellRangerSummaryCount.ReadsMappedAntisenseToGene == 0.025D);
+        assertTrue(cellRangerSummaryCount.FractionReadsInCells == 0.908D);
+        assertTrue(cellRangerSummaryCount.TotalGenesDetected == 23332D);
+        assertTrue(cellRangerSummaryCount.MedianUMICountsPerCell == 6074D);
+
+        // TODO - These were present in the HTML - present elsewhere?
+        /*
         assertTrue(cellRangerSummaryCount.Name.equals("RUQ_IGO_09443_C_6"));
         assertTrue(cellRangerSummaryCount.Transcriptome.equals("GRCh38"));
         assertTrue(cellRangerSummaryCount.Chemistry.equals("Single Cell 3' v3"));
         assertTrue(cellRangerSummaryCount.CellRangerVersion.equals("3.0.2"));
+         */
     }
 
-    private File getMockWebSummaryFile(CellRangerType type){
+    private File getMockCellRangerOutputFile(CellRangerType type, String file){
         final String pkgName = new CellRangerControllerTest().getClass().getPackage().getName();
         final String pkgPath = pkgName.replace(".", "/");
         final String path = String.format("./src/test/java/%s", pkgPath);
 
         switch(type) {
             case COUNT:
-                return new File(String.format("%s/sample__count/outs/web_summary.html", path));
+                return new File(String.format("%s/sample__count/outs/%s", path, file));
             case VDJ:
-                return new File(String.format("%s/sample__vdj/outs/web_summary.html", path));
+                return new File(String.format("%s/sample__vdj/outs/%s", path, file));
             default:
                 break;
         }
