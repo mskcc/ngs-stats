@@ -59,7 +59,7 @@ public class CellRangerController {
     @Value("${cellranger.websummarypath}")
     private String WEB_SUMMARY_PATH;
 
-    @Value("cellranger.metricspath")
+    @Value("${cellranger.metricspath}")
     private String METRICS_PATH;
 
     /**
