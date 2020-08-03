@@ -120,7 +120,7 @@ public class CellRangerController {
             try {
                 log.info(String.format("Creating entry for file 'id' %s (Project: %s, Run: %s, Type: %s)", id, project, run, type));
                 dataRecord = createDataRecordFromCellRangerOutput(run, id, project, type);
-            } catch (IOException | NullPointerException e) {
+            } catch (IOException e) {
                 final String error = String.format("Failed to read file for w/ name '%s' (Project: '%s', Run: '%s', Type: '%s')", id, project, run, type);
                 return createErrorResponse(error, true);
             }
@@ -262,13 +262,18 @@ public class CellRangerController {
             Class sqlType;
             while ((line = br.readLine()) != null) {
                 values = parseCellRangerCsvLine(line);
-                if(values.size() == headerValues.length){
-                    for(int i = 0; i<values.size(); i++){
+                if (values.size() == headerValues.length) {
+                    for (int i = 0; i < values.size(); i++) {
                         headerVal = headerValues[i];
                         field = values.get(i);
                         sqlColumn = fieldMapperModel.getSqlColumn(headerVal);
                         sqlType = fieldMapperModel.getSqlType(headerVal);
-                        dataRecord.setField(sqlColumn, field, sqlType);
+                        if(sqlColumn != null && sqlType != null){
+                            dataRecord.setField(sqlColumn, field, sqlType);
+                        } else {
+                            log.error(String.format("Failed to extract header value: %s (sqlColumn: %s, sqlType: %s)",
+                                    headerVal, sqlColumn, sqlType));
+                        }
                     }
                 }
             }
@@ -366,6 +371,7 @@ public class CellRangerController {
             default:
                 break;
         }
+        log.error(String.format("Invalid Type for Data Record: %s", type));
         return null;
     }
 
@@ -397,6 +403,7 @@ public class CellRangerController {
             default:
                 break;
         }
+        log.error(String.format("Invalid Type for FieldMapper: %s", type));
         return null;
     }
 
