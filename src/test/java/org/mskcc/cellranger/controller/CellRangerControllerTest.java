@@ -194,8 +194,9 @@ public class CellRangerControllerTest {
     public void saveCellRangerSampleTest_fail() {
         CellRangerType[] types = getCellRangerTypes();
         for(CellRangerType type : types){
+            String[] params = new String[0];
             try {
-                String[] params = new String[]{type.toString(), SAMPLE, PROJECT, RUN};
+                params = new String[]{type.toString(), SAMPLE, PROJECT, RUN};
                 String temp;
                 for(int i = 0; i<params.length; i++){
                     temp = params[i];
@@ -208,6 +209,8 @@ public class CellRangerControllerTest {
                 }
             } catch(IOException e){
                 log.error(String.format("Failed to test %s. Error: %s", type, e.getMessage()));
+            } catch(NullPointerException e){
+                assertEquals("Null Pointer only valid if type is invalid", params[0], "INVALID_PARAM");
             }
         }
     }

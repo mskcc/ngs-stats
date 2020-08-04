@@ -55,4 +55,16 @@ public class ParserUtilTest {
 
         Assert.assertEquals(parsedLine.size(), expected.length);
     }
+
+    @Test
+    public void parseCellRangerCsvLineTest_edge2() {
+        final String csvLine = "\"2,166\",\"49,188\",218,\"106,542,626\",81.5%,95.0%,95.8%,93.7%,88.4%,95.3%,75.9%,60.8%,15.5%,3.8%,30.5%,28.9%,7.2%,54.0%,\"17,651\",369";
+        String[] expected = { "2166", "49188", "218", "106542626", "0.815", "0.95", "0.958", "0.937", "0.884", "0.953", "0.759", "0.608", "0.155", "0.038", "0.305", "0.289", "0.072", "0.54", "17651", "369" };
+        List<String> parsedLine = ParserUtil.parseCellRangerCsvLine(csvLine);
+        for(int i = 0; i<parsedLine.size(); i++){
+            Assert.assertEquals(expected[i], parsedLine.get(i));
+        }
+
+        Assert.assertEquals(parsedLine.size(), expected.length);
+    }
 }
