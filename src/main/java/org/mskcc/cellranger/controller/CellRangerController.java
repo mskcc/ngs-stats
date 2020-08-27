@@ -275,6 +275,9 @@ public class CellRangerController {
                                     headerVal, sqlColumn, sqlType));
                         }
                     }
+                } else {
+                    log.error(String.format("Number Headers (%d) don't match Number Values (%d): %s",
+                            headerValues.length, values.size(), metricsPath));
                 }
             }
         }

@@ -39,6 +39,19 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseCellRangerCsvLineTest_count3() {
+        final String csvLine = "69,\"32,143\",1,\"2,217,916\",90.7%,0.0%,96.7%,91.1%,96.2%,0.2%,0.0%,0.0%,0.0%,0.0%,0.0%,0.0%,100.0%,39,1";
+        String[] expected = { "69", "32143", "1", "2217916", "0.907", "0.0", "0.967", "0.911", "0.962", "0.002", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "1.0", "39", "1" };
+        List<String> parsedLine = ParserUtil.parseCellRangerCsvLine(csvLine);
+
+        for(int i = 0; i<parsedLine.size(); i++){
+            Assert.assertEquals(expected[i], parsedLine.get(i));
+        }
+
+        Assert.assertEquals(parsedLine.size(), expected.length);
+    }
+
+    @Test
     public void parseCellRangerCsvLineTest_vdj() {
         // TODO
     }
