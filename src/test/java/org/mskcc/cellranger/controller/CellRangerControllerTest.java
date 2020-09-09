@@ -179,6 +179,22 @@ public class CellRangerControllerTest {
     }
 
     @Test
+    public void getCellRangerFile_success() {
+        CellRangerType[] types = getCellRangerTypes();
+        for(CellRangerType type : types){
+            try {
+                copyFileUsingStream(getMockCellRangerOutputFile(type, "metrics_summary.csv"), METRICS_SUMMARY_PATH.get(type.toString()).toFile());
+                copyFileUsingStream(getMockCellRangerOutputFile(type, "web_summary.html"), WEB_SUMMARY_PATH.get(type.toString()).toFile());
+            } catch (IOException e){
+                log.error(String.format("Failed to test %s. Error: %s", type, e.getMessage()));
+            }
+
+            Map<String,Object> response = cellRangerController.getCellRangerFile(PROJECT, RUN, SAMPLE, type.toString());
+            assertNotNull(response.get("data"));
+        }
+    }
+
+    @Test
     public void saveCellRangerSampleTest_success() {
         CellRangerType[] types = getCellRangerTypes();
         for(CellRangerType type : types){

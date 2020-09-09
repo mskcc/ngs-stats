@@ -34,6 +34,7 @@ import static org.mskcc.Constants.API_DATA;
 import static org.mskcc.utils.ApiUtil.createErrorResponse;
 import static org.mskcc.utils.ApiUtil.createSuccessResponse;
 import static org.mskcc.utils.ParserUtil.parseCellRangerCsvLine;
+import static org.mskcc.utils.ParserUtil.readFile;
 
 @RestController
 public class CellRangerController {
@@ -178,6 +179,25 @@ public class CellRangerController {
         status = String.format("Found %d samples for project '%s'", samples.size(), project);
         Map<String, Object> resp = createSuccessResponse(status);
         resp.put(API_DATA, samples);
+        return resp;
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/getCellRangerFile")
+    public Map<String, Object> getCellRangerFile( @RequestParam("project") String project,
+                                                  @RequestParam("run") String run,
+                                                  @RequestParam("sample") String sample,
+                                                  @RequestParam("type") String type) {
+        log.info(String.format("Retrieving cell ranger output file for run: %s, project: %s, sample: %s, type: %s",
+                run, project, sample, type));
+        final String webSummaryPath = getCellRangerOutputPath(run, sample, project, type, WEB_SUMMARY_PATH);
+        final String data = readFile(webSummaryPath);
+        String status = String.format("File not found: %s", webSummaryPath);
+        if(data != null){
+            status = String.format("Retrieved data from %s", webSummaryPath);
+        }
+        Map<String, Object> resp = createSuccessResponse(status);
+        resp.put(API_DATA, data);
         return resp;
     }
 
