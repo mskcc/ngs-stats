@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class ParserUtil {
     private static Logger log = LoggerFactory.getLogger(ParserUtil.class);
@@ -35,14 +36,60 @@ public class ParserUtil {
      * @return
      */
     public static List<String> parseCellRangerCsvLine(String line){
-        String[] values = line.split("[\"%],|,[\"%]");
+        // SPECIAL CHARACTERS - These enclose values of the line
+        Character COMMA_CHAR = ',';     // .., 0.69, ...
+        Character QUOTE_CHAR = '"';     // ..., "1,053", ...
+
+        List<String> values = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        Stack<Character> quoteStack = new Stack<>();    // Pushes/pops " char; when non-empty, is reading quoted value
+        for(int i = 0; i<line.length(); i++){
+            Character c = line.charAt(i);
+            if(QUOTE_CHAR.equals(c)){
+                if(quoteStack.size() > 0){
+                    // Closing QUOTE_CHAR encountered - end state of reading in value, add string value, and clear stack
+                    quoteStack.pop();
+                    values.add(sb.toString());
+                    sb = new StringBuilder();
+                } else {
+                    // Opening QUOTE_CHAR encountered - enter state of reading value until another QUOTE_CHAR is read
+                    quoteStack.push(c);
+                }
+            } else if(COMMA_CHAR.equals(c)){
+                if(quoteStack.size() > 0){
+                    // In state of reading in opened-quote string value, e.g. reading the ',' of "1,053"
+                    sb.append(c);
+                } else if (sb.length() == 0) {
+                    // Pass - A COMMA_CHAR is never the leading character of a value; value must have just been added
+                } else {
+                    // Otherwise, this delimits COMMA_CHAR the current string from the next
+                    values.add(sb.toString());
+                    sb = new StringBuilder();
+                }
+            } else {
+                // Not a special character - continue building the string
+                sb.append(c);
+            }
+        }
+        // Add last parsed value
+        if(sb.length() > 0){
+            values.add(sb.toString());
+        }
+
+        // Clean up the values, i.e. remove: , %
         List<String> cleanedValues = new ArrayList<>();
         for(String value : values){
             value = value.replace(",", "");
             value = value.replace("\"", "");
-            value = value.replace("%", "");
+
             if(value.contains(".")){
-                BigDecimal d = new BigDecimal(value).divide(BigDecimal.valueOf(100));
+                BigDecimal d = new BigDecimal(0);
+                if(value.contains("%")){
+                    value = value.replace("%", "");
+                    d = new BigDecimal(value).divide(BigDecimal.valueOf(100));
+                } else {
+                    d = new BigDecimal(value);
+                }
                 if(! (d.compareTo(new BigDecimal(1)) > 1) ){
                     // If the value is a decimal (less than or equal to 1), make the double the value
                     value = d.toString();
