@@ -1,11 +1,10 @@
 package org.mskcc.cellranger.model;
 
-import java.lang.Double;
-import java.lang.String;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import lombok.NoArgsConstructor;
 
 /**
  * ─────────────────▄████▄
@@ -124,9 +123,4 @@ public class CellRangerSummaryCount extends CellRangerDataRecord {
             length = 64
     )
     public String CellRangerVersion;
-
-    @Column(
-            columnDefinition = "MEDIUMTEXT"
-    )
-    public String CompressedGraphData;
 }

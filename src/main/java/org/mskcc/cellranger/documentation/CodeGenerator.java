@@ -12,6 +12,9 @@ import java.util.Map;
 /**
  * Generates the org.mskcc.cellranger.model files w/ accompanying documentation in org.mskcc.cellranger.documentation.
  * Should run as a seperate gradle task configured in build.grade > "generateDocs"
+ * Steps:
+ *      1) Refresh Gradle
+ *      2) ngs-stats > Tasks > other > buildModels
  */
 public class CodeGenerator {
     private final static String ROOT_PATH = "./src/main/java";
