@@ -2,7 +2,6 @@ package org.mskcc.cellranger.controller;
 
 import com.codesnippets4all.json.parsers.JSONParser;
 import com.codesnippets4all.json.parsers.JsonParserFactory;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -275,16 +274,16 @@ public class CellRangerController {
         final String metricsPath = getCellRangerOutputPath(run, id, project, type, METRICS_PATH);
         try (BufferedReader br = new BufferedReader(new FileReader(metricsPath))) {
             String header = br.readLine();
-            String[] headerValues = header.split(",");
+            List<String> headerValues = parseCellRangerCsvLine(header);
 
             List<String> values;
             String line, field, headerVal, sqlColumn;
             Class sqlType;
             while ((line = br.readLine()) != null) {
                 values = parseCellRangerCsvLine(line);
-                if (values.size() == headerValues.length) {
+                if (values.size() == headerValues.size()) {
                     for (int i = 0; i < values.size(); i++) {
-                        headerVal = headerValues[i];
+                        headerVal = headerValues.get(i);
                         field = values.get(i);
                         sqlColumn = fieldMapperModel.getSqlColumn(headerVal);
                         sqlType = fieldMapperModel.getSqlType(headerVal);
@@ -298,13 +297,6 @@ public class CellRangerController {
                 }
             }
         }
-
-        // TODO - Extract graph from "web_summary.html"
-        final String webSummaryPath = getCellRangerOutputPath(run, id, project, type, WEB_SUMMARY_PATH);
-        File input = new File(webSummaryPath);
-        Document webSummary = Jsoup.parse(input, "UTF-8", "");
-        String compressedGraphData = getCompressedGraphData(webSummary);
-        dataRecord.setField("CompressedGraphData", compressedGraphData, String.class);
         return dataRecord;
     }
 

@@ -332,22 +332,20 @@ public class CellRangerControllerTest {
         String processedProjectName = PROJECT.replaceAll("\\D+","");
         assertTrue(processedProjectName.equals(cellRangerSummaryVdj.project));
 
-        assertTrue(cellRangerSummaryVdj.EstimatedNumberOfCells == 2464D);
-        assertTrue(cellRangerSummaryVdj.MeanReadsPerCell == 14900D);
-        assertTrue(cellRangerSummaryVdj.NumCellsWithVDJSpanningPair == 1958D);
-        assertTrue(cellRangerSummaryVdj.ReadsMappedToAnyVDJGene == 0.831D);
-        assertTrue(cellRangerSummaryVdj.ReadsMappedToTRA == 0.269D);
-        assertTrue(cellRangerSummaryVdj.ReadsMappedToTRB == 0.464D);
-        assertTrue(cellRangerSummaryVdj.MedianTRAUMIsPerCell == 3D);
-        assertTrue(cellRangerSummaryVdj.MedianTRBUMIsPerCell == 9D);
-        assertTrue(cellRangerSummaryVdj.NumCellsWithVDJSpanningPair == 1958D);
-        assertTrue(cellRangerSummaryVdj.NumberOfReadPairs == 36715767D);
-        assertTrue(cellRangerSummaryVdj.ValidBarcodes == 0.961D);
-        assertTrue(cellRangerSummaryVdj.Q30BasesInBarcode == 0.959D);
-        assertTrue(cellRangerSummaryVdj.Q30BasesInRNARead1 == 0.944D);
-        assertTrue(cellRangerSummaryVdj.Q30BasesInRNARead2 == 0.924D);
-        assertTrue(cellRangerSummaryVdj.Q30BasesInSampleIndex == 0.891D);
-        assertTrue(cellRangerSummaryVdj.Q30BasesInUMI == 0.951D);
+        assertTrue(cellRangerSummaryVdj.EstimatedNumberOfCells == 66D);
+        assertTrue(cellRangerSummaryVdj.MeanReadsPerCell == 320124D);
+        assertTrue(cellRangerSummaryVdj.NumCellsWithVDJSpanningPair == 60D);
+        assertTrue(cellRangerSummaryVdj.ReadsMappedToAnyVDJGene == 0.091D);
+        assertTrue(cellRangerSummaryVdj.ReadsMappedToTRA == 0.034D);
+        assertTrue(cellRangerSummaryVdj.ReadsMappedToTRB == 0.057D);
+        assertTrue(cellRangerSummaryVdj.MedianTRAUMIsPerCell == 4D);
+        assertTrue(cellRangerSummaryVdj.MedianTRBUMIsPerCell == 7D);
+        assertTrue(cellRangerSummaryVdj.NumberOfReadPairs == 21128235D);
+        assertTrue(cellRangerSummaryVdj.ValidBarcodes == 0.79D);
+        assertTrue(cellRangerSummaryVdj.Q30BasesInBarcode == 0.964D);
+        assertTrue(cellRangerSummaryVdj.Q30BasesInRNARead1 == 0.942D);
+        assertTrue(cellRangerSummaryVdj.Q30BasesInRNARead2 == 0.895D);
+        assertTrue(cellRangerSummaryVdj.Q30BasesInUMI == 0.952D);
         // TODO - These came from html. How to get back?
         /*
         assertTrue(cellRangerSummaryVdj.Name.equals("TCRbp-ctl1-5f_IGO_09987_B_1"));

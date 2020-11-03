@@ -31,8 +31,7 @@ public class CellRangerSummaryVDJModel extends FieldMapperModel {
                 // new FieldMapper("td", "Description", "Description", String.class),
                 new FieldMapper("td", "V(D)J Reference", "VDJReference", String.class),
                 new FieldMapper("td", "Chemistry", "Chemistry", String.class),
-                new FieldMapper("td", "Cell Ranger Version", "CellRangerVersion", String.class),
-                new FieldMapper("script", "N/A - Contained in script body", "CompressedGraphData", String.class)
+                new FieldMapper("td", "Cell Ranger Version", "CellRangerVersion", String.class)
         ));
     }
 }
