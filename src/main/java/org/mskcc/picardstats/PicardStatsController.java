@@ -20,7 +20,7 @@ public class PicardStatsController {
     private static Logger log = LoggerFactory.getLogger(PicardStatsController.class);
 
     // while /ifs and /igo storage are both active
-    private static final String [] BASE_STATS_DIR =  new String [] {"/igo/stats/DONE/", "/ifs/data/BIC/Stats/hiseq/DONE/"};
+    private static final String [] BASE_STATS_DIR =  new String [] {"/igo/stats/DONE/"};
 
     // directories where Picard stats Excel files are written
     final String RUN_REPORTS_SHARED_DIR = "/data/picardExcel/run_reports/";
