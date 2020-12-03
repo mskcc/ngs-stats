@@ -7,5 +7,4 @@ import java.util.List;
 
 public interface RnaSeqMetricsRepository extends CrudRepository<RnaSeqMetrics, Integer> {
     List<RnaSeqMetrics> findByFilename(String filename);
-
 }

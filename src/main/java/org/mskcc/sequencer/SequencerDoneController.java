@@ -138,7 +138,7 @@ public class SequencerDoneController {
 
     @GetMapping(value = "/fastq/{directoryName}")
     public String trackDemuxAndArchiving(@PathVariable String directoryName) {
-        String baseDir = "/ifs/archive/GCL/hiseq/FASTQ/";
+        String baseDir = "/igo/delivery/FASTQ/";
         String fastqDirName = baseDir + directoryName;
         File fastqDir = new File(fastqDirName);
 
@@ -174,14 +174,9 @@ public class SequencerDoneController {
         return startStop.toString();
     }
 
-    @GetMapping(value = {"/sequencerstartstop/{sequencer}/{run}/{lastFile}", "/sequencerstartstop/{sequencer}/{run}/{lastFile}/{useIGOStorage}"})
-    public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile,
-                              @PathVariable(required = false) String useIGOStorage) {
-        String baseDir;
-        if (useIGOStorage == null)
-            baseDir = "/ifs/input/GCL/hiseq/";
-        else
-            baseDir = "/igo/sequencers/";
+    @GetMapping(value = {"/sequencerstartstop/{sequencer}/{run}/{lastFile}"})
+    public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile) {
+        String baseDir = "/igo/sequencers/";
 
         String runDirectoryName = baseDir + sequencer + "/" + run + "/";
         if (!new File(runDirectoryName).exists()) {
@@ -261,12 +256,12 @@ public class SequencerDoneController {
         addBasicAuth(restTemplate, limsUser, limsPass);
         return restTemplate;
     }
-    private void addBasicAuth(RestTemplate restTemplate, String username, String password) {
+    private static void addBasicAuth(RestTemplate restTemplate, String username, String password) {
         List<ClientHttpRequestInterceptor> interceptors = Collections.singletonList(new BasicAuthorizationInterceptor(username, password));
         restTemplate.setRequestFactory(new InterceptingClientHttpRequestFactory(restTemplate.getRequestFactory(),
                 interceptors));
     }
-    private RestTemplate getInsecureRestTemplate() {
+    public static RestTemplate getInsecureRestTemplate() {
         try {
             TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
             SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()

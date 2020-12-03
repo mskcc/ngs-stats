@@ -14,5 +14,6 @@ import java.util.List;
 public class RequestPermissions {
     private String labName;
     private List<String> labMembers;
-    private List<String> requestGroups; // groups that have read access for a request such as 'cmoigo', 'bicigo'
+    private List<String> requestGroups; // UNIX groups that have read access such as 'cmoigo', 'bicigo', 'isabl'
+    private List<String> fastqs; // list of all fastqs for that request
 }

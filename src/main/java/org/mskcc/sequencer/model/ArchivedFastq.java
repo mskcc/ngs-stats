@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter @Setter
 @ToString
@@ -42,6 +43,10 @@ public class ArchivedFastq {
 
     private Date lastUpdated;
 
+    public static List<String> toFastqPathOnly(List<ArchivedFastq> x) {
+        List<String> list = x.stream().map(ArchivedFastq::getFastq).collect(Collectors.toList());
+        return list;
+    }
 
     public String getSampleName() {
         if (sample.contains("_IGO_"))
