@@ -73,7 +73,7 @@ public class DeliveryPermissionsController {
         }
         List<String> fastqPaths = ArchivedFastq.toFastqPathOnly(fastqs);
 
-        return new RequestPermissions(lims.getLabName(), labMembers, groupReadAccess, fastqPaths);
+        return new RequestPermissions(lims.getLabName(), labMembers, request, groupReadAccess, fastqPaths);
     }
 
     protected static String getFourDigitRequest(String request) {
