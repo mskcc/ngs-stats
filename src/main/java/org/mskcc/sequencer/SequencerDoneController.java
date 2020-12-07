@@ -256,12 +256,12 @@ public class SequencerDoneController {
         addBasicAuth(restTemplate, limsUser, limsPass);
         return restTemplate;
     }
-    private void addBasicAuth(RestTemplate restTemplate, String username, String password) {
+    private static void addBasicAuth(RestTemplate restTemplate, String username, String password) {
         List<ClientHttpRequestInterceptor> interceptors = Collections.singletonList(new BasicAuthorizationInterceptor(username, password));
         restTemplate.setRequestFactory(new InterceptingClientHttpRequestFactory(restTemplate.getRequestFactory(),
                 interceptors));
     }
-    private RestTemplate getInsecureRestTemplate() {
+    public static RestTemplate getInsecureRestTemplate() {
         try {
             TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
             SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
