@@ -20,7 +20,7 @@ class WgsMetricsTest {
 
     @Test
     void readFilePicardVersion() throws FileNotFoundException, IllegalAccessException {
-        File f = new File("src/test/resources/DIANA_0279_AHTGNVDSXY___P11264_C___400579_IGO_11264_C_40___GRCh37___WGS.txt");
+        File f = new File("src/test/resources/DIANA_0279_AHTGNVDSXY___P11264_C___79_IGO_11264_C_40___GRCh37___WGS.txt");
         WgsMetrics wgs = WgsMetrics.readFile(f, "x");
         // no null pointer exception so all is good
         assertNotNull(wgs);
