@@ -135,6 +135,11 @@ public class WgsMetrics {
     public double HET_SNP_SENSITIVITY;
 
     /**
+     *
+     */
+    public double FOLD_80_BASE_PENALTY;
+
+    /**
      * The Phred Scaled Q Score of the theoretical HET SNP sensitivity.
      */
     public double HET_SNP_Q;
@@ -170,10 +175,12 @@ public class WgsMetrics {
                 if ("".equals(value)) // some columns are nullable
                     continue;
                 else if ("?".equals(value))
-                    return null;
+                    continue;
 
                 String fieldName = columnHeaders[i];
                 Field field = nameToField.get(fieldName);
+                if (field == null) // ignore newly added fields
+                    continue;
                 if (field.getType().getName().equals("double"))
                     field.setDouble(x, Double.parseDouble(parts[i]));
                 else if (field.getType().getName().equals("java.lang.Double"))
