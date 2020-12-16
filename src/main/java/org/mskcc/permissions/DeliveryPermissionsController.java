@@ -1,6 +1,7 @@
 package org.mskcc.permissions;
 
 import lombok.*;
+import org.mskcc.permissions.model.RequestReadAccess;
 import org.mskcc.permissions.model.dto.RequestPermissions;
 import org.mskcc.permissions.repository.LabMemberRepository;
 import org.mskcc.permissions.repository.RequestReadAccessRepository;
@@ -63,12 +64,13 @@ public class DeliveryPermissionsController {
         RequestPermissionsLIMS lims = queryLIMSforLabNameAndGroupAccess(request);
         log.info("LIMS response:" + lims);
 
-        // query lab members list from db
+        log.info("Searching for all lab members with read access.");
         List<String> labMembers = labMemberRepository.findByPi(lims.getLabName());
 
-        List<String> requestReaders = readAccessRepository.findByRequest(request);
-
         List<String> groupReadAccess = buildGroupAccessList(lims.getIsCmoRequest(), lims.getIsBicRequest(), lims.dataAccessEmails);
+
+        log.info("Searching for individuals/groups with read access to this specific request.");
+        List<RequestReadAccess> requestReadAccess = readAccessRepository.findByRequest(request);
 
         List<ArchivedFastq> fastqs = archivedFastqRepository.findByProject(request);
         if (request.startsWith("0")) {
@@ -79,7 +81,7 @@ public class DeliveryPermissionsController {
         }
         List<String> fastqPaths = ArchivedFastq.toFastqPathOnly(fastqs);
 
-        return new RequestPermissions(lims.getLabName(), labMembers, request, requestReaders, groupReadAccess, fastqPaths);
+        return new RequestPermissions(lims.getLabName(), labMembers, request, requestReadAccess, groupReadAccess, fastqPaths);
     }
 
     protected static String getFourDigitRequest(String request) {

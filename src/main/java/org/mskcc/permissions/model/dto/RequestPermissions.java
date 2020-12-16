@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.mskcc.permissions.model.RequestReadAccess;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class RequestPermissions {
     private String labName;
     private List<String> labMembers;
     private String request;
-    private List<String> requestMembers;  // individuals who have access to this specific request
+    private List<RequestReadAccess> requestReadAccess;  // individuals who have access to this specific request
     private List<String> requestGroups; // UNIX groups that have read access such as 'cmoigo', 'bicigo', 'isabl'
     private List<String> fastqs; // list of all fastqs for that request
 }

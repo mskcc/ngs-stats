@@ -22,6 +22,5 @@ public class RequestReadAccess {
     @Id
     private String member;
 
-    // TODO add date added
-    // TODO add requested by?
+    boolean isGroup = false; // groups must be specified because the ACL requires ":g:" to work
 }
