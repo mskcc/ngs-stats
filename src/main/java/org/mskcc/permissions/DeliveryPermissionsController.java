@@ -1,6 +1,7 @@
 package org.mskcc.permissions;
 
 import lombok.*;
+import org.mskcc.permissions.model.LabMember;
 import org.mskcc.permissions.model.RequestReadAccess;
 import org.mskcc.permissions.model.dto.RequestPermissions;
 import org.mskcc.permissions.repository.LabMemberRepository;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,7 +67,7 @@ public class DeliveryPermissionsController {
         log.info("LIMS response:" + lims);
 
         log.info("Searching for all lab members with read access.");
-        List<String> labMembers = labMemberRepository.findByPi(lims.getLabName());
+        List<LabMember> labMembers = labMemberRepository.findByPi(lims.getLabName());
 
         List<String> groupReadAccess = buildGroupAccessList(lims.getIsCmoRequest(), lims.getIsBicRequest(), lims.dataAccessEmails);
 
@@ -79,9 +81,23 @@ public class DeliveryPermissionsController {
             if (moreFastqs != null && moreFastqs.size() > 0)
                 fastqs.addAll(moreFastqs);
         }
+
+        List<String> dataAccessIDs = getDataAccessIDs(lims.dataAccessEmails);
+
         List<String> fastqPaths = ArchivedFastq.toFastqPathOnly(fastqs);
 
-        return new RequestPermissions(lims.getLabName(), labMembers, request, requestReadAccess, groupReadAccess, fastqPaths);
+        return new RequestPermissions(lims.getLabName(), labMembers, request, requestReadAccess, groupReadAccess,
+                dataAccessIDs, fastqPaths);
+    }
+
+    protected static List<String> getDataAccessIDs(String dataAccessEmails) {
+        List<String> dataAccessEmailsList = Arrays.asList(dataAccessEmails.split(","));
+        List<String> dataAccessIDs = new ArrayList<>();
+        for (String email:dataAccessEmailsList) {
+            if (email.endsWith("mskcc.org") && !email.contains("zzPDL"))
+                dataAccessIDs.add(email.split("@")[0]);
+        }
+        return dataAccessIDs;
     }
 
     protected static String getFourDigitRequest(String request) {

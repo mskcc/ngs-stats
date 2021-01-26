@@ -38,4 +38,20 @@ class DeliveryPermissionsControllerTest {
         assertEquals("1234_AH", DeliveryPermissionsController.getFourDigitRequest("01234_AH"));
         assertEquals("12345", DeliveryPermissionsController.getFourDigitRequest("12345"));
     }
+
+    @Test
+    void getDataAccessIDsRemoveNonmskcc() {
+        String test = "jah@med.cornell.edu,david@mskcc.org";
+        List<String> result = DeliveryPermissionsController.getDataAccessIDs(test);
+        assertEquals("david", result.get(0));
+    }
+    @Test
+    void getDataAccessIDsRemovezzPDL() {
+        String test = "skicmopm@mskcc.org,zzPDL_SKI_CMO_ACCESS@mskcc.org,";
+        List<String> result = DeliveryPermissionsController.getDataAccessIDs(test);
+        assertEquals("skicmopm", result.get(0));
+        assertEquals(1, result.size());
+    }
+
+
 }

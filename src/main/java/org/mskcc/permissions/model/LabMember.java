@@ -21,4 +21,6 @@ public class LabMember {
     private String pi;
     @Id
     private String member;
+
+    boolean isGroup = false; // groups must be specified because the ACL requires ":g:" to work
 }
