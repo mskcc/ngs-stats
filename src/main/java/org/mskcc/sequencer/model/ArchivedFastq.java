@@ -91,14 +91,30 @@ public class ArchivedFastq {
             ArchivedFastq f = new ArchivedFastq(run, runBaseDirectory, null, null, p.toString(), new Date(p.toFile().lastModified()), bytes, new Date());
             paths.add(f);
         } else {
+            // DLP project fastq.gz files do not start with "Sample_" all others do
+            // DLP projects do not have a separate folder for each sample
+            String sample;
+            Path projectPath;
             Path samplePath = p.getParent();
-            String sample = samplePath.getFileName().toString().substring(7);    // remove "Sample_" prefix
-            Path projectPath = samplePath.getParent();
-            // TODO debug and unit test failure for /ifs/archive/GCL/hiseq/FASTQ/VIC_2120_000000000-A6N30
+            if (samplePath.getFileName().toString().startsWith("Sample_")) {
+                sample = samplePath.getFileName().toString().substring(7);    // remove "Sample_" prefix
+                projectPath = samplePath.getParent();
+            } else {
+                log.info("Processing fastq.gz files in the same directory");
+                // 065RA_DLP_UNSORTED_128655A_23_54_IGO_11113_C_2_1_671_S671_L003_R1_001.fastq.gz
+                // remove _S*_L*_001.fastq.gz
+                sample = getSampleName(filename);
+                projectPath = p.getParent();
+            }
             String project = projectPath.getFileName().toString().substring(8);  // remove "Project_" prefix
 
             ArchivedFastq f = new ArchivedFastq(run, runBaseDirectory, project, sample, p.toAbsolutePath().toString(), new Date(p.toFile().lastModified()), bytes, new Date());
             paths.add(f);
         }
+    }
+
+    protected static String getSampleName(String filename) {
+        //"065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S631_L003_R1_001.fastq.gz"
+        return filename.replaceFirst("_S[0-9]+_L[0-9]+_R[0-9]_[0-9][0-9][0-9].fastq.gz", "");
     }
 }
