@@ -81,6 +81,12 @@ public class ArchivedFastq {
         List<ArchivedFastq> fastqs = new ArrayList<>();
         Files.walk(rootPath, 4).filter(p -> p.toString().endsWith(".fastq.gz")).forEach(y->save(run, runBaseDirectory, y, fastqs));
         log.info("Total fastq.gz files found: " + fastqs.size());
+        if (fastqs.size() == 0) {
+            // SCOTT_0296_AHKL2MBGXH_A1 is a custom demux with uncompressed data such as
+            // 501_shNIPBL5_6D_1_CAGEtag_IGO_11724_3_L001_R1.fastq
+            Files.walk(rootPath, 4).filter(p -> p.toString().endsWith(".fastq")).forEach(y->save(run, runBaseDirectory, y, fastqs));
+            log.info("Total fastq files found: " + fastqs.size());
+        }
         return fastqs;
     }
 
@@ -115,6 +121,6 @@ public class ArchivedFastq {
 
     protected static String getSampleName(String filename) {
         //"065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S631_L003_R1_001.fastq.gz"
-        return filename.replaceFirst("_S[0-9]+_L[0-9]+_R[0-9]_[0-9][0-9][0-9].fastq.gz", "");
+        return filename.replaceFirst("_S[0-9]+_L[0-9]+_R[0-9]_001.fastq.gz", "");
     }
 }

@@ -42,7 +42,7 @@ class ArchivedFastqTest {
 
     @Test
     void getSampleName() {
-        String result = ArchivedFastq.getSampleName("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S631_L003_R1_001.fastq.gz");
+        String result = ArchivedFastq.getSampleName("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S631_L008_R1_001.fastq.gz");
         assertEquals("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631", result);
 
         String result2 = ArchivedFastq.getSampleName("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S63_L007_R2_001.fastq.gz");
