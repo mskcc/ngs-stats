@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -56,6 +58,19 @@ public class SequencerDoneController {
     private String limsUser;
     @Value("${lims.rest.password}")
     private String limsPass;
+
+    @GetMapping(value = "/getRecentlyArchivedRequests/{minutes}")
+    public List<String> getRecentlyArchivedRequests(@PathVariable Integer minutes) {
+        if (minutes < 1) {
+            String errorDetails = "Minutes argument must be 1 or greater.";
+            new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+        }
+        // convert minutes to start date
+        Date startDate = new Date(System.currentTimeMillis() - (minutes * 60000));
+        String timestampString = new SimpleDateFormat("dd-M-yyyy hh:mm:ss").format(startDate);
+        log.info(String.format("Finding requests archived in the last %s minutes, after %s", minutes, timestampString));
+        return archivedFastqRepository.findRecentlyArchived(startDate);
+    }
 
     @GetMapping(value = "/getpoolednormals/{request}")
     public List<ArchivedFastq> getPooledNormals(@PathVariable String request) {

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.List;
 
 public interface ArchivedFastqRepository extends CrudRepository<ArchivedFastq, String> {
@@ -17,4 +18,8 @@ public interface ArchivedFastqRepository extends CrudRepository<ArchivedFastq, S
     List<ArchivedFastq> findBySampleEndsWith(String sample);
     // Note: projects in the database are often missing the leading '0' so 03595 may be in stored as 3595
     List<ArchivedFastq> findByProject(String project);
+
+    @Query(value = "SELECT DISTINCT PROJECT FROM ARCHIVEDFASTQ WHERE PROJECT IS NOT null AND LASTUPDATED > :startDate",
+            nativeQuery = true)
+    List<String> findRecentlyArchived(@Param("startDate") Date startDate);
 }
