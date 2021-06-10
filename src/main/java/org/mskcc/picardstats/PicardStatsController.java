@@ -19,7 +19,7 @@ import java.util.*;
 public class PicardStatsController {
     private static Logger log = LoggerFactory.getLogger(PicardStatsController.class);
 
-    private static final String [] BASE_STATS_DIR =  new String [] {"/igo/stats/DONE/"};
+    private static final String [] BASE_STATS_DIR =  new String [] {"/igo/staging/stats/DONE"};
 
     // directories where Picard stats Excel files are written
     final String RUN_REPORTS_SHARED_DIR = "/data/picardExcel/run_reports/";
