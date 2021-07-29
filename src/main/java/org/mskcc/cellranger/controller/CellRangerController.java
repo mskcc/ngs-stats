@@ -472,8 +472,8 @@ public class CellRangerController {
 
             return cellRangerOutputPath;
         } catch(FileNotFoundException e) {
-            log.error("Could not find CellRangerOutputPath w/ RUN=%s SAMPLE=%s PROJECT=%s TYPE=%s",
-                    run, sample, project, type);
+            log.error(String.format("Could not find CellRangerOutputPath w/ RUN=%s SAMPLE=%s PROJECT=%s TYPE=%s",
+                    run, sample, project, type));
         }
         return "";
     }
