@@ -3,10 +3,14 @@ package org.mskcc.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 public class ParserUtil {
     private static Logger log = LoggerFactory.getLogger(ParserUtil.class);
@@ -26,69 +30,102 @@ public class ParserUtil {
     }
 
     /**
-     * Removes empty elements from an input Object array
-     * @param inputArray, Object array
-     * @param <E>
-     * @return
-     */
-    private static <E> List<E> removeEmptiesFromArray(E[] inputArray) {
-        final Object[] BLACKLIST = { "", null };        // Elements that will be removed from input
-
-        List<E> list = new ArrayList<E>(Arrays.asList(inputArray));
-        list.removeAll(Arrays.asList(BLACKLIST));
-
-        return list;
-    }
-
-    /**
      * Parses out the cleaned (no comma, quotes, etc.) in the line
      *      E.g.    "152,952,980",97.1%,81.5%,...   =>  152952980,0.971,0.815%,...
      * @param line
      * @return
      */
     public static List<String> parseCellRangerCsvLine(String line){
-        /**
-         * Split the input line on the quote - this will "cleanly" (remove t separate all numbers with a comma in them
-         *      e.g. line:          69,"32,143",1,"2,217,916",90.7%,0.0%,39,1
-         *           quoteSplit:    ["69,", "32,143", ",1," , "2,217,916", ",90.7%,0.0%,39,1"
-         */
-        List<String> rawValues = new ArrayList<>();
-        final String[] quoteSplitRaw = line.split("\"");
-        List<String> quoteSplit = removeEmptiesFromArray(quoteSplitRaw);
-        for(String quoteStr : quoteSplit){
-            if( quoteStr.equals(",")){
-                /**
-                 *  A comma will be isolated if surrounded by two quoted. We want to skip this value
-                 *      e.g. line: "\"2,083\",\"73,429\"" -> quoteSplit: ["2,083", ",", "73,429"]
-                 */
-                continue;
-            }
-            else if( quoteStr.charAt(0) == ',' ||
-                quoteStr.charAt(quoteStr.length()-1) == ',' ){
-                // Check if quoteStr is a list of values, which will be indicated by having a "," at the start or end
-                final String[] commaSplitRaw = quoteStr.split(",");
-                final List<String> commaSplit = removeEmptiesFromArray(commaSplitRaw);
-                for(String commaStr : commaSplit){
-                    rawValues.add(commaStr);
+        // SPECIAL CHARACTERS - These enclose values of the line
+        Character COMMA_CHAR = ',';     // .., 0.69, ...
+        Character QUOTE_CHAR = '"';     // ..., "1,053", ...
+
+        List<String> values = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        Stack<Character> quoteStack = new Stack<>();    // Pushes/pops " char; when non-empty, is reading quoted value
+        for(int i = 0; i<line.length(); i++){
+            Character c = line.charAt(i);
+            if(QUOTE_CHAR.equals(c)){
+                if(quoteStack.size() > 0){
+                    // Closing QUOTE_CHAR encountered - end state of reading in value, add string value, and clear stack
+                    quoteStack.pop();
+                    values.add(sb.toString());
+                    sb = new StringBuilder();
+                } else {
+                    // Opening QUOTE_CHAR encountered - enter state of reading value until another QUOTE_CHAR is read
+                    quoteStack.push(c);
+                }
+            } else if(COMMA_CHAR.equals(c)){
+                if(quoteStack.size() > 0){
+                    // In state of reading in opened-quote string value, e.g. reading the ',' of "1,053"
+                    sb.append(c);
+                } else if (sb.length() == 0) {
+                    // Pass - A COMMA_CHAR is never the leading character of a value; value must have just been added
+                } else {
+                    // Otherwise, this delimits COMMA_CHAR the current string from the next
+                    values.add(sb.toString());
+                    sb = new StringBuilder();
                 }
             } else {
-                // quoteStr is a single value, e.g. quoteStr = "32,143"
-                rawValues.add(quoteStr);
+                // Not a special character - continue building the string
+                sb.append(c);
             }
         }
+        // Add last parsed value
+        if(sb.length() > 0){
+            values.add(sb.toString());
+        }
 
+        // Clean up the values, i.e. remove: , %
         List<String> cleanedValues = new ArrayList<>();
-        for(String value : rawValues){
+        for(String value : values){
             value = value.replace(",", "");
-            if(value.contains("%") && value.contains(".")){
-                // Percentages need to be converted to their decimal form
-                value = value.replace("%", "");
-                BigDecimal d = new BigDecimal(value).divide(BigDecimal.valueOf(100));
-                value = d.toString();
+            value = value.replace("\"", "");
+
+            if(value.contains(".")){
+                BigDecimal d = new BigDecimal(0);
+                if(value.contains("%")){
+                    value = value.replace("%", "");
+                    d = new BigDecimal(value).divide(BigDecimal.valueOf(100));
+                } else {
+                    d = new BigDecimal(value);
+                }
+                if(! (d.compareTo(new BigDecimal(1)) > 1) ){
+                    // If the value is a decimal (less than or equal to 1), make the double the value
+                    value = d.toString();
+                }
             }
             cleanedValues.add(value);
         }
 
         return cleanedValues;
+    }
+
+    /**
+     * Reads the file at the input path into a string
+     * @param path
+     * @return
+     */
+    public static String readFile(String path) {
+        String strLine = "";
+        String str_data = "";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            while (strLine != null)
+            {
+                if (strLine == null)
+                    break;
+                str_data += strLine;
+                strLine = br.readLine();
+
+            }
+            br.close();
+            return str_data;
+        } catch (FileNotFoundException e) {
+            System.err.println(String.format("File not found: %s", path));
+        } catch (IOException e) {
+            System.err.println(String.format("Unable to read the file: %s", path));
+        }
+        return null;
     }
 }

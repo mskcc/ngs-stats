@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '2.1.6.RELEASE'
+		springBootVersion = '2.4.5'
 	}
 	repositories {
         mavenCentral()
@@ -8,6 +8,11 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 	}
+}
+
+plugins {
+	// https://projectlombok.org
+	id "io.freefair.lombok" version "5.3.0"
 }
 
 repositories {
@@ -29,16 +34,9 @@ war {
 }
 
 group = 'org.mskcc'
-// TODO
-//version = '0.0' - Tomcat endpoint currently named by war name
 sourceCompatibility = '1.8'
 
-repositories {
-	mavenCentral()
-}
-
 dependencies {
-	//implementation ('com.github.broadinstitute:picard:2.18.26')
 	implementation "io.springfox:springfox-swagger-ui:2.9.2"
 	implementation "io.springfox:springfox-swagger2:2.9.2"
 	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
@@ -50,19 +48,18 @@ dependencies {
 	implementation 'org.apache.httpcomponents:httpclient:4.5.8'
 	implementation group: 'org.jsoup', name: 'jsoup', version: '1.12.1'
 	implementation group: 'com.squareup', name: 'javapoet', version: '1.10.0'
-	implementation group: 'org.projectlombok', name: 'lombok', version: '1.16.16'
 
 	runtimeOnly('mysql:mysql-connector-java')
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
-	testImplementation('org.junit.jupiter:junit-jupiter-api:5.3.1')
-	testImplementation group: 'org.springframework', name: 'spring-test', version: '5.1.8.RELEASE'
+	testImplementation group: 'org.springframework', name: 'spring-test'
 	testImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
-	testRuntimeOnly ('org.junit.jupiter:junit-jupiter-engine:5.3.1')
 
-	// https://projectlombok.org
-	compileOnly 'org.projectlombok:lombok:1.18.6'
-//	annotationProcessor 'org.projectlombok:lombok:1.18.6'
+	// from https://docs.gradle.org/current/userguide/java_testing.html#using_junit5
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+	testCompileOnly 'junit:junit:4.13'
+	testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
 }
 
 uploadArchives {
@@ -77,6 +74,13 @@ uploadArchives {
 				authentication(userName: nexusUsername, password: nexusPassword)
 			}
 		}
+	}
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
 	}
 }
 

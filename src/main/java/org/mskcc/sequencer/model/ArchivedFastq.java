@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter @Setter
 @ToString
@@ -42,6 +43,10 @@ public class ArchivedFastq {
 
     private Date lastUpdated;
 
+    public static List<String> toFastqPathOnly(List<ArchivedFastq> x) {
+        List<String> list = x.stream().map(ArchivedFastq::getFastq).collect(Collectors.toList());
+        return list;
+    }
 
     public String getSampleName() {
         if (sample.contains("_IGO_"))
@@ -76,6 +81,12 @@ public class ArchivedFastq {
         List<ArchivedFastq> fastqs = new ArrayList<>();
         Files.walk(rootPath, 4).filter(p -> p.toString().endsWith(".fastq.gz")).forEach(y->save(run, runBaseDirectory, y, fastqs));
         log.info("Total fastq.gz files found: " + fastqs.size());
+        if (fastqs.size() == 0) {
+            // SCOTT_0296_AHKL2MBGXH_A1 is a custom demux with uncompressed data such as
+            // 501_shNIPBL5_6D_1_CAGEtag_IGO_11724_3_L001_R1.fastq
+            Files.walk(rootPath, 4).filter(p -> p.toString().endsWith(".fastq")).forEach(y->save(run, runBaseDirectory, y, fastqs));
+            log.info("Total fastq files found: " + fastqs.size());
+        }
         return fastqs;
     }
 
@@ -86,14 +97,30 @@ public class ArchivedFastq {
             ArchivedFastq f = new ArchivedFastq(run, runBaseDirectory, null, null, p.toString(), new Date(p.toFile().lastModified()), bytes, new Date());
             paths.add(f);
         } else {
+            // DLP project fastq.gz files do not start with "Sample_" all others do
+            // DLP projects do not have a separate folder for each sample
+            String sample;
+            Path projectPath;
             Path samplePath = p.getParent();
-            String sample = samplePath.getFileName().toString().substring(7);    // remove "Sample_" prefix
-            Path projectPath = samplePath.getParent();
-            // TODO debug and unit test failure for /ifs/archive/GCL/hiseq/FASTQ/VIC_2120_000000000-A6N30
+            if (samplePath.getFileName().toString().startsWith("Sample_")) {
+                sample = samplePath.getFileName().toString().substring(7);    // remove "Sample_" prefix
+                projectPath = samplePath.getParent();
+            } else {
+                log.info("Processing fastq.gz files in the same directory");
+                // 065RA_DLP_UNSORTED_128655A_23_54_IGO_11113_C_2_1_671_S671_L003_R1_001.fastq.gz
+                // remove _S*_L*_001.fastq.gz
+                sample = getSampleName(filename);
+                projectPath = p.getParent();
+            }
             String project = projectPath.getFileName().toString().substring(8);  // remove "Project_" prefix
 
             ArchivedFastq f = new ArchivedFastq(run, runBaseDirectory, project, sample, p.toAbsolutePath().toString(), new Date(p.toFile().lastModified()), bytes, new Date());
             paths.add(f);
         }
+    }
+
+    protected static String getSampleName(String filename) {
+        //"065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S631_L003_R1_001.fastq.gz"
+        return filename.replaceFirst("_S[0-9]+_L[0-9]+_R[0-9]_001.fastq.gz", "");
     }
 }

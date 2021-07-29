@@ -1,4 +1,4 @@
-Paths to over 900k IGO fastq.gz files.
+Paths to over 1 million IGO fastq.gz files.
 
 Sequencer start-stop times.
 

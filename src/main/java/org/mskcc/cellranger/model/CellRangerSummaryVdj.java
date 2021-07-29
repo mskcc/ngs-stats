@@ -114,9 +114,4 @@ public class CellRangerSummaryVdj extends CellRangerDataRecord {
             length = 64
     )
     public String CellRangerVersion;
-
-    @Column(
-            columnDefinition = "MEDIUMTEXT"
-    )
-    public String CompressedGraphData;
 }

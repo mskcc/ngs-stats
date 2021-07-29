@@ -3,9 +3,9 @@
 
 | Html Element | Html Label | Table Field | Table Type |
 | ------------ | ---------- | ----------- | ---------- |
-| h1 | Estimated Number of Cells | EstimatedNumberOfCells | class java.lang.Double |
-| h2 | Mean Reads per Cell | MeanReadsPerCell | class java.lang.Double |
-| h2 | Median Genes per Cell | MedianGenesPerCell | class java.lang.Double |
+| div | Estimated Number of Cells | EstimatedNumberOfCells | class java.lang.Double |
+| div | Mean Reads per Cell | MeanReadsPerCell | class java.lang.Double |
+| div | Median Genes per Cell | MedianGenesPerCell | class java.lang.Double |
 | td | Number of Reads | NumberOfReads | class java.lang.Double |
 | td | Valid Barcodes | ValidBarcodes | class java.lang.Double |
 | td | Sequencing Saturation | SequencingSaturation | class java.lang.Double |
@@ -27,15 +27,14 @@
 | td | Transcriptome | Transcriptome | class java.lang.String |
 | td | Chemistry | Chemistry | class java.lang.String |
 | td | Cell Ranger Version | CellRangerVersion | class java.lang.String |
-| script | N/A - Contained in script body | CompressedGraphData | class java.lang.String |
 
 # CellRangerSummaryVdj
 
 | Html Element | Html Label | Table Field | Table Type |
 | ------------ | ---------- | ----------- | ---------- |
-| h1 | Estimated Number of Cells | EstimatedNumberOfCells | class java.lang.Double |
-| h2 | Mean Read Pairs per Cell | MeanReadsPerCell | class java.lang.Double |
-| h2 | Number of Cells With Productive V-J Spanning Pair | NumCellsWithVDJSpanningPair | class java.lang.Double |
+| div | Estimated Number of Cells | EstimatedNumberOfCells | class java.lang.Double |
+| div | Mean Read Pairs per Cell | MeanReadsPerCell | class java.lang.Double |
+| div | Number of Cells With Productive V-J Spanning Pair | NumCellsWithVDJSpanningPair | class java.lang.Double |
 | td | Reads Mapped to Any V(D)J Gene | ReadsMappedToAnyVDJGene | class java.lang.Double |
 | td | Reads Mapped to TRA | ReadsMappedToTRA | class java.lang.Double |
 | td | Reads Mapped to TRB | ReadsMappedToTRB | class java.lang.Double |
@@ -52,4 +51,3 @@
 | td | V(D)J Reference | VDJReference | class java.lang.String |
 | td | Chemistry | Chemistry | class java.lang.String |
 | td | Cell Ranger Version | CellRangerVersion | class java.lang.String |
-| script | N/A - Contained in script body | CompressedGraphData | class java.lang.String |

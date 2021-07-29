@@ -2,7 +2,6 @@ package org.mskcc.cellranger.controller;
 
 import com.codesnippets4all.json.parsers.JSONParser;
 import com.codesnippets4all.json.parsers.JsonParserFactory;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -34,6 +33,7 @@ import static org.mskcc.Constants.API_DATA;
 import static org.mskcc.utils.ApiUtil.createErrorResponse;
 import static org.mskcc.utils.ApiUtil.createSuccessResponse;
 import static org.mskcc.utils.ParserUtil.parseCellRangerCsvLine;
+import static org.mskcc.utils.ParserUtil.readFile;
 
 @RestController
 public class CellRangerController {
@@ -181,6 +181,25 @@ public class CellRangerController {
         return resp;
     }
 
+    @CrossOrigin
+    @GetMapping(value = "/getCellRangerFile")
+    public Map<String, Object> getCellRangerFile( @RequestParam("project") String project,
+                                                  @RequestParam("run") String run,
+                                                  @RequestParam("sample") String sample,
+                                                  @RequestParam("type") String type) {
+        log.info(String.format("Retrieving cell ranger output file for run: %s, project: %s, sample: %s, type: %s",
+                run, project, sample, type));
+        final String webSummaryPath = getCellRangerOutputPath(run, sample, project, type, WEB_SUMMARY_PATH);
+        final String data = readFile(webSummaryPath);
+        String status = String.format("File not found: %s", webSummaryPath);
+        if(data != null){
+            status = String.format("Retrieved data from %s", webSummaryPath);
+        }
+        Map<String, Object> resp = createSuccessResponse(status);
+        resp.put(API_DATA, data);
+        return resp;
+    }
+
     /**
      * Reads Post Body from request object
      * REF - https://stackoverflow.com/a/14885950/3874247
@@ -255,16 +274,16 @@ public class CellRangerController {
         final String metricsPath = getCellRangerOutputPath(run, id, project, type, METRICS_PATH);
         try (BufferedReader br = new BufferedReader(new FileReader(metricsPath))) {
             String header = br.readLine();
-            String[] headerValues = header.split(",");
+            List<String> headerValues = parseCellRangerCsvLine(header);
 
             List<String> values;
             String line, field, headerVal, sqlColumn;
             Class sqlType;
             while ((line = br.readLine()) != null) {
                 values = parseCellRangerCsvLine(line);
-                if (values.size() == headerValues.length) {
+                if (values.size() == headerValues.size()) {
                     for (int i = 0; i < values.size(); i++) {
-                        headerVal = headerValues[i];
+                        headerVal = headerValues.get(i);
                         field = values.get(i);
                         sqlColumn = fieldMapperModel.getSqlColumn(headerVal);
                         sqlType = fieldMapperModel.getSqlType(headerVal);
@@ -281,13 +300,6 @@ public class CellRangerController {
                 }
             }
         }
-
-        // TODO - Extract graph from "web_summary.html"
-        final String webSummaryPath = getCellRangerOutputPath(run, id, project, type, WEB_SUMMARY_PATH);
-        File input = new File(webSummaryPath);
-        Document webSummary = Jsoup.parse(input, "UTF-8", "");
-        String compressedGraphData = getCompressedGraphData(webSummary);
-        dataRecord.setField("CompressedGraphData", compressedGraphData, String.class);
         return dataRecord;
     }
 
