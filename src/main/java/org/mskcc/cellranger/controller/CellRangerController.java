@@ -456,7 +456,7 @@ public class CellRangerController {
      */
     private String getCellRangerOutputPath(String run, String sample, String project, String type, String path) {
         String runRegex = String.format(".*%s.*", run);
-        String prjRegex = String.format(".*%s.*", project);
+        String prjRegex = String.format(".*%s", project);
         String smpRegex = String.format(".*%s.*%s", sample, type);
 
         Path cellRangerPath = Paths.get(CELL_RANGER_DIR);
@@ -472,8 +472,8 @@ public class CellRangerController {
 
             return cellRangerOutputPath;
         } catch(FileNotFoundException e) {
-            log.error("Could not find CellRangerOutputPath w/ RUN=%s SAMPLE=%s PROJECT=%s TYPE=%s",
-                    run, sample, project, type);
+            log.error(String.format("Could not find CellRangerOutputPath w/ RUN=%s SAMPLE=%s PROJECT=%s TYPE=%s",
+                    run, sample, project, type));
         }
         return "";
     }
