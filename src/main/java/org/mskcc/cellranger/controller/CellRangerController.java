@@ -456,7 +456,7 @@ public class CellRangerController {
      */
     private String getCellRangerOutputPath(String run, String sample, String project, String type, String path) {
         String runRegex = String.format(".*%s.*", run);
-        String prjRegex = String.format(".*%s.*", project);
+        String prjRegex = String.format(".*%s", project);
         String smpRegex = String.format(".*%s.*%s", sample, type);
 
         Path cellRangerPath = Paths.get(CELL_RANGER_DIR);
