@@ -23,11 +23,15 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.mskcc.Constants.API_DATA;
 import static org.mskcc.utils.ApiUtil.createErrorResponse;
@@ -420,13 +424,58 @@ public class CellRangerController {
     }
 
     /**
+     * Returns the path found w/ the input regex
+     * 
+     * @param rootPath
+     * @param regex
+     * @return
+     * @throws FileNotFoundException
+     */
+    private Path findPath(Path rootPath, String regex) throws FileNotFoundException {
+        String root = rootPath.toString();
+        try {
+            List<Path> foundPaths = Files.find(rootPath, 1,
+                    (p, basicFileAttributes) -> p.toFile().getName().matches(regex)
+            ).collect(Collectors.toList());
+            if(foundPaths.size() > 1){
+                log.error(String.format("Ambiguous matching of %s in %s", regex, root));
+             } else if(foundPaths.size() == 1){
+                Path found = foundPaths.get(0);
+                log.info(String.format("Found Path: %s", found.toString()));
+                return found;
+            }
+
+        } catch (IOException e) {
+            log.error(String.format("Error searching for %s in %s", regex, root));
+        }
+        throw new FileNotFoundException(String.format("Could not find directory matching %s in %s", regex, root));
+    }
+
+    /**
      * Returns path to where field cell ranger output for input parameters can be found
      */
     private String getCellRangerOutputPath(String run, String sample, String project, String type, String path) {
-        final String samplePath = String.format("/%s/%s/%s__%s", run, project, sample, type.toLowerCase());
-        final String runPath = String.format("%s%s/%s", CELL_RANGER_DIR, samplePath, path);
-        log.info(String.format("Cell Ranger Output path: %s", runPath));
-        return runPath;
+        String runRegex = String.format(".*%s.*", run);
+        String prjRegex = String.format(".*%s.*", project);
+        String smpRegex = String.format(".*%s.*%s", sample, type);
+
+        Path cellRangerPath = Paths.get(CELL_RANGER_DIR);
+        try {
+            Path runPath = findPath(cellRangerPath, runRegex);
+            Path prjPath = findPath(runPath, prjRegex);
+            Path smpPath = findPath(prjPath, smpRegex);
+
+            String cellRangerSamplePath = smpPath.toString();
+
+            final String cellRangerOutputPath = String.format("%s/%s", cellRangerSamplePath, path);
+            log.info(String.format("Found CellRangerOutputPath: %s", cellRangerOutputPath));
+
+            return cellRangerOutputPath;
+        } catch(FileNotFoundException e) {
+            log.error("Could not find CellRangerOutputPath w/ RUN=%s SAMPLE=%s PROJECT=%s TYPE=%s",
+                    run, sample, project, type);
+        }
+        return "";
     }
 
     /**
