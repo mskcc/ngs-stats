@@ -25,10 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("permissions")
@@ -94,7 +91,7 @@ public class DeliveryPermissionsController {
         List<String> dataAccessEmailsList = Arrays.asList(dataAccessEmails.split(","));
         List<String> dataAccessIDs = new ArrayList<>();
         for (String email:dataAccessEmailsList) {
-            if (email.endsWith("mskcc.org") && !email.contains("zzPDL"))
+            if (email.endsWith("mskcc.org") && !email.toLowerCase().startsWith("zzpdl"))
                 dataAccessIDs.add(email.split("@")[0]);
         }
         return dataAccessIDs;
@@ -112,7 +109,7 @@ public class DeliveryPermissionsController {
             groups.add(CMO_GROUP);
         if (bicAnalysis)
             groups.add(BIC_GROUP);
-        if (dataAccessEmails.contains(ISABL_EMAIL))
+        if (dataAccessEmails.toLowerCase().contains(ISABL_EMAIL.toLowerCase()))
             groups.add(ISABL_GROUP);
 
         return groups;
