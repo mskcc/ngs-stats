@@ -190,17 +190,25 @@ public class CellRangerController {
     public Map<String, Object> getCellRangerFile( @RequestParam("project") String project,
                                                   @RequestParam("run") String run,
                                                   @RequestParam("sample") String sample,
-                                                  @RequestParam("type") String type) {
+                                                  @RequestParam("type") String type,
+                                                  @RequestParam(required = false, defaultValue = "true") Boolean download) {
         log.info(String.format("Retrieving cell ranger output file for run: %s, project: %s, sample: %s, type: %s",
                 run, project, sample, type));
         final String webSummaryPath = getCellRangerOutputPath(run, sample, project, type, WEB_SUMMARY_PATH);
-        final String data = readFile(webSummaryPath);
-        String status = String.format("File not found: %s", webSummaryPath);
-        if(data != null){
-            status = String.format("Retrieved data from %s", webSummaryPath);
+
+        File f = new File(webSummaryPath);
+        if(!f.exists() || f.isDirectory()) {
+            String errMessage = String.format("File not found: %s (run=%s project=%s sample=%s type=%s)",
+                    webSummaryPath, run, project, sample, type);
+            return createErrorResponse(errMessage, true);
         }
+
+        String status = String.format("Retrieved data from %s", webSummaryPath);
         Map<String, Object> resp = createSuccessResponse(status);
-        resp.put(API_DATA, data);
+        if(download){
+            final String data = readFile(webSummaryPath);
+            resp.put(API_DATA, data);
+        }
         return resp;
     }
 

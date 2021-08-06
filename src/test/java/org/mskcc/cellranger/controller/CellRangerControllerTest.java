@@ -189,7 +189,7 @@ public class CellRangerControllerTest {
                 log.error(String.format("Failed to test %s. Error: %s", type, e.getMessage()));
             }
 
-            Map<String,Object> response = cellRangerController.getCellRangerFile(PROJECT, RUN, SAMPLE, type.toString());
+            Map<String,Object> response = cellRangerController.getCellRangerFile(PROJECT, RUN, SAMPLE, type.toString(), true);
             assertNotNull(response.get("data"));
         }
     }
