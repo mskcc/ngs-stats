@@ -13,19 +13,6 @@ public class SampleInfo {
         this.patientId = patientId;
         this.tumorNormal = TumorNormal.getEnum(tumorNormal);
     }
-
-    public String getProject() {
-        return this.project;
-    }
-
-    public String getIgoId() {
-        return this.igoId;
-    }
-
-    public String getPatientId() {
-        return this.patientId;
-    }
-
     public String getTumorNormal() {
         return this.tumorNormal.name();
     }
