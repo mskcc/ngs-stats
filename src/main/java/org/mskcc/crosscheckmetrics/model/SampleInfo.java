@@ -1,5 +1,6 @@
 package org.mskcc.crosscheckmetrics.model;
-
+import lombok.Getter;
+@Getter
 public class SampleInfo {
     private String project;
     private String igoId;
