@@ -1,11 +1,12 @@
 package org.mskcc.crosscheckmetrics.model;
 import lombok.Getter;
+import lombok.AccessLevel;
 @Getter
 public class SampleInfo {
     private String project;
     private String igoId;
     private String patientId;
-    private TumorNormal tumorNormal;
+    @Getter(AccessLevel.NONE) private TumorNormal tumorNormal;
 
     public SampleInfo(String project, String igoId, String patientId, String tumorNormal) {
         this.project = project;
