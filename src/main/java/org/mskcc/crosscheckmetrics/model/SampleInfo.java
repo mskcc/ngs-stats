@@ -7,6 +7,8 @@ public class SampleInfo {
     private String igoId;
     private String patientId;
     @Getter(AccessLevel.NONE) private TumorNormal tumorNormal;
+    /* The existing getTumorNormal should override the default
+     lombok automatic getter generation.*/
 
     public SampleInfo(String project, String igoId, String patientId, String tumorNormal) {
         this.project = project;
