@@ -1,11 +1,14 @@
 package org.mskcc.crosscheckmetrics.model;
 import lombok.Getter;
+import lombok.AccessLevel;
 @Getter
 public class SampleInfo {
     private String project;
     private String igoId;
     private String patientId;
-    private TumorNormal tumorNormal;
+    @Getter(AccessLevel.NONE) private TumorNormal tumorNormal;
+    /* The existing getTumorNormal should override the default
+     lombok automatic getter generation.*/
 
     public SampleInfo(String project, String igoId, String patientId, String tumorNormal) {
         this.project = project;
@@ -13,19 +16,6 @@ public class SampleInfo {
         this.patientId = patientId;
         this.tumorNormal = TumorNormal.getEnum(tumorNormal);
     }
-
-    public String getProject() {
-        return this.project;
-    }
-
-    public String getIgoId() {
-        return this.igoId;
-    }
-
-    public String getPatientId() {
-        return this.patientId;
-    }
-
     public String getTumorNormal() {
         return this.tumorNormal.name();
     }
