@@ -40,12 +40,20 @@ class ArchivedFastqTest {
         assertEquals("hello", x.getSampleName());
     }
 
+
     @Test
-    void getSampleName() {
+    void getSampleNameFastqDotGz() {
         String result = ArchivedFastq.getSampleName("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S631_L008_R1_001.fastq.gz");
         assertEquals("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631", result);
 
         String result2 = ArchivedFastq.getSampleName("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S63_L007_R2_001.fastq.gz");
         assertEquals("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631", result2);
+    }
+
+    @Test
+    void getSampleNameFastqDotOra() {
+        String result = ArchivedFastq.getSampleName("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S63_L007_R2_001.fastq.ora");
+        System.out.println("SAMPLE NAME: " + result);
+        assertEquals("065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631", result);
     }
 }

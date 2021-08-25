@@ -56,7 +56,7 @@ public class ArchivedFastq {
     }
 
     /**
-     * Walks a FASTQ run runDirectory looking for fastq.gz files.
+     * Walks a FASTQ run runDirectory looking for fastq.gz or fastq.ora files.
      *
      * @param baseDirectory directory where FASTQ runs are written
      * @param runDirectory run directory
@@ -68,7 +68,7 @@ public class ArchivedFastq {
             baseDirectory = baseDirectory + "/";
 
         Path rootPath = new File(baseDirectory + runDirectory).toPath();
-        log.info("Walking runDirectory to find fastq.gz files: " + rootPath);
+        log.info("Walking runDirectory to find .fastq.gz, .fastq.or & .fastq files: " + rootPath);
 
         String runBaseDirectory = rootPath.getFileName().toString();
         String [] runParts = runBaseDirectory.split("_");
@@ -80,12 +80,14 @@ public class ArchivedFastq {
 
         List<ArchivedFastq> fastqs = new ArrayList<>();
         Files.walk(rootPath, 4).filter(p -> p.toString().endsWith(".fastq.gz")).forEach(y->save(run, runBaseDirectory, y, fastqs));
-        log.info("Total fastq.gz files found: " + fastqs.size());
+        log.info("Re-walking adding fastq.ora fastqs"); // slow re-walk but the directories are walked rarely
+        Files.walk(rootPath, 4).filter(p -> p.toString().endsWith(".fastq.ora")).forEach(y->save(run, runBaseDirectory, y, fastqs));
+        log.info("Total .fastq.gz & .fastq.ora files found: " + fastqs.size());
         if (fastqs.size() == 0) {
             // SCOTT_0296_AHKL2MBGXH_A1 is a custom demux with uncompressed data such as
             // 501_shNIPBL5_6D_1_CAGEtag_IGO_11724_3_L001_R1.fastq
             Files.walk(rootPath, 4).filter(p -> p.toString().endsWith(".fastq")).forEach(y->save(run, runBaseDirectory, y, fastqs));
-            log.info("Total fastq files found: " + fastqs.size());
+            log.info("Total .fastq files found: " + fastqs.size());
         }
         return fastqs;
     }
@@ -120,7 +122,11 @@ public class ArchivedFastq {
     }
 
     protected static String getSampleName(String filename) {
-        //"065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S631_L003_R1_001.fastq.gz"
-        return filename.replaceFirst("_S[0-9]+_L[0-9]+_R[0-9]_001.fastq.gz", "");
+        // Normal IGO fastq naming:
+        // "065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S631_L003_R1_001.fastq.gz" or ending with fastq.ora
+        // "065RA_DLP_UNSORTED_128655A_23_51_IGO_11113_C_2_1_631_S631_L003_R1_001.fastq.ora
+        // however some very old 2012 fastqs do not have "_S" and sample name won't work - for example:
+        // /igo/delivery/FASTQ/LIZ_0206_AD186DACXX/Project_3075/Sample_EB-LKO-Ac-II/EB-LKO-Ac-II_AGTCAA_L002_R1_002.fastq.ora
+        return filename.replaceFirst("_S[0-9]+_L[0-9]+_R[0-9]_001.fastq.(gz|ora)", "");
     }
 }
