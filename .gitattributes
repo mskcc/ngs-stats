@@ -1,2 +1,4 @@
 * linguist-vendored
 * .java linguist-vendored=false
+# Apply override to all files in the directory
+src/test/java/org/mskcc/cellranger/controller/sample__vdj/outs/* linguist-documentation
