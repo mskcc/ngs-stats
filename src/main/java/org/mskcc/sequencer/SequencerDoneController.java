@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -192,6 +191,9 @@ public class SequencerDoneController {
     @GetMapping(value = {"/sequencerstartstop/{sequencer}/{run}/{lastFile}"})
     public String addRunTimes(@PathVariable String sequencer, @PathVariable String run, @PathVariable String lastFile) {
         String baseDir = "/igo/sequencers/";
+
+        if ("pepe".equals(sequencer)) // PEPE is currently IGO's only NextSeq 2000 which has a new directory structure
+            sequencer += "/output";
 
         String runDirectoryName = baseDir + sequencer + "/" + run + "/";
         if (!new File(runDirectoryName).exists()) {
