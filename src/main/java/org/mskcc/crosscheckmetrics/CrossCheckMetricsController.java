@@ -29,6 +29,8 @@ public class CrossCheckMetricsController {
     private static final String RESULT = "RESULT";
     private static final String LEFT_FILE = "LEFT_FILE";
     private static final String RIGHT_FILE = "RIGHT_FILE";
+    private static final String LEFT_GROUP_VALUE = "LEFT_GROUP_VALUE";
+    private static final String RIGHT_GROUP_VALUE = "RIGHT_GROUP_VALUE";
     private static Logger log = LoggerFactory.getLogger(CrossCheckMetricsController.class);
     private final String LAST_METADATA_LINE = "## METRICS CLASS";
     private final String LOD_SCORE = "LOD_SCORE";
@@ -127,6 +129,7 @@ public class CrossCheckMetricsController {
             final String[] headers = line.split(TAB);
             int lodIndex = getColumnIndex(headers, LOD_SCORE);
             int resultIndex = getColumnIndex(headers, RESULT);
+            // For fingerprinting using gatk extract and crosscheck use LEFT_GROUP_VALUE and RIGHT_GROUP_VALUE
             int sampleInfoAIndex = getColumnIndex(headers, LEFT_FILE);
             int sampleInfoBIndex = getColumnIndex(headers, RIGHT_FILE);
 
@@ -146,7 +149,7 @@ public class CrossCheckMetricsController {
      * Parses CrosscheckMetrics info from line and saves to database
      *
      * @param line,             String - Line from cross_check metrics file containing values
-     * @param lodIndex,         int - Index of deliminted line w/ lodIndex information
+     * @param lodIndex,         int - Index of delimited line w/ lodIndex information
      * @param resultIndex,      int - Index of results
      * @param sampleInfoAIndex, int - Index of first sample
      * @param sampleInfoBIndex, int - Index of second sample
@@ -172,7 +175,7 @@ public class CrossCheckMetricsController {
         final String pathA = values[sampleInfoAIndex];
         final String pathB = values[sampleInfoBIndex];
 
-        // PATH -> [ PROJECT_ID, IGO_ID, PATIENT_ID, TUMOR/NORMAL ]
+        // PATH -> [ PROJECT_ID, IGO_ID, PATIENT_ID, TUMOR/NORMAL ] OR [ PROJECT_ID, IGO_ID, PATIENT_ID ]
         final SampleInfo sampleInfoA = getSampleInfo(pathA);
         final SampleInfo sampleInfoB = getSampleInfo(pathB);
 
@@ -198,11 +201,15 @@ public class CrossCheckMetricsController {
      * @param pathName, e.g. "PATH/TO/09455_S_1__C-7JJ452__Tumor_headers.bam"
      */
     private SampleInfo getSampleInfo(String pathName) {
-        String bamName = getBamName(pathName);
-        String[] values = bamName.split(BAM_DELIMITER);
-        if (values.length != 4) {
-            log.error(String.format("Failed to parse out sampleInfo from bamName: %s", bamName));
+        String fileName = getFileName(pathName);
+        String[] values = fileName.split(BAM_DELIMITER);
+        if (values.length != 4 || values.length != 3) {
+            log.error(String.format("Failed to parse out sampleInfo from bamName: %s", fileName));
             return new SampleInfo("", "", "", "");
+        }
+        if (values.length == 3) {
+            values[2] = values[2].replaceAll(".vcf", "");
+            return new SampleInfo(values[0], values[1], values[2]);
         }
         values[3] = values[3].replaceAll(".bam", "")
                              .replaceAll("_headers", "");
@@ -215,7 +222,7 @@ public class CrossCheckMetricsController {
      * @param pathName, e.g. "PATH/TO/P04969_N__04969_N_5__C-000238__Tumor_headers.bam"
      * @return, e.g. "P04969_N__04969_N_5__C-000238__Tumor_headers.bam"
      */
-    private String getBamName(String pathName) {
+    private String getFileName(String pathName) {
         String[] values = pathName.split(BACKSLASH);
         if (values.length == 0) {
             log.error(String.format("Failed to parse path: %s", pathName));
