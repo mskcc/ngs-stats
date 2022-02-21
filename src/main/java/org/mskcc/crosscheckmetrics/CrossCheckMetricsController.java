@@ -29,8 +29,6 @@ public class CrossCheckMetricsController {
     private static final String RESULT = "RESULT";
     private static final String LEFT_FILE = "LEFT_FILE";
     private static final String RIGHT_FILE = "RIGHT_FILE";
-    private static final String LEFT_GROUP_VALUE = "LEFT_GROUP_VALUE";
-    private static final String RIGHT_GROUP_VALUE = "RIGHT_GROUP_VALUE";
     private static Logger log = LoggerFactory.getLogger(CrossCheckMetricsController.class);
     private final String LAST_METADATA_LINE = "## METRICS CLASS";
     private final String LOD_SCORE = "LOD_SCORE";
@@ -129,7 +127,6 @@ public class CrossCheckMetricsController {
             final String[] headers = line.split(TAB);
             int lodIndex = getColumnIndex(headers, LOD_SCORE);
             int resultIndex = getColumnIndex(headers, RESULT);
-            // For fingerprinting using gatk extract and crosscheck use LEFT_GROUP_VALUE and RIGHT_GROUP_VALUE
             int sampleInfoAIndex = getColumnIndex(headers, LEFT_FILE);
             int sampleInfoBIndex = getColumnIndex(headers, RIGHT_FILE);
 
