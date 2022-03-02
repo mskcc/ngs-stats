@@ -324,7 +324,7 @@ public class CrosscheckMetricsControllerTest {
         Map<String, Object> response = crossCheckMetricsController.writeCrosscheckMetrics(testProject);
         assertEquals("false", response.get("success"));
 
-         // 2) Bad Values
+        // 2) Bad Values
         testProject = "BAD_PROJECT_VALUES";      // Missing all columns for header
         request = new HashMap<>();
         request.put("project", testProject);
