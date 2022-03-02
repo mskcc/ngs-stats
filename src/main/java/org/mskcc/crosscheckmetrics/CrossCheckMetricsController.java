@@ -77,6 +77,7 @@ public class CrossCheckMetricsController {
         // Crosscheck metrics are stored on the filesystem ngs-stats runs on
         List<CrosscheckMetrics> crosscheckMetricsObjects = new LinkedList<>();
         final String fileName = String.format("%s.crosscheck_metrics", project);
+        int crosscheckMetricObjsIndex = 0;
         for (String crosscheckMetricsDir : CROSSCHECK_METRICS_DIRS) {
             final String filePath = String.format("%s/%s/%s", crosscheckMetricsDir, project, fileName);
             if (!new File(filePath).exists()) {
@@ -92,7 +93,7 @@ public class CrossCheckMetricsController {
                 return createErrorResponse(status, false);
             }
             final String status = String.format("Saved CrossCheckMetrics for Project: %s", project);
-            return createSuccessResponse(status, crosscheckMetricsObjects.get(0));
+            return createSuccessResponse(status, crosscheckMetricsObjects.get(crosscheckMetricObjsIndex++));
         }
         return createErrorResponse("No file found", true);
     }
@@ -201,7 +202,6 @@ public class CrossCheckMetricsController {
     private SampleInfo getSampleInfo(String pathName) {
         String fileName = getFileName(pathName);
         String[] values = fileName.split(BAM_DELIMITER);
-        log.info("values lenght  = " + values.length);
 
         if (values.length == 3) {
             values[2] = values[2].replaceAll(".vcf*", "");

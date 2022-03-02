@@ -39,7 +39,6 @@ public class CrosscheckMetricsId implements Serializable {
         if(!(o instanceof CrosscheckMetricsId)) {
             return false;
         }
-        System.out.println("this.project" + this.project + " o.project" + ((CrosscheckMetricsId) o).getProject());
         if(((CrosscheckMetricsId) o).project.equals(this.project) && ((CrosscheckMetricsId) o).igoIdA.equals(this.igoIdA)
         && ((CrosscheckMetricsId) o).igoIdB.equals(this.igoIdB)) {
             return true;

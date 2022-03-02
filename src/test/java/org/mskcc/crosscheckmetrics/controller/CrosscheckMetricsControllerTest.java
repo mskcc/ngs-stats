@@ -352,7 +352,6 @@ public class CrosscheckMetricsControllerTest {
         SampleInfo sampleInfoB = new SampleInfo("C-2348M1", "P12683_C", "12683_C_30");
         CrosscheckMetrics metrics = new CrosscheckMetrics(31.632998, 25.273458, 25.273458
                 , "P12683_C", "EXPECTED_MATCH", sampleInfoA, sampleInfoB);
-        log.info("response lod score:" + response.get("crosscheckMetrics").getClass());
         assertEquals(metrics, response.get("crosscheckMetrics"));
 
     }

@@ -28,7 +28,7 @@ public class ApiUtil {
     /**
      * Creates a map w/ status and error response to be returned to the client. Includes logging
      *
-     * @param status,         String - Message to logP
+     * @param status,         String - Message to log
      * @param returnToClient, boolean - Whether the status should be returned to client
      * @return
      */
@@ -40,7 +40,7 @@ public class ApiUtil {
         if (returnToClient) {
             map.put("status", status);
         } else {
-            map.put("status", "Server Error. Email streidd@mskcc.org");
+            map.put("status", "Server Error. Email skigodata@mskcc.org");
         }
 
         return map;
