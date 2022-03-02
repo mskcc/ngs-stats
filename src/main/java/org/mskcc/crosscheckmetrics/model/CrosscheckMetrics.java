@@ -34,13 +34,28 @@ public class CrosscheckMetrics {
         this.result = result;
         this.patientIdA = sampleAInfo.getPatientId();
         this.patientIdB = sampleBInfo.getPatientId();
-        this.tumorNormalA = sampleAInfo.getTumorNormal();
-        this.tumorNormalB = sampleBInfo.getTumorNormal();
+        //this.tumorNormalA = sampleAInfo.getTumorNormal();
+        //this.tumorNormalB = sampleBInfo.getTumorNormal();
         this.crosscheckMetricsId = new CrosscheckMetricsId(project, sampleAInfo.getIgoId(), sampleBInfo.getIgoId());
     }
 
     @JsonInclude
     public Boolean isExpected() {
         return FingerprintResult.valueOf(result).isExpected();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(!(o instanceof  CrosscheckMetrics)) {
+            return false;
+        }
+        System.out.println("this.lodScore " + this.lodScore + " o.lodScore " + ((CrosscheckMetrics) o).getLodScore());
+        if(this.lodScore.equals(((CrosscheckMetrics) o).lodScore) && this.lodScoreTumorNormal.equals(((CrosscheckMetrics) o).lodScoreTumorNormal)
+            && this.lodScoreNormalTumor.equals(((CrosscheckMetrics) o).lodScoreNormalTumor) && this.patientIdA.equals(((CrosscheckMetrics) o).patientIdA)
+            && this.patientIdB.equals(((CrosscheckMetrics) o).patientIdB) && crosscheckMetricsId.equals(((CrosscheckMetrics) o).crosscheckMetricsId)) {
+            return true;
+        }
+        System.out.println("I'm HERE!!");
+        return false;
     }
 }

@@ -1,5 +1,6 @@
 package org.mskcc.utils;
 
+import org.mskcc.crosscheckmetrics.model.CrosscheckMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +16,11 @@ public class ApiUtil {
      * @param status, String - Informative message about the request status
      * @return
      */
-    public static Map<String, Object> createSuccessResponse(String status) {
+    public static Map<String, Object> createSuccessResponse(String status, Object crosscheckMetrics) {
         Map<String, Object> map = new HashMap<>();
         map.put("status", status);
         map.put("success", "true");
+        map.put("crosscheckMetrics", crosscheckMetrics);
         log.info(status);
         return map;
     }
@@ -26,7 +28,7 @@ public class ApiUtil {
     /**
      * Creates a map w/ status and error response to be returned to the client. Includes logging
      *
-     * @param status,         String - Message to log
+     * @param status,         String - Message to logP
      * @param returnToClient, boolean - Whether the status should be returned to client
      * @return
      */

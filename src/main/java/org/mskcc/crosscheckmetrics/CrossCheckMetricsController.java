@@ -14,10 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.mskcc.Constants.*;
 import static org.mskcc.utils.ApiUtil.createErrorResponse;
@@ -63,7 +60,7 @@ public class CrossCheckMetricsController {
         }
 
         status = String.format("Found %d samples for %d projects '%s'", results.size(), response.size(), projects);
-        Map<String, Object> resp = createSuccessResponse(status);
+        Map<String, Object> resp = createSuccessResponse(status, results);
         resp.put(API_DATA, response);
         return resp;
     }
@@ -78,6 +75,7 @@ public class CrossCheckMetricsController {
     @RequestMapping(value = "/writeCrosscheckMetrics", method = RequestMethod.GET)
     public Map<String, Object> writeCrosscheckMetrics(@RequestParam("project") String project) {
         // Crosscheck metrics are stored on the filesystem ngs-stats runs on
+        List<CrosscheckMetrics> crosscheckMetricsObjects = new LinkedList<>();
         final String fileName = String.format("%s.crosscheck_metrics", project);
         for (String crosscheckMetricsDir : CROSSCHECK_METRICS_DIRS) {
             final String filePath = String.format("%s/%s/%s", crosscheckMetricsDir, project, fileName);
@@ -88,13 +86,13 @@ public class CrossCheckMetricsController {
             log.info(String.format("/writeCrosscheckMetrics: Reading %s", fileName));
 
             try {
-                saveCrossCheckMetricsFile(filePath);
+                crosscheckMetricsObjects = saveCrossCheckMetricsFile(filePath);
             } catch (IOException | IllegalStateException e) {
                 String status = String.format("Failed to read %s: %s", filePath, e.getMessage());
                 return createErrorResponse(status, false);
             }
             final String status = String.format("Saved CrossCheckMetrics for Project: %s", project);
-            return createSuccessResponse(status);
+            return createSuccessResponse(status, crosscheckMetricsObjects.get(0));
         }
         return createErrorResponse("No file found", true);
     }
@@ -105,7 +103,8 @@ public class CrossCheckMetricsController {
      * @param filePath, String - e.g. /PATH/TO/{PROJECT}_{RUN}.crosscheck_metrics
      * @throws IOException
      */
-    private void saveCrossCheckMetricsFile(String filePath) throws IOException, IllegalStateException {
+    private List<CrosscheckMetrics> saveCrossCheckMetricsFile(String filePath) throws IOException, IllegalStateException {
+        List<CrosscheckMetrics> crosscheckMetricObjs = new LinkedList<>();
         BufferedReader TSVFile = new BufferedReader(new FileReader(filePath));
         String line = TSVFile.readLine(); // Read first line.
 
@@ -132,7 +131,7 @@ public class CrossCheckMetricsController {
 
             line = TSVFile.readLine();
             while (line != null) {
-                createCrosscheckMetricsEntry(line, lodIndex, resultIndex, sampleInfoAIndex, sampleInfoBIndex);
+                crosscheckMetricObjs.add(createAndReturnCrosscheckMetricsEntry(line, lodIndex, resultIndex, sampleInfoAIndex, sampleInfoBIndex));
                 line = TSVFile.readLine();
             }
         } else {
@@ -140,6 +139,7 @@ public class CrossCheckMetricsController {
             throw new IllegalStateException(status);
         }
         TSVFile.close();
+        return crosscheckMetricObjs;
     }
 
     /**
@@ -151,8 +151,8 @@ public class CrossCheckMetricsController {
      * @param sampleInfoAIndex, int - Index of first sample
      * @param sampleInfoBIndex, int - Index of second sample
      */
-    private void createCrosscheckMetricsEntry(String line, int lodIndex, int resultIndex, int sampleInfoAIndex, int sampleInfoBIndex) throws IllegalStateException {
-        if (line.equals("")) return;
+    private CrosscheckMetrics createAndReturnCrosscheckMetricsEntry(String line, int lodIndex, int resultIndex, int sampleInfoAIndex, int sampleInfoBIndex) throws IllegalStateException {
+        if (line.equals("")) return null;
         final String[] values = line.split(TAB);
 
         int[] indices = new int[]{lodIndex + 2, resultIndex, sampleInfoAIndex, sampleInfoBIndex};
@@ -172,7 +172,7 @@ public class CrossCheckMetricsController {
         final String pathA = values[sampleInfoAIndex];
         final String pathB = values[sampleInfoBIndex];
 
-        // PATH -> [ PROJECT_ID, IGO_ID, PATIENT_ID, TUMOR/NORMAL ] OR [ PROJECT_ID, IGO_ID, PATIENT_ID ]
+        // PATH -> [ PROJECT_ID, IGO_ID, PATIENT_ID, TUMOR/NORMAL ] OR [ PATIENT_ID, PROJECT_ID, IGO_ID ]
         final SampleInfo sampleInfoA = getSampleInfo(pathA);
         final SampleInfo sampleInfoB = getSampleInfo(pathB);
 
@@ -187,6 +187,7 @@ public class CrossCheckMetricsController {
         // Save to database
         CrosscheckMetrics metrics = new CrosscheckMetrics(lod, lodAlt1, lodAlt2, project, result, sampleInfoA, sampleInfoB);
         crossCheckMetricsRepository.save(metrics);
+        return metrics;
     }
 
     /**
@@ -200,17 +201,21 @@ public class CrossCheckMetricsController {
     private SampleInfo getSampleInfo(String pathName) {
         String fileName = getFileName(pathName);
         String[] values = fileName.split(BAM_DELIMITER);
-        if (values.length != 4 || values.length != 3) {
-            log.error(String.format("Failed to parse out sampleInfo from bamName: %s", fileName));
-            return new SampleInfo("", "", "", "");
-        }
+        log.info("values lenght  = " + values.length);
+
         if (values.length == 3) {
-            values[2] = values[2].replaceAll(".vcf", "");
+            values[2] = values[2].replaceAll(".vcf*", "");
             return new SampleInfo(values[0], values[1], values[2]);
         }
-        values[3] = values[3].replaceAll(".bam", "")
-                             .replaceAll("_headers", "");
-        return new SampleInfo(values[0], values[1], values[2], values[3]);
+        else if (values.length == 4) {
+            values[3] = values[3].replaceAll(".bam", "")
+                    .replaceAll("_headers", "");
+            return new SampleInfo(values[0], values[1], values[2], values[3]);
+        }
+        else {
+            log.error(String.format("Failed to parse out sampleInfo from bam or vcf name: %s", fileName));
+            return new SampleInfo("", "", "", "");
+        }
     }
 
     /**

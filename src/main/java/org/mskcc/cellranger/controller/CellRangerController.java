@@ -134,7 +134,7 @@ public class CellRangerController {
             }
             repo.save(dataRecord);
         }
-        return createSuccessResponse(String.format("Saved %d Samples", samples.size()));
+        return createSuccessResponse(String.format("Saved %d Samples", samples.size()), null);
     }
 
     /**
@@ -180,7 +180,7 @@ public class CellRangerController {
             return createErrorResponse(status, true);
         }
         status = String.format("Found %d samples for project '%s'", samples.size(), project);
-        Map<String, Object> resp = createSuccessResponse(status);
+        Map<String, Object> resp = createSuccessResponse(status, null);
         resp.put(API_DATA, samples);
         return resp;
     }
@@ -199,7 +199,7 @@ public class CellRangerController {
         if(data != null){
             status = String.format("Retrieved data from %s", webSummaryPath);
         }
-        Map<String, Object> resp = createSuccessResponse(status);
+        Map<String, Object> resp = createSuccessResponse(status, null);
         resp.put(API_DATA, data);
         return resp;
     }
