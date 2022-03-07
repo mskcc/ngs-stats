@@ -50,11 +50,8 @@ public class CrossCheckMetricsController {
 
         // Create API response for each DB entry
         final Map<String, ProjectEntries> response = new HashMap<>();
-        status = String.format("Found %d samples for %d projects '%s'", results.size(), response.size(), projects);
-        Map<String, Object> resp = createSuccessResponse(status, null);
-        for(CrosscheckMetrics entry : results){
+        for(CrosscheckMetrics entry : results) {
             String project = entry.getCrosscheckMetricsId().getProject();
-            resp = createSuccessResponse(status, entry);
             if(response.containsKey(project)){
                 response.get(project).addEntry(entry);
             } else {
@@ -62,6 +59,8 @@ public class CrossCheckMetricsController {
             }
         }
 
+        status = String.format("Found %d samples for %d projects '%s'", results.size(), response.size(), projects);
+        Map<String, Object> resp = createSuccessResponse(status, results.get(0));
         resp.put(API_DATA, response);
         return resp;
     }
