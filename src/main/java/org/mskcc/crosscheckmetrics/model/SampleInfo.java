@@ -1,6 +1,9 @@
 package org.mskcc.crosscheckmetrics.model;
 import lombok.Getter;
 import lombok.AccessLevel;
+
+import java.util.Objects;
+
 @Getter
 public class SampleInfo {
     private String project;
@@ -16,7 +19,25 @@ public class SampleInfo {
         this.patientId = patientId;
         this.tumorNormal = TumorNormal.getEnum(tumorNormal);
     }
+    public SampleInfo(String patientId, String project, String igoId) {
+        this.project = project;
+        this.patientId = patientId;
+        this.igoId = igoId;
+    }
     public String getTumorNormal() {
         return this.tumorNormal.name();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(!(o instanceof SampleInfo)) {
+            return false;
+        }
+        if(((SampleInfo) o).getProject().equals(this.getProject()) && ((SampleInfo) o).getIgoId().equals(this.getIgoId()) &&
+                ((SampleInfo) o).getPatientId().equals(this.getPatientId()) && ((SampleInfo) o).getTumorNormal().equals(this.getTumorNormal())) {
+            return true;
+        }
+
+        return false;
     }
 }

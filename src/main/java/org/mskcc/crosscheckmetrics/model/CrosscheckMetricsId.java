@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
+import java.util.Objects;
 
 @NoArgsConstructor
 @Embeddable
@@ -31,5 +32,17 @@ public class CrosscheckMetricsId implements Serializable {
         this.project = project;
         this.igoIdA = igoIdA;
         this.igoIdB = igoIdB;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(!(o instanceof CrosscheckMetricsId)) {
+            return false;
+        }
+        if(((CrosscheckMetricsId) o).project.equals(this.project) && ((CrosscheckMetricsId) o).igoIdA.equals(this.igoIdA)
+        && ((CrosscheckMetricsId) o).igoIdB.equals(this.igoIdB)) {
+            return true;
+        }
+        return false;
     }
 }

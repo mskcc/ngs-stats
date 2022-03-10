@@ -1,5 +1,6 @@
 package org.mskcc.utils;
 
+import org.mskcc.crosscheckmetrics.model.CrosscheckMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +16,11 @@ public class ApiUtil {
      * @param status, String - Informative message about the request status
      * @return
      */
-    public static Map<String, Object> createSuccessResponse(String status) {
+    public static Map<String, Object> createSuccessResponse(String status, Object crosscheckMetrics) {
         Map<String, Object> map = new HashMap<>();
         map.put("status", status);
         map.put("success", "true");
+        map.put("crosscheckMetrics", crosscheckMetrics);
         log.info(status);
         return map;
     }
@@ -38,7 +40,7 @@ public class ApiUtil {
         if (returnToClient) {
             map.put("status", status);
         } else {
-            map.put("status", "Server Error. Email streidd@mskcc.org");
+            map.put("status", "Server Error. Email skigodata@mskcc.org");
         }
 
         return map;

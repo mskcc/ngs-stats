@@ -54,7 +54,7 @@ public class ProjectEntries {
      * @param entry
      */
     public void addEntry(CrosscheckMetrics entry){
-        final Map<String,Object> processed = procesEntry(entry);
+        final Map<String,Object> processed = processEntry(entry);
         this.entries.add(processed);
         updateStatus(entry);
     }
@@ -85,7 +85,7 @@ public class ProjectEntries {
      * @param entry, CrosscheckMetrics - DB entry
      * @return, Map to be converted into JSON object
      */
-    private Map<String,Object> procesEntry(CrosscheckMetrics entry){
+    private Map<String,Object> processEntry(CrosscheckMetrics entry){
         final Map<String, Object> processed = new HashMap<>();
         processed.put("lodScore", entry.getLodScore());
         processed.put("lodScoreTumorNormal",entry.getLodScoreTumorNormal());
