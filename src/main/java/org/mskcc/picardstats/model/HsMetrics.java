@@ -116,9 +116,11 @@ public class HsMetrics {
                 String typeName = field.getType().getName();
 
                 String value = parts[i];
-                if ("".equals(value)) // some columns are nullable
+                if ("".equals(value) ) // some columns are nullable
                     continue;
-                else if ("?".equals(value)) {
+                else if ("?".equals(value) ) {
+                    if ("FOLD_80_BASE_PENALTY".equals(fieldName))
+                        continue;
                     System.err.println("Failing due to type:" + typeName + " fieldName:" + fieldName);
                     return null;
                 }
