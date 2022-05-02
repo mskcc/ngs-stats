@@ -18,6 +18,7 @@ public class RequestPermissions {
     private List<LabMember> labMembers;
 
     private String request;
+    private String requestName;
     private List<RequestReadAccess> requestReadAccess;  // individuals who have access to this specific request
     // groups that have read access such as 'cmoigo', 'bicigo', 'isabl' with special code in LIMS or iLabs for them
     private List<String> requestGroups;

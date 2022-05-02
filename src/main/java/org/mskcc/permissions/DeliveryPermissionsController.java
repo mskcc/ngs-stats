@@ -83,8 +83,8 @@ public class DeliveryPermissionsController {
 
         List<String> fastqPaths = ArchivedFastq.toFastqPathOnly(fastqs);
 
-        return new RequestPermissions(lims.getLabName(), labMembers, request, requestReadAccess, groupReadAccess,
-                dataAccessIDs, fastqPaths);
+        return new RequestPermissions(lims.getLabName(), labMembers, request, lims.getRequestName(),requestReadAccess,
+                groupReadAccess, dataAccessIDs, fastqPaths);
     }
 
     protected static List<String> getDataAccessIDs(String dataAccessEmails) {
@@ -149,6 +149,7 @@ public class DeliveryPermissionsController {
     @NoArgsConstructor
     public static class RequestPermissionsLIMS {
         private String requestId;
+        private String requestName;
         private String labName;
         private String labHeadEmail;
         private Boolean isCmoRequest;
