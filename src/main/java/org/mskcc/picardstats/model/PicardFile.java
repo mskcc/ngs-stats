@@ -118,6 +118,6 @@ public class PicardFile {
 
     protected static String getVersionDRAGEN(String firstLine) {
         firstLine = firstLine.replace("#DRAGEN_VERSION_", "");
-        return firstLine.split(" ")[0];
+        return "DRAGEN_" + firstLine.split(" ")[0];
     }
 }
