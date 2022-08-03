@@ -98,7 +98,7 @@ public class PicardFile {
             String firstLine = br.readLine();
             // DRAGEN .txt files are written with the first line like:
             // '#DRAGEN_VERSION_01.003.044.3.10.1-183-g9ced7ae8 '
-            if (firstLine.contains("#DRAGEN_VERSION")) {
+            if (firstLine != null && firstLine.contains("#DRAGEN_VERSION")) {
                 version = getVersionDRAGEN(firstLine);
             }
         } catch (IOException e) {
