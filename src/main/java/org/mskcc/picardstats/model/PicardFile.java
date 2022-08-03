@@ -8,7 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import java.io.File;
+import java.io.*;
 import java.util.Date;
 
 @Entity
@@ -92,15 +92,32 @@ public class PicardFile {
         String sample = parts[2];
         String referenceGenome = parts[3];
 
+        String version = null;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String firstLine = br.readLine();
+            // DRAGEN .txt files are written with the first line like:
+            // '#DRAGEN_VERSION_01.003.044.3.10.1-183-g9ced7ae8 '
+            if (firstLine.contains("#DRAGEN_VERSION")) {
+                version = getVersionDRAGEN(firstLine);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to read DRAGEN version number." + e.getMessage());
+        }
+
         String fileType;
-        String picardVersion = null;
         if (parts.length == 6) {
-            picardVersion = parts[4];
+            version = parts[4];
             fileType = parts[5].substring(0, parts[5].length()-4); // remove .txt
         } else {
             fileType = parts[4].substring(0, parts[4].length()-4); // remove .txt
         }
 
-        return new PicardFile(filename, run, request, sample, referenceGenome, fileType, new Date(file.lastModified()), true, picardVersion);
+        return new PicardFile(filename, run, request, sample, referenceGenome, fileType, new Date(file.lastModified()), true, version);
+    }
+
+    protected static String getVersionDRAGEN(String firstLine) {
+        firstLine = firstLine.replace("#DRAGEN_VERSION_", "");
+        return firstLine.split(" ")[0];
     }
 }
