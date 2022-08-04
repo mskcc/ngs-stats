@@ -93,24 +93,27 @@ public class PicardFile {
         String referenceGenome = parts[3];
 
         String version = null;
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String firstLine = br.readLine();
-            // DRAGEN .txt files are written with the first line like:
-            // '#DRAGEN_VERSION_01.003.044.3.10.1-183-g9ced7ae8 '
-            if (firstLine != null && firstLine.contains("#DRAGEN_VERSION")) {
-                version = getVersionDRAGEN(firstLine);
-            }
-        } catch (IOException e) {
-            System.err.println("Failed to read DRAGEN version number." + e.getMessage());
-        }
-
         String fileType;
+        // read version from file name like
+        // DIANA_0508_BHVV72DSX3___P13340_B___TM_20220614_Exp1_T65_beta_IGO_13340_B_65___grcm39___2_23_2___AM.txt
         if (parts.length == 6) {
             version = parts[4];
             fileType = parts[5].substring(0, parts[5].length()-4); // remove .txt
         } else {
             fileType = parts[4].substring(0, parts[4].length()-4); // remove .txt
+            try {
+                System.out.println("Reading DRAGEN version number");
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String firstLine = br.readLine();
+                // DRAGEN .txt files are written with the first line like:
+                // '#DRAGEN_VERSION_01.003.044.3.10.1-183-g9ced7ae8 '
+                if (firstLine != null && firstLine.contains("#DRAGEN_VERSION")) {
+                    version = getVersionDRAGEN(firstLine);
+                }
+                br.close();
+            } catch (IOException e) {
+                System.err.println("Failed to read DRAGEN version number." + e.getMessage());
+            }
         }
 
         return new PicardFile(filename, run, request, sample, referenceGenome, fileType, new Date(file.lastModified()), true, version);
