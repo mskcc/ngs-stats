@@ -79,7 +79,7 @@ public class DeliveryPermissionsController {
                 fastqs.addAll(moreFastqs);
         }
 
-        List<String> dataAccessIDs = getDataAccessIDs(lims.dataAccessEmails);
+        List<String> dataAccessIDs = getDataAccessIDs(lims.dataAccessEmails, lims.labHeadEmail, lims.investigatorEmail);
 
         List<String> fastqPaths = ArchivedFastq.toFastqPathOnly(fastqs);
 
@@ -87,13 +87,18 @@ public class DeliveryPermissionsController {
                 groupReadAccess, dataAccessIDs, fastqPaths);
     }
 
-    protected static List<String> getDataAccessIDs(String dataAccessEmails) {
+    protected static List<String> getDataAccessIDs(String dataAccessEmails, String labHeadEmail, String investigatorEmail) {
         List<String> dataAccessEmailsList = Arrays.asList(dataAccessEmails.split(","));
         List<String> dataAccessIDs = new ArrayList<>();
         for (String email:dataAccessEmailsList) {
             if (email.endsWith("mskcc.org") && !email.toLowerCase().startsWith("zzpdl"))
                 dataAccessIDs.add(email.split("@")[0]);
         }
+        if (labHeadEmail.endsWith("mskcc.org") && !labHeadEmail.toLowerCase().startsWith("zzpdl"))
+            dataAccessIDs.add(labHeadEmail.split("@")[0]);
+        if (investigatorEmail.endsWith("mskcc.org") && !investigatorEmail.toLowerCase().startsWith("zzpdl"))
+            dataAccessIDs.add(investigatorEmail.split("@")[0]);
+
         return dataAccessIDs;
     }
 
@@ -152,6 +157,7 @@ public class DeliveryPermissionsController {
         private String requestName;
         private String labName;
         private String labHeadEmail;
+        private String investigatorEmail;
         private Boolean isCmoRequest;
         private Boolean isBicRequest;
         private String dataAccessEmails;
