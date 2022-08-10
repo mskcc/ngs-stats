@@ -60,6 +60,7 @@ public class DeliveryPermissionsController {
             return null;
 
         // ask LIMS which lab and which request groups should have access ie cmoigo, bicigo, isabl
+        // Note: for some old requests prior to 2017 there may be no LIMS information
         RequestPermissionsLIMS lims = queryLIMSforLabNameAndGroupAccess(request);
         log.info("LIMS response:" + lims);
 
@@ -83,8 +84,15 @@ public class DeliveryPermissionsController {
 
         List<String> fastqPaths = ArchivedFastq.toFastqPathOnly(fastqs);
 
-        return new RequestPermissions(lims.getLabName(), labMembers, request, lims.getRequestName(),requestReadAccess,
+        return new RequestPermissions(lims.getLabName(), labMembers, request, lims.getRequestName(), requestReadAccess,
                 groupReadAccess, dataAccessIDs, fastqPaths);
+    }
+
+    @GetMapping(value = "/getLabPermissions/{labName}")
+    public RequestPermissions getLabPermissions(@PathVariable String labName) {
+        log.info("Searching for all lab members.");
+        List<LabMember> labMembers = labMemberRepository.findByPi(labName);
+        return new RequestPermissions(labName, labMembers, null, null, null, null, null, null);
     }
 
     protected static List<String> getDataAccessIDs(String dataAccessEmails, String labHeadEmail, String investigatorEmail) {
