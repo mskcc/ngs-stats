@@ -25,13 +25,13 @@ public class PicardToExcel {
     private static final String[] titlesMD = {"Run", "Request", "Sample", "ReferenceGenome", "Last Modified Date",
             "LIBRARY", "UNPAIRED_READS_EXAMINED", "READ_PAIRS_EXAMINED", "SECONDARY_OR_SUPPLEMENTARY_RDS",
             "UNMAPPED_READS", "UNPAIRED_READ_DUPLICATES", "READ_PAIR_DUPLICATES", "READ_PAIR_OPTICAL_DUPLICATES",
-            "PERCENT_DUPLICATION", "ESTIMATED_LIBRARY_SIZE"};
+            "PERCENT_DUPLICATION", "ESTIMATED_LIBRARY_SIZE", "VERSION"};
 
     private static final String[] titlesAM = {"Run", "Request", "Sample", "ReferenceGenome", "Last Modified Date",
             "CATEGORY", "TOTAL_READS", "PF_READS", "PCT_PF_READS", "PF_NOISE_READS", "PF_READS_ALIGNED", "PCT_PF_READS_ALIGNED",
             "PF_ALIGNED_BASES", "PF_HQ_ALIGNED_READS", "PF_HQ_ALIGNED_BASES", "PF_HQ_ALIGNED_Q20_BASES",
             "PF_HQ_MEDIAN_MISMATCHES", "PF_MISMATCH_RATE", "PF_HQ_ERROR_RATE", "PF_INDEL_RATE", "MEAN_READ_LENGTH",
-            "READS_ALIGNED_IN_PAIRS", "PCT_READS_ALIGNED_IN_PAIRS", "BAD_CYCLES", "STRAND_BALANCE", "PCT_CHIMERAS", "PCT_ADAPTER"};
+            "READS_ALIGNED_IN_PAIRS", "PCT_READS_ALIGNED_IN_PAIRS", "BAD_CYCLES", "STRAND_BALANCE", "PCT_CHIMERAS", "PCT_ADAPTER", "VERSION"};
 
     private static final String[] titlesHS = {"Run", "Request", "Sample", "ReferenceGenome", "Last Modified Date",
             "BAIT_SET", "GENOME_SIZE","BAIT_TERRITORY","TARGET_TERRITORY", "BAIT_DESIGN_EFFICIENCY","TOTAL_READS",
@@ -44,7 +44,7 @@ public class PicardToExcel {
             "PCT_TARGET_BASES_1X","PCT_TARGET_BASES_2X","PCT_TARGET_BASES_10X", "PCT_TARGET_BASES_20X",
             "PCT_TARGET_BASES_30X","PCT_TARGET_BASES_40X","PCT_TARGET_BASES_50X", "PCT_TARGET_BASES_100X",
             "HS_LIBRARY_SIZE","HS_PENALTY_10X","HS_PENALTY_20X","HS_PENALTY_30X", "HS_PENALTY_40X","HS_PENALTY_50X",
-            "HS_PENALTY_100X","AT_DROPOUT","GC_DROPOUT","HET_SNP_SENSITIVITY", "HET_SNP_Q"};
+            "HS_PENALTY_100X","AT_DROPOUT","GC_DROPOUT","HET_SNP_SENSITIVITY", "HET_SNP_Q", "VERSION"};
 
     private static final String [] titlesRNA = {"Run", "Request", "Sample", "ReferenceGenome", "Last Modified Date",
             "   PF_BASES   ", "PF_ALIGNED_BASES","RIBOSOMAL_BASES","CODING_BASES", "UTR_BASES","INTRONIC_BASES",
@@ -52,7 +52,7 @@ public class PicardToExcel {
             "NUM_R1_TRANSCRIPT_STRAND_READS","NUM_R2_TRANSCRIPT_STRAND_READS","NUM_UNEXPLAINED_READS",
             "PCT_R1_TRANSCRIPT_STRAND_READS","PCT_R2_TRANSCRIPT_STRAND_READS","PCT_RIBOSOMAL_BASES", "PCT_CODING_BASES",
             "PCT_UTR_BASES", "PCT_INTRONIC_BASES", "PCT_INTERGENIC_BASES", "PCT_MRNA_BASES", "PCT_USABLE_BASES",
-            "PCT_CORRECT_STRAND_READS","MEDIAN_CV_COVERAGE","MEDIAN_5PRIME_BIAS","MEDIAN_3PRIME_BIAS","MEDIAN_5PRIME_TO_3PRIME_BIAS"};
+            "PCT_CORRECT_STRAND_READS","MEDIAN_CV_COVERAGE","MEDIAN_5PRIME_BIAS","MEDIAN_3PRIME_BIAS","MEDIAN_5PRIME_TO_3PRIME_BIAS", "VERSION"};
 
 
     protected static void writeExcel(File fileName, List<PicardFile> picardFiles) throws IOException {
@@ -139,6 +139,9 @@ public class PicardToExcel {
                 cell = row.createCell(14);
                 cell.setCellStyle(styles.get("number"));
                 cell.setCellValue(dm.ESTIMATED_LIBRARY_SIZE);
+                cell = row.createCell(15);
+                cell.setCellStyle(styles.get("cell"));
+                cell.setCellValue(f.getPicardVersion());
             } else if ("AM".equals(f.getFileType())) {
                 Row row = amMetrics.createRow(amRow++);
                 writeRunRequestSampleGenomeDate(styles, f, row);
@@ -212,6 +215,9 @@ public class PicardToExcel {
                 cell = row.createCell(i++);
                 cell.setCellStyle(styles.get("percent"));
                 cell.setCellValue(am.PCT_ADAPTER);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("cell"));
+                cell.setCellValue(f.getPicardVersion());
             } else if ("HS".equals(f.getFileType())) {
                 Row row = hsMetrics.createRow(hsRow++);
                 writeRunRequestSampleGenomeDate(styles, f, row);
@@ -384,6 +390,9 @@ public class PicardToExcel {
                 cell = row.createCell(i++);
                 cell.setCellStyle(styles.get("percent"));
                 cell.setCellValue(hs.HET_SNP_Q);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("cell"));
+                cell.setCellValue(f.getPicardVersion());
             } else if ("RNA".equals(f.getFileType())) {
                 Row row = rnaMetrics.createRow(rnaRow++);
                 writeRunRequestSampleGenomeDate(styles, f, row);
@@ -475,6 +484,9 @@ public class PicardToExcel {
                 cell = row.createCell(i++);
                 cell.setCellStyle(styles.get("percent"));
                 cell.setCellValue(rna.MEDIAN_5PRIME_TO_3PRIME_BIAS);
+                cell = row.createCell(i++);
+                cell.setCellStyle(styles.get("cell"));
+                cell.setCellValue(f.getPicardVersion());
             }
         }
 
