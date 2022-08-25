@@ -53,19 +53,29 @@ public class DeliveryPermissionsController {
     protected static final String ISABL_GROUP = "isabl";
     protected static final String ISABL_EMAIL = "zzPDL_SKI_ISABL@mskcc.org";
 
-    @GetMapping(value = "/getRequestPermissions/{request}")
-    public RequestPermissions getRequestPermissions(@PathVariable String request) {
+    @GetMapping(value = "/getRequestPermissions/{request}/{lab}")
+    public RequestPermissions getRequestPermissions(@PathVariable String request, @PathVariable(required = false) String lab) {
         log.info("Querying request permissions for:" + request);
         if (request.length() < 5 || request.length() > 10)
             return null;
 
-        // ask LIMS which lab and which request groups should have access ie cmoigo, bicigo, isabl
-        // Note: for some old requests prior to 2017 there may be no LIMS information
-        RequestPermissionsLIMS lims = queryLIMSforLabNameAndGroupAccess(request);
-        log.info("LIMS response:" + lims);
+        RequestPermissionsLIMS lims;
+        if ("none".equals(lab)) {
+            // ask LIMS which lab and which request groups should have access ie cmoigo, bicigo, isabl
+            // Note: for some old requests prior to 2017 there may be no LIMS information
+            lims = queryLIMSforLabNameAndGroupAccess(request);
+            log.info("LIMS response:" + lims);
+        } else {
+            lims = new RequestPermissionsLIMS(request, "", lab, lab + "@mskcc.org", "", Boolean.FALSE, Boolean.FALSE, "");
+        }
 
         log.info("Searching for all lab members with read access.");
-        List<LabMember> labMembers = labMemberRepository.findByPi(lims.getLabName());
+        String labName = "";
+        if ("none".equals(lab))
+            labName = lab;
+        else
+            labName = lims.getLabName();
+        List<LabMember> labMembers = labMemberRepository.findByPi(labName);
 
         List<String> groupReadAccess = buildGroupAccessList(lims.getIsCmoRequest(), lims.getIsBicRequest(), lims.dataAccessEmails);
 
