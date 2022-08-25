@@ -70,11 +70,7 @@ public class DeliveryPermissionsController {
         }
 
         log.info("Searching for all lab members with read access.");
-        String labName = "";
-        if ("none".equals(lab))
-            labName = lab;
-        else
-            labName = lims.getLabName();
+        String labName = labName = lims.getLabName();
         List<LabMember> labMembers = labMemberRepository.findByPi(labName);
 
         List<String> groupReadAccess = buildGroupAccessList(lims.getIsCmoRequest(), lims.getIsBicRequest(), lims.dataAccessEmails);
