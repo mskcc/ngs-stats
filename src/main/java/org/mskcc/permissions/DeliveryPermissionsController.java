@@ -53,6 +53,11 @@ public class DeliveryPermissionsController {
     protected static final String ISABL_GROUP = "isabl";
     protected static final String ISABL_EMAIL = "zzPDL_SKI_ISABL@mskcc.org";
 
+    @GetMapping(value = "/getRequestPermissions/{request}")
+    public RequestPermissions getRequestPermissions(@PathVariable String request) {
+        return getRequestPermissions(request, "none");
+    }
+
     @GetMapping(value = "/getRequestPermissions/{request}/{lab}")
     public RequestPermissions getRequestPermissions(@PathVariable String request, @PathVariable(required = false) String lab) {
         log.info("Querying request permissions for:" + request);
