@@ -1,4 +1,4 @@
-Paths to over 1 million IGO fastq.gz files.
+Paths to over 1 million IGO fastq.gz files, 17 tables, 2.1 GB of data total as of 10/2022.
 
 Sequencer start-stop times.
 
