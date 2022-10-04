@@ -1,10 +1,12 @@
-Paths to over 1 million IGO fastq.gz files, 17 tables, 2.1 GB of data total as of 10/2022.
+The database has 17 tables with post sequencing information such as:
 
-Sequencer start-stop times.
+File name information for over 1.5 million fastq files written by IGO since 2011 in the table archivedfastq
 
-Cell Ranger Stats.
+Sequencer start-stop times in the table startstopsequencer so the lab can track sequencer availability.
 
-Picard.jar statistics (HS Metrics, Duplication Metrics, Alignment Summary Metrics, RNA Seq Metrics & WGS Metrics)
+10x Cell Ranger Stats in tables cellrangersummaryvdj and cellrangersummarycount.
+
+Code to parse several Broad picard.jar output files and store in the database - HS Metrics, Duplication Metrics, Alignment Summary Metrics, RNA Seq Metrics & WGS Metrics, and crosscheckmetrics.
 
 Picard naming conventions follow the Picard Metrics Definitions:
 
