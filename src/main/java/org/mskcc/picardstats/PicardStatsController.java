@@ -2,8 +2,6 @@ package org.mskcc.picardstats;
 
 import org.mskcc.picardstats.model.*;
 import org.mskcc.picardstats.repository.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +15,6 @@ import java.util.*;
 
 @RestController
 public class PicardStatsController {
-    private static Logger log = LoggerFactory.getLogger(PicardStatsController.class);
-
     private static final String [] BASE_STATS_DIR =  new String [] {"/igo/stats/DONE/"};
 
     // directories where Picard stats Excel files are written
@@ -150,7 +146,7 @@ public class PicardStatsController {
         for (PicardFile pf : files) {
             if (!pf.isParseOK())
                 continue;
-
+            System.out.println("Reading stats file: " + pf.getFilename());
             QCSiteStats stats = statsMap.getOrDefault(pf.getMd5RRS(), new QCSiteStats(pf));
 
             switch (pf.getFileType()) {
@@ -279,7 +275,7 @@ public class PicardStatsController {
     @GetMapping(value = "/picardstats/run-date/{dateInMilis}")
     public Map<String, QCSiteStats> getPicardStatsByDate(@PathVariable long dateInMilis) {
         Date date = new Date(dateInMilis);
-        log.info(String.format("Retrieving picard stats for date %d (%s)", dateInMilis, date));
+        System.out.println(String.format("Retrieving picard stats for date %d (%s)", dateInMilis, date));
 
         List<PicardFile> picardFiles = picardFileRepository.findByLastModifiedGreaterThan(date);
 

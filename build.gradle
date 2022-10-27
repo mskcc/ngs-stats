@@ -12,7 +12,7 @@ buildscript {
 
 plugins {
 	// https://projectlombok.org
-	id "io.freefair.lombok" version "5.3.0"
+	id "io.freefair.lombok" version "6.5.1"
 }
 
 repositories {
@@ -55,7 +55,7 @@ dependencies {
 	// from https://docs.gradle.org/current/userguide/java_testing.html#using_junit5
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-	testCompileOnly 'junit:junit:4.13'
+	testCompileOnly 'junit:junit:4.13.2'
 	testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
 }
 
