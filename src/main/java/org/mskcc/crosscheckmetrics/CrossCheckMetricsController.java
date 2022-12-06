@@ -38,6 +38,8 @@ public class CrossCheckMetricsController {
     @CrossOrigin
     @RequestMapping(value = "/getCrosscheckMetrics", method = RequestMethod.GET)
     public Map<String, Object> getCrosscheckMetrics(@RequestParam("projects") String projects) {
+        long startTime = System.currentTimeMillis();
+
         List<String> projectList = Arrays.asList(projects.split(","));
         List<CrosscheckMetrics> results = crossCheckMetricsRepository.findByCrosscheckMetrics_IdProject_IsIn(projectList);
         log.info("/getCrosscheckMetrics");
@@ -50,9 +52,9 @@ public class CrossCheckMetricsController {
 
         // Create API response for each DB entry
         final Map<String, ProjectEntries> response = new HashMap<>();
-        for(CrosscheckMetrics entry : results) {
+        for (CrosscheckMetrics entry : results) {
             String project = entry.getCrosscheckMetricsId().getProject();
-            if(response.containsKey(project)){
+            if (response.containsKey(project)) {
                 response.get(project).addEntry(entry);
             } else {
                 response.put(project, new ProjectEntries(project, entry));
@@ -62,6 +64,7 @@ public class CrossCheckMetricsController {
         status = String.format("Found %d samples for %d projects '%s'", results.size(), response.size(), projects);
         Map<String, Object> resp = createSuccessResponse(status, results.get(0));
         resp.put(API_DATA, response);
+        log.info("/getCrosscheckMetrics elapsed time: " + (System.currentTimeMillis() - startTime) + " ms");
         return resp;
     }
 
