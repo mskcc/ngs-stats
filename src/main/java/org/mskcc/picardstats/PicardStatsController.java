@@ -170,10 +170,6 @@ public class PicardStatsController {
                     List<HsMetrics> hs = hsRepository.findByFilename(pf.getFilename());
                     stats.addHS(hs.get(0));
                     break;
-                case "mskQ":
-                    List<QMetric> qMetrics = qMetricsRepository.findByFilename(pf.getFilename());
-                    stats.addQ(qMetrics.get(0));
-                    break;
                 case "RNA":
                     List<RnaSeqMetrics> rnaSeqMetrics = rnaSeqRepository.findByFilename(pf.getFilename());
                     stats.addRna(rnaSeqMetrics.get(0));

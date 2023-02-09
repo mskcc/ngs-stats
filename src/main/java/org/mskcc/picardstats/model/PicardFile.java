@@ -29,7 +29,8 @@ public class PicardFile {
     @Column(length = 32)
     private String md5RRS;
     private boolean parseOK = true; // if the format is bad or unrecognized and parsing fails set to false
-    private String picardVersion;
+
+    private String statsVersion;
 
     @OneToOne(mappedBy = "picardFile")
     private AlignmentSummaryMetrics alignmentSummaryMetrics;
@@ -55,7 +56,7 @@ public class PicardFile {
     public PicardFile() {}
 
     public PicardFile(String filename, String run, String request, String sample, String referenceGenome,
-                      String fileType, Date lastModified, boolean parseOK, String picardVersion) {
+                      String fileType, Date lastModified, boolean parseOK, String statsVersion) {
         this.filename = filename;
         this.run = run;
         this.request = request;
@@ -64,7 +65,7 @@ public class PicardFile {
         this.fileType = fileType;
         this.lastModified = lastModified;
         this.parseOK = parseOK;
-        this.picardVersion = picardVersion;
+        this.statsVersion = statsVersion;
 
         if (run != null && request != null && sample != null) {
             this.md5RRS = DigestUtils.md5Hex(this.run + this.request + this.sample);
@@ -101,26 +102,9 @@ public class PicardFile {
             fileType = parts[5].substring(0, parts[5].length()-4); // remove .txt
         } else {
             fileType = parts[4].substring(0, parts[4].length()-4); // remove .txt
-            try {
-                System.out.println("Reading DRAGEN version number");
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                String firstLine = br.readLine();
-                // DRAGEN .txt files are written with the first line like:
-                // '#DRAGEN_VERSION_01.003.044.3.10.1-183-g9ced7ae8 '
-                if (firstLine != null && firstLine.contains("#DRAGEN_VERSION")) {
-                    version = getVersionDRAGEN(firstLine);
-                }
-                br.close();
-            } catch (IOException e) {
-                System.err.println("Failed to read DRAGEN version number." + e.getMessage());
-            }
+            version = "UNKNOWN";
         }
 
         return new PicardFile(filename, run, request, sample, referenceGenome, fileType, new Date(file.lastModified()), true, version);
-    }
-
-    protected static String getVersionDRAGEN(String firstLine) {
-        firstLine = firstLine.replace("#DRAGEN_VERSION_", "");
-        return "DRAGEN_" + firstLine.split(" ")[0];
     }
 }

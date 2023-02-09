@@ -19,6 +19,8 @@ public class QCSiteStats {
     private String sample;
     private String referenceGenome;
 
+    private String statsVersion;
+
     // ALIGNMENT SUMMARY METRICS
     public Long TOTAL_READS;
     public Long PF_READS_ALIGNED;
@@ -63,9 +65,6 @@ public class QCSiteStats {
     private Double PCT_TARGET_BASES_30X;
     private Double PCT_TARGET_BASES_100X;
 
-    //Q Metrics
-    private Double MSK_Q;
-
     //CPCG METRICS
     private Double G_REF_OXO_Q;
 
@@ -76,6 +75,7 @@ public class QCSiteStats {
         this.request = pf.getRequest();
         this.sample = pf.getSample();
         this.referenceGenome = pf.getReferenceGenome();
+        this.statsVersion = pf.getStatsVersion();
     }
 
     public void addAM(AlignmentSummaryMetrics am) {
@@ -116,10 +116,6 @@ public class QCSiteStats {
         this.PCT_40X = wgs.PCT_40X;
         this.PCT_80X = wgs.PCT_80X;
         this.PCT_100X = wgs.PCT_100X;
-    }
-
-    public void addQ(QMetric qMetric) {
-        this.MSK_Q = qMetric.mskQ;
     }
 
     public void addRna(RnaSeqMetrics rnaSeqMetrics) {

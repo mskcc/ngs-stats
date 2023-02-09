@@ -141,7 +141,7 @@ public class PicardToExcel {
                 cell.setCellValue(dm.ESTIMATED_LIBRARY_SIZE);
                 cell = row.createCell(15);
                 cell.setCellStyle(styles.get("cell"));
-                cell.setCellValue(f.getPicardVersion());
+                cell.setCellValue(f.getStatsVersion());
             } else if ("AM".equals(f.getFileType())) {
                 Row row = amMetrics.createRow(amRow++);
                 writeRunRequestSampleGenomeDate(styles, f, row);
@@ -217,7 +217,7 @@ public class PicardToExcel {
                 cell.setCellValue(am.PCT_ADAPTER);
                 cell = row.createCell(i++);
                 cell.setCellStyle(styles.get("cell"));
-                cell.setCellValue(f.getPicardVersion());
+                cell.setCellValue(f.getStatsVersion());
             } else if ("HS".equals(f.getFileType())) {
                 Row row = hsMetrics.createRow(hsRow++);
                 writeRunRequestSampleGenomeDate(styles, f, row);
@@ -392,7 +392,7 @@ public class PicardToExcel {
                 cell.setCellValue(hs.HET_SNP_Q);
                 cell = row.createCell(i++);
                 cell.setCellStyle(styles.get("cell"));
-                cell.setCellValue(f.getPicardVersion());
+                cell.setCellValue(f.getStatsVersion());
             } else if ("RNA".equals(f.getFileType())) {
                 Row row = rnaMetrics.createRow(rnaRow++);
                 writeRunRequestSampleGenomeDate(styles, f, row);
@@ -486,7 +486,7 @@ public class PicardToExcel {
                 cell.setCellValue(rna.MEDIAN_5PRIME_TO_3PRIME_BIAS);
                 cell = row.createCell(i++);
                 cell.setCellStyle(styles.get("cell"));
-                cell.setCellValue(f.getPicardVersion());
+                cell.setCellValue(f.getStatsVersion());
             }
         }
 
