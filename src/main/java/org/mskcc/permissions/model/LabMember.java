@@ -7,12 +7,14 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Table;
 
 @Getter @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name = "labmember")
 @IdClass(LabMemberId.class)
 public class LabMember {
     private static Logger log = LoggerFactory.getLogger(LabMember.class);

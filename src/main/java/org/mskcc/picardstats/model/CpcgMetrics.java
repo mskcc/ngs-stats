@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 @Entity
+@Table(name = "cpcgmetrics")
 /*
 https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/CollectOxoGMetrics.java
  */

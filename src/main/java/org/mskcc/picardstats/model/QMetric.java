@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 @Entity
+@Table(name = "qmetric")
 /*
 Internal MSK metric for oxidation.
  */

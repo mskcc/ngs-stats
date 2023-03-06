@@ -13,6 +13,7 @@ import java.util.Scanner;
 https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/RnaSeqMetrics.java
  */
 @Entity
+@Table(name = "rnaseqmetrics")
 @ToString
 public class RnaSeqMetrics {
     @Id

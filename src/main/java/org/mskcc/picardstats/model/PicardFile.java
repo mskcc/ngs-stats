@@ -4,14 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.io.*;
 import java.util.Date;
 
 @Entity
+@Table(name = "picardfile")
 @Getter @Setter
 public class PicardFile {
     @Id

@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 //https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/directed/HsMetrics.java
 @Entity
+@Table(name = "hsmetrics")
 @ToString
 public class HsMetrics {
     @Id

@@ -14,6 +14,7 @@ This file has ten columns and a histogram.
 https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/sam/DuplicationMetrics.java
  */
 @Entity
+@Table(name = "duplicationmetrics")
 @ToString
 public class DuplicationMetrics {
     @Id

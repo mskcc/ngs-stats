@@ -13,6 +13,7 @@ import java.util.Scanner;
 https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/CollectWgsMetrics.java
  */
 @Entity
+@Table(name = "wgsmetrics")
 @ToString
 public class WgsMetrics {
     public static int headerRow = 6;

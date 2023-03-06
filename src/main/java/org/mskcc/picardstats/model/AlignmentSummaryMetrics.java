@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Scanner;
 
 @Entity
+@Table(name = "alignmentsummarymetrics")
 /*
 https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/AlignmentSummaryMetrics.java
  */
