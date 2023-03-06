@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,11 +17,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Getter @Setter
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
+@Table(name = "archivedfastq")
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 /**
  * A fastq.gz file that has been archived.
  * The absolute path and some meta-data.

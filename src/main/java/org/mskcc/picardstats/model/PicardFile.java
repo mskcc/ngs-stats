@@ -1,6 +1,7 @@
 package org.mskcc.picardstats.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -9,6 +10,7 @@ import java.io.*;
 import java.util.Date;
 
 @Entity
+@NoArgsConstructor
 @Table(name = "picardfile")
 @Getter @Setter
 public class PicardFile {
@@ -30,7 +32,7 @@ public class PicardFile {
 
     private String statsVersion;
 
-    @OneToOne(mappedBy = "picardFile")
+    @OneToOne (mappedBy = "picardFile")
     private AlignmentSummaryMetrics alignmentSummaryMetrics;
 
     @OneToOne(mappedBy = "picardFile")
@@ -50,8 +52,6 @@ public class PicardFile {
 
     @OneToOne(mappedBy = "picardFile")
     private WgsMetrics wgsMetrics;
-
-    public PicardFile() {}
 
     public PicardFile(String filename, String run, String request, String sample, String referenceGenome,
                       String fileType, Date lastModified, boolean parseOK, String statsVersion) {

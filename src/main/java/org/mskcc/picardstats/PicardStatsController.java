@@ -22,10 +22,10 @@ public class PicardStatsController {
     final String PROJ_REPORTS_SHARED_DIR = "/data/picardExcel/project_reports/";
 
     private static final String [] ACTIVE_SEQUENCERS =
-            {"DIANA", "JAX", "JOHNSAWYERS", "KIM", "LIZ", "MICHELLE", "MOMO", "PITT", "SCOTT", "TOMS", "VIC"};
+            {"DIANA", "RUTH", "JOHNSAWYERS", "MICHELLE", "AMELIE", "PEPE", "SCOTT"};
 
     private static final String [] ALL_SEQUENCERS =
-            {"BRAD", "DIANA", "JAX", "JOHNSAWYERS", "KIM", "LIZ", "LOLA", "MICHELLE", "MOMO", "PITT", "SCOTT", "TOMS", "VIC"};
+            {"BRAD", "DIANA", "JAX", "JOHNSAWYERS", "KIM", "LIZ", "LOLA", "MICHELLE", "MOMO", "PITT", "SCOTT", "TOMS", "VIC", "RUTH", "AMELIE", "PEPE"};
 
     @Autowired
     private WgsMetricsRepository wgsRepository;
