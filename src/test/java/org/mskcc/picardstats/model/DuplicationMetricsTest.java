@@ -10,6 +10,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class DuplicationMetricsTest {
 
     @Test
+    void readFileBlank() throws FileNotFoundException, IllegalAccessException {
+        // read file with wrong Picard stats format
+        DuplicationMetrics dm = DuplicationMetrics.readFile(new File("src/test/resources/DIANA_0008_AH3V2JDMXX___BLANK_FILE___hg19___MD.txt"), "");
+    }
+
+
+    @Test
     void readFileMET() throws FileNotFoundException, IllegalAccessException {
         // read file with wrong Picard stats format
         DuplicationMetrics dm = DuplicationMetrics.readFile(new File("src/test/resources/DIANA_0076_AHK5YCDMXX___hg19___MD.txt"), "");

@@ -45,6 +45,10 @@ public class DuplicationMetrics {
 
     public static DuplicationMetrics readFile(File file, String md5) throws FileNotFoundException, IllegalAccessException {
         Scanner scan = new Scanner(file);
+        if (!scan.hasNext()) {
+            System.err.println("Ignoring blank file: " + file);
+            return null;
+        }
         String firstLine = scan.nextLine();
         int headerRow;
         if (firstLine.contains("## htsjdk.samtools.metrics.StringHeader")) // Normal Picard first row
