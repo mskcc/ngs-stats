@@ -1,4 +1,4 @@
-A Java/SpringBoot, Tomcat & MySQL application initiated in 2018 running on delphi.mskcc.org which has 17 tables with IGO (Integrated Genomics Operation) post sequencing information such as:
+A Java/SpringBoot, Tomcat & MySQL application initiated in 2018 originally running on delphi.mskcc.org (now igodb.mskcc.org) which has 17 tables with IGO (Integrated Genomics Operation) post sequencing information such as:
 
 File name information for over 1.5 million fastq files written by IGO since 2011 in the table archivedfastq
 
