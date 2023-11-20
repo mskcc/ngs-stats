@@ -22,17 +22,15 @@ public class PicardStatsController {
     final String PROJ_REPORTS_SHARED_DIR = "/data/picardExcel/project_reports/";
 
     private static final String [] ACTIVE_SEQUENCERS =
-            {"DIANA", "RUTH", "JOHNSAWYERS", "MICHELLE", "AMELIE", "PEPE", "SCOTT"};
+            {"DIANA", "RUTH", "JOHNSAWYERS", "FAUCI", "AMELIE", "PEPE", "SCOTT"};
 
     private static final String [] ALL_SEQUENCERS =
-            {"BRAD", "DIANA", "JAX", "JOHNSAWYERS", "KIM", "LIZ", "LOLA", "MICHELLE", "MOMO", "PITT", "SCOTT", "TOMS", "VIC", "RUTH", "AMELIE", "PEPE"};
+            {"BRAD", "DIANA", "JAX", "JOHNSAWYERS", "KIM", "LIZ", "LOLA", "MICHELLE", "MOMO", "PITT", "SCOTT", "TOMS", "VIC", "RUTH", "AMELIE", "PEPE", "FAUCI"};
 
     @Autowired
     private WgsMetricsRepository wgsRepository;
     @Autowired
     private CpcgMetricsRepository cpcgRepository;
-    @Autowired
-    private QMetricsRepository qMetricsRepository;
     @Autowired
     private RnaSeqMetricsRepository rnaSeqRepository;
     @Autowired
@@ -249,6 +247,35 @@ public class PicardStatsController {
         return "Files parsed: " + filesParsed;
     }
 
+    @GetMapping(value = "/picardstats/updaterunWGS")
+    public String updateDatabaseByRunWGS() throws Exception {
+
+        int filesParsed = 0;
+        for (String baseStatsDir : BASE_STATS_DIR) {
+            File statsDir = new File("/igo/stats/DONE/MEDIAN");
+            System.out.println("Looking for stats files in directory: " + statsDir);
+
+            FilenameFilter prefixFilter = (dir, name) -> {
+                if (name.endsWith("WGS.txt")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            };
+            File[] statsFiles = statsDir.listFiles(prefixFilter);
+            if (statsFiles == null || statsFiles.length == 0) {
+                continue;
+            } else {
+                filesParsed += statsFiles.length;
+            }
+
+            for (File statsFile : statsFiles) {
+                saveStats(statsFile, true);
+            }
+        }
+        return "Files parsed: " + filesParsed;
+    }
+
     @GetMapping(value = "/picardstats/run/{runId}")
     public Map<String, QCSiteStats> getPicardStatsByRunId(@PathVariable String runId) {
         List<PicardFile> picardFiles = picardFileRepository.findByRun(runId);
@@ -394,16 +421,6 @@ public class PicardStatsController {
             if (x != null) {
                 picardFileRepository.save(pf);
                 wgsRepository.save(x);
-            } else {
-                pf.setParseOK(false);
-                picardFileRepository.save(pf);
-                System.err.println("File is not in the correct format, ignoring:" + name);
-            }
-        } else if (name.endsWith("___mskQ.txt")) {
-            QMetric x = QMetric.readFile(statsFile, pf.getMd5RRS());
-            if (x != null) {
-                picardFileRepository.save(pf);
-                qMetricsRepository.save(x);
             } else {
                 pf.setParseOK(false);
                 picardFileRepository.save(pf);

@@ -45,9 +45,6 @@ public class PicardFile {
     private HsMetrics hsMetrics;
 
     @OneToOne(mappedBy = "picardFile")
-    private QMetric qMetric;
-
-    @OneToOne(mappedBy = "picardFile")
     private RnaSeqMetrics rnaSeqMetrics;
 
     @OneToOne(mappedBy = "picardFile")
