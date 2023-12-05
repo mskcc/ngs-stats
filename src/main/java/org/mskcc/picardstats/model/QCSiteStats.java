@@ -38,6 +38,7 @@ public class QCSiteStats {
     // WGS
     private Long GENOME_TERRITORY;
     private Double MEAN_COVERAGE;
+    private Double MEDIAN_COVERAGE;
     private Double PCT_EXC_MAPQ;
     private Double PCT_EXC_DUPE;
     private Double PCT_EXC_BASEQ;
@@ -107,6 +108,7 @@ public class QCSiteStats {
     public void addWGS(WgsMetrics wgs) {
         this.GENOME_TERRITORY = wgs.GENOME_TERRITORY;
         this.MEAN_COVERAGE = wgs.MEAN_COVERAGE;
+        this.MEDIAN_COVERAGE = wgs.MEDIAN_COVERAGE;
         this.PCT_EXC_MAPQ = wgs.PCT_EXC_MAPQ;
         this.PCT_EXC_DUPE = wgs.PCT_EXC_DUPE;
         this.PCT_EXC_BASEQ = wgs.PCT_EXC_BASEQ;
