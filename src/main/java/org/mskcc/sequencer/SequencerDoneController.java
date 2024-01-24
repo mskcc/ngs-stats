@@ -129,6 +129,16 @@ public class SequencerDoneController {
         return fastqs;
     }
 
+    @GetMapping(value = "/fastqsbyproject/{project}")
+    public List<ArchivedFastq> findFastqsByProject(@PathVariable String project) {
+        log.info("/findFastqsByProject/" + project);
+        if (project == null || project.length() < 5 || project.length() > 9)
+            return null;
+
+        List<ArchivedFastq> fastqs = archivedFastqRepository.findByProject(project);
+        return fastqs;
+    }
+
     @GetMapping(value = "/search/most/recent/fastqpath/{run}/{sampleAndigoid}")
     public List<ArchivedFastq> findMostRecentFastqDir(@PathVariable String run, @PathVariable String sampleAndigoid) {
         log.info("/search/most/recent/fastqpath/ for run:" + run + " sampleAndigoid:" + sampleAndigoid);
