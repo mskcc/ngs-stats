@@ -19,6 +19,7 @@ public class RequestPermissions {
 
     private String request;
     private String requestName;
+    private Boolean isDLP;
     private List<RequestReadAccess> requestReadAccess;  // individuals who have access to this specific request
     // groups that have read access such as 'cmoigo', 'bicigo', 'isabl' with special code in LIMS or iLabs for them
     private List<String> requestGroups;

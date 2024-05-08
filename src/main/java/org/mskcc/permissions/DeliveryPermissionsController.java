@@ -91,19 +91,23 @@ public class DeliveryPermissionsController {
                 fastqs.addAll(moreFastqs);
         }
 
+        Boolean isDLP = Boolean.FALSE;
+        if (fastqs.size() > 0 && fastqs.get(0).getRunBaseDirectory().endsWith("_DLP"))
+            isDLP = Boolean.TRUE;
+
         List<String> dataAccessIDs = getDataAccessIDs(lims.dataAccessEmails, lims.labHeadEmail, lims.investigatorEmail);
 
         List<String> fastqPaths = ArchivedFastq.toFastqPathOnly(fastqs);
 
-        return new RequestPermissions(lims.getLabName(), labMembers, request, lims.getRequestName(), requestReadAccess,
-                groupReadAccess, dataAccessIDs, fastqPaths);
+        return new RequestPermissions(lims.getLabName(), labMembers, request, lims.getRequestName(), isDLP,
+                requestReadAccess, groupReadAccess, dataAccessIDs, fastqPaths);
     }
 
     @GetMapping(value = "/getLabPermissions/{labName}")
     public RequestPermissions getLabPermissions(@PathVariable String labName) {
         log.info("Searching for all lab members.");
         List<LabMember> labMembers = labMemberRepository.findByPi(labName);
-        return new RequestPermissions(labName, labMembers, null, null, null, null, null, null);
+        return new RequestPermissions(labName, labMembers, null, null, null, null, null, null, null);
     }
 
     protected static List<String> getDataAccessIDs(String dataAccessEmails, String labHeadEmail, String investigatorEmail) {
