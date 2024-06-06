@@ -132,7 +132,8 @@ public class SequencerDoneController {
     @GetMapping(value = "/fastqsbyproject/{project}")
     public List<ArchivedFastq> findFastqsByProject(@PathVariable String project) {
         log.info("/findFastqsByProject/" + project);
-        if (project == null || project.length() < 5 || project.length() > 9)
+        // Project 4786 -> must allow old format non zero prepended projects
+        if (project == null || project.length() < 4 || project.length() > 9)
             return null;
 
         List<ArchivedFastq> fastqs = archivedFastqRepository.findByProject(project);
