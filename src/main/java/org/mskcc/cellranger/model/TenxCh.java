@@ -15,8 +15,18 @@ public class TenxCh {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxCh tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
+
             lims.setSampleId(tenx.getSampleId());
             lims.setSequencerRunFolder(tenx.getRunId());
+            lims.setCellHashSampleId(tenx.getChSampleId());
+            lims.setCellNumber(tenx.getEstimatedNumberOfCellAssociatedBarcodes());
+            lims.setCellsAssignedToSample(tenx.getGexCellsAssignedToThisSample());
+            lims.setFractionUnrecognized(tenx.getFractionUnrecognizedCmo());
+            lims.setMeanReadsPerCell(tenx.getMeanReadsPerCellAssociatedBarcode().doubleValue());
+            lims.setMedianUmisPerCellBarcode(tenx.getMedianCmoUmisPerCellAssociatedBarcode());
+            lims.setSamplesAssignedAtLeastOneCell(tenx.getSamplesAssignedAtLeastOneCell().doubleValue());
+            lims.setSeqSaturation(tenx.getSequencingSaturation());
+            lims.setTotalReads(tenx.getNumberOfReads());
 
             list.add(lims);
         }
