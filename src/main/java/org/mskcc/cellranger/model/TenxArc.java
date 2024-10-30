@@ -15,8 +15,18 @@ public class TenxArc {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxArc tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
+            
             lims.setSampleId(tenx.getSampleId());
             lims.setSequencerRunFolder(tenx.getRunId());
+            lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());
+            lims.setMeanReadsPerCell(tenx.getGexMeanRawReadsPerCell());
+            lims.setAtacMeanRawReadsPerCell(tenx.getAtacMeanRawReadPairsPerCell());
+            lims.setAtacMedianHighQultyFragPerCell(tenx.getAtacMedianHighQualityFragmentsPerCell());
+            lims.setReadsMappedConfidentlyToGenome(tenx.getGexReadsMappedConfidentlyToGenome());
+            lims.setAtacConfidentlyMappedReadsPair(tenx.getAtacConfidentlyMappedReadPairs());
+            lims.setReadsMappedToTranscriptome(tenx.getGexReadsMappedConfidentlyToTranscriptome());
+            lims.setTotalReads(tenx.getGexSequencedReadPairs());
+            lims.setAtacTotalReads(tenx.getAtacSequencedReadPairs());
 
             list.add(lims);
         }

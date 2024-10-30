@@ -13,16 +13,17 @@ public class TenxLimsStats {
     private String SampleId;
     private String OtherSampleId;
     private String SequencerRunFolder;
+    private String CellHashSampleId;
     private Long AntibodyReadsPerCell;
     private Double CellNumber;
     private Double ChCellNumber;
     private String CellsAssignedToSample;
     private Double FractionUnrecognized;
     private Double MeanReadsPerCell;
-    private Integer ChMeanReadsPerCell;
+    private Long ChMeanReadsPerCell;
     private Double AtacMeanRawReadsPerCell;
     private Double MeanReadsPerSpot;
-    private Integer MedianUmisPerCellBarcode;
+    private Long MedianUmisPerCellBarcode;
     private Double MedianGenesOrFragmentsPerCell;
     private Double AtacMedianHighQultyFragPerCell; // ATAC_MEDIAN_HIGH_QUALITY_FRAGMENTS_PER_CELL
     private Double MedianIGLUmisPerCell;  // MEDIAN_IGL_UMIs_PER_CELL
@@ -36,7 +37,7 @@ public class TenxLimsStats {
     private Double SamplesAssignedAtLeastOneCell;
     private Double SeqSaturation;
     private Double ChSeqSaturation;
-    private Integer TotalReads;
-    private Integer ChTotalReads;
-    private Integer AtacTotalReads;
+    private Long TotalReads;
+    private Long ChTotalReads;
+    private Long AtacTotalReads;
 }

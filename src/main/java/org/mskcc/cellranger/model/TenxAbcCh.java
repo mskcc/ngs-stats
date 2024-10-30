@@ -16,8 +16,18 @@ public class TenxAbcCh {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxAbcCh tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
+
             lims.setSampleId(tenx.getSampleId());
             lims.setSequencerRunFolder(tenx.getRunId());
+            lims.setCellHashSampleId(tenx.getChSampleId());
+            lims.setChCellNumber(tenx.getChEstimatedNumberOfCellAssociatedBarcodes().doubleValue());
+            lims.setFractionUnrecognized(tenx.getChFractionUnrecognizedCmo());
+            lims.setChMeanReadsPerCell(tenx.getChMeanReadsPerCellAssociatedBarcode());
+            lims.setMedianUmisPerCellBarcode(tenx.getChMeanReadsPerCellAssociatedBarcode());
+            lims.setSeqSaturation(tenx.getAbcSequencingSaturation());
+            lims.setChSeqSaturation(tenx.getChSequencingSaturation());
+            lims.setTotalReads(tenx.getAbcNumberOfReads());
+            lims.setChTotalReads(tenx.getChNumberOfReads());
 
             list.add(lims);
         }
