@@ -15,8 +15,16 @@ public class TenxGex {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxGex tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
+
             lims.setSampleId(tenx.getSampleId());
             lims.setSequencerRunFolder(tenx.getRunId());
+            lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());
+            lims.setMeanReadsPerCell(tenx.getMeanReadsPerCell().doubleValue());
+            lims.setMedianGenesOrFragmentsPerCell(tenx.getMedianGenesPerCell().doubleValue());
+            lims.setReadsMappedConfidentlyToGenome(tenx.getReadsMappedConfidentlyToGenome());
+            lims.setReadsMappedToTranscriptome(tenx.getReadsMappedConfidentlyToTranscriptome());
+            lims.setSeqSaturation(tenx.getSequencingSaturation());
+            lims.setTotalReads(tenx.getNumberOfReads());
 
             list.add(lims);
         }
