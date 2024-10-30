@@ -1,7 +1,10 @@
 package org.mskcc.cellranger.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,6 +14,20 @@ import lombok.ToString;
 @Table(name = "10x_abc")
 @Getter @Setter @ToString
 public class TenxAbc {
+    public static List<TenxLimsStats> toLimsStats(List<TenxAbc> tenxAbcList) {
+        List<TenxLimsStats> list = new ArrayList<>();
+        for (TenxAbc tenx : tenxAbcList) {
+            TenxLimsStats lims = new TenxLimsStats();
+            lims.setSampleId(tenx.getSampleId());
+            lims.setSequencerRunFolder(tenx.getRunId());
+            lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());
+            lims.setMeanReadsPerCell(tenx.getMeanReadsPerCell().doubleValue());
+            lims.setSeqSaturation(tenx.getSequencingSaturation());
+            lims.setTotalReads(tenx.getNumberOfReads().intValue());
+            list.add(lims);
+        }
+        return list;
+    }
 
     @Id
     @Column(name = "Sample_ID", nullable = false, length = 160)

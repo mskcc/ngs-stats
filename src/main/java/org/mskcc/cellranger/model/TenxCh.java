@@ -1,13 +1,27 @@
 package org.mskcc.cellranger.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import lombok.Data;
 
 @Entity
 @Table(name = "10x_ch")
 @Data
 public class TenxCh {
+    public static List<TenxLimsStats> toLimsStats(List<TenxCh> inputList) {
+        List<TenxLimsStats> list = new ArrayList<>();
+        for (TenxCh tenx : inputList) {
+            TenxLimsStats lims = new TenxLimsStats();
+            lims.setSampleId(tenx.getSampleId());
+            lims.setSequencerRunFolder(tenx.getRunId());
+
+            list.add(lims);
+        }
+        return list;
+    }
 
     @Id
     @Column(name = "Sample_ID", nullable = false, length = 160)

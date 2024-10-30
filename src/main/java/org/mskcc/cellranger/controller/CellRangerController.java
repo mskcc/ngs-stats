@@ -8,11 +8,8 @@ import org.jsoup.select.Elements;
 import org.mskcc.cellranger.documentation.CellRangerSummaryCountModel;
 import org.mskcc.cellranger.documentation.CellRangerSummaryVDJModel;
 import org.mskcc.cellranger.documentation.FieldMapperModel;
-import org.mskcc.cellranger.model.CellRangerDataRecord;
-import org.mskcc.cellranger.model.CellRangerSummaryCount;
-import org.mskcc.cellranger.model.CellRangerSummaryVdj;
-import org.mskcc.cellranger.repository.CellRangerSummaryCountRepository;
-import org.mskcc.cellranger.repository.CellRangerSummaryVdjRepository;
+import org.mskcc.cellranger.model.*;
+import org.mskcc.cellranger.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,18 +50,57 @@ public class CellRangerController {
 
     @Autowired
     private CellRangerSummaryCountRepository cellRangerSummaryCountRepository;
-
     @Autowired
     private CellRangerSummaryVdjRepository cellRangerSummaryVdjRepository;
 
+    @Autowired
+    private TenxAbcRepository tenxAbcRepository;
+    @Autowired
+    private TenxAbcChRepository tenxAbcChRepository;
+    @Autowired
+    private TenxArcRepository tenxArcRepository;
+    @Autowired
+    private TenxAtacRepository tenxAtacRepository;
+    @Autowired
+    private TenxBcrRepository tenxBcrRepository;
+    @Autowired
+    private TenxChRepository tenxChRepository;
+    @Autowired
+    private TenxGexRepository tenxGexRepository;
+    @Autowired
+    private TenxTcrRepository tenxTcrRepository;
+    @Autowired
+    private TenxVisiumFfpeRepository tenxVisiumFfpeRepository;
+    @Autowired
+    private TenxVisiumHdFfpeRepository tenxVisiumHdFfpeRepository;
+
     @Value("${cellranger.dir}")
     private String CELL_RANGER_DIR;
-
     @Value("${cellranger.websummarypath}")
     private String WEB_SUMMARY_PATH;
-
     @Value("${cellranger.metricspath}")
     private String METRICS_PATH;
+
+
+    @CrossOrigin
+    @GetMapping(value = "/get10xStats")
+    public List<TenxLimsStats> get10xStats(@RequestParam("run") String runId) {
+        log.info(String.format("Get 10X stats for run: %s", runId));
+        List<TenxLimsStats> limsStats = new ArrayList<>();
+        limsStats.addAll(TenxAbc.toLimsStats(tenxAbcRepository.findByRunId(runId)));
+        limsStats.addAll(TenxAbcCh.toLimsStats(tenxAbcChRepository.findByRunId(runId)));
+        limsStats.addAll(TenxArc.toLimsStats(tenxArcRepository.findByRunId(runId)));
+        limsStats.addAll(TenxAtac.toLimsStats(tenxAtacRepository.findByRunId(runId)));
+        limsStats.addAll(TenxBcr.toLimsStats(tenxBcrRepository.findByRunId(runId)));
+        limsStats.addAll(TenxCh.toLimsStats(tenxChRepository.findByRunId(runId)));
+        limsStats.addAll(TenxGex.toLimsStats(tenxGexRepository.findByRunId(runId)));
+        limsStats.addAll(TenxTcr.toLimsStats(tenxTcrRepository.findByRunId(runId)));
+        limsStats.addAll(TenxVisiumFfpe.toLimsStats(tenxVisiumFfpeRepository.findByRunId(runId)));
+        limsStats.addAll(TenxVisiumHdFfpe.toLimsStats(tenxVisiumHdFfpeRepository.findByRunId(runId)));
+        
+        log.info("Found n stats: " + limsStats.size());
+        return limsStats;
+    }
 
     /**
      * Saves Cell Ranger record to database. Parses file from path determined from input parameters
