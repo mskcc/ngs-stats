@@ -24,6 +24,7 @@ public class TenxLimsStats {
     private Double AtacMeanRawReadsPerCell;
     private Double MeanReadsPerSpot;
     private Long MedianUmisPerCellBarcode;
+    private Double MedianGenesPerSpot;
     private Double MedianGenesOrFragmentsPerCell;
     private Double AtacMedianHighQultyFragPerCell; // ATAC_MEDIAN_HIGH_QUALITY_FRAGMENTS_PER_CELL
     private Double MedianIGLUmisPerCell;  // MEDIAN_IGL_UMIs_PER_CELL

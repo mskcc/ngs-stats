@@ -15,8 +15,14 @@ public class TenxVisiumHdFfpe {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxVisiumHdFfpe tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
+
             lims.setSampleId(tenx.getSampleId());
             lims.setSequencerRunFolder(tenx.getRunId());
+            lims.setSampleId(tenx.getSampleId());
+            lims.setSequencerRunFolder(tenx.getRunId());
+            lims.setReadMappedConfidentlyToProbSet(tenx.getReadsMappedConfidentlyToProbeSet());
+            lims.setSeqSaturation(tenx.getSequencingSaturation());
+            lims.setTotalReads(tenx.getNumberOfReads());
 
             list.add(lims);
         }
