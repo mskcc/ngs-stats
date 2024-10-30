@@ -15,8 +15,15 @@ public class TenxBcr {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxBcr tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
+
             lims.setSampleId(tenx.getSampleId());
             lims.setSequencerRunFolder(tenx.getRunId());
+            lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());
+            lims.setMeanReadsPerCell(tenx.getMeanReadPairsPerCell().doubleValue());
+            lims.setMedianIGLUmisPerCell(tenx.getMedianIglUmisPerCell());
+            lims.setMedianTraIghUmisPerCell(tenx.getMedianIghUmisPerCell());
+            lims.setVdjReadsMapped(tenx.getReadsMappedToAnyVdjGene());
+            lims.setTotalReads(tenx.getNumberOfReadPairs());
 
             list.add(lims);
         }

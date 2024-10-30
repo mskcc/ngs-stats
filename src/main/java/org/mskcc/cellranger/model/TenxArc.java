@@ -15,7 +15,7 @@ public class TenxArc {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxArc tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
-            
+
             lims.setSampleId(tenx.getSampleId());
             lims.setSequencerRunFolder(tenx.getRunId());
             lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());

@@ -15,8 +15,13 @@ public class TenxAtac {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxAtac tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
+
             lims.setSampleId(tenx.getSampleId());
             lims.setSequencerRunFolder(tenx.getRunId());
+            lims.setAtacMeanRawReadsPerCell(tenx.getMeanRawReadPairsPerCell());
+            lims.setAtacMedianHighQultyFragPerCell(tenx.getMedianHighQualityFragmentsPerCell());
+            lims.setAtacConfidentlyMappedReadsPair(tenx.getConfidentlyMappedReadPairs());
+            lims.setAtacTotalReads(tenx.getSequencedReadPairs());
 
             list.add(lims);
         }
