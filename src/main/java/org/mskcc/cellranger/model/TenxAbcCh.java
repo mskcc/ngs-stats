@@ -1,6 +1,7 @@
 package org.mskcc.cellranger.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -8,10 +9,12 @@ import java.util.List;
 
 import lombok.Data;
 
+
 @Entity
+@IdClass(TenxAbcChId.class)
 @Table(name = "10x_abc_ch")
 @Data
-public class TenxAbcCh {
+public class TenxAbcCh implements Serializable {
     public static List<TenxLimsStats> toLimsStats(List<TenxAbcCh> inputList) {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxAbcCh tenx : inputList) {

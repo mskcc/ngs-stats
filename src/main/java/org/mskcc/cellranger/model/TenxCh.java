@@ -1,13 +1,16 @@
 package org.mskcc.cellranger.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import lombok.Data;
 
+
 @Entity
+@IdClass(TenxChId.class)
 @Table(name = "10x_ch")
 @Data
 public class TenxCh {

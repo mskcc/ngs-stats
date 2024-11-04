@@ -88,11 +88,11 @@ public class CellRangerController {
         log.info(String.format("Get 10X stats for run: %s", runId));
         List<TenxLimsStats> limsStats = new ArrayList<>();
         limsStats.addAll(TenxAbc.toLimsStats(tenxAbcRepository.findByRunId(runId)));
-        limsStats.addAll(TenxAbcCh.toLimsStats(tenxAbcChRepository.findByRunId(runId)));
+        //limsStats.addAll(TenxAbcCh.toLimsStats(tenxAbcChRepository.findByRunId(runId)));
         limsStats.addAll(TenxArc.toLimsStats(tenxArcRepository.findByRunId(runId)));
         limsStats.addAll(TenxAtac.toLimsStats(tenxAtacRepository.findByRunId(runId)));
         limsStats.addAll(TenxBcr.toLimsStats(tenxBcrRepository.findByRunId(runId)));
-        limsStats.addAll(TenxCh.toLimsStats(tenxChRepository.findByRunId(runId)));
+        //limsStats.addAll(TenxCh.toLimsStats(tenxChRepository.findByRunId(runId)));
         limsStats.addAll(TenxGex.toLimsStats(tenxGexRepository.findByRunId(runId)));
         limsStats.addAll(TenxTcr.toLimsStats(tenxTcrRepository.findByRunId(runId)));
         limsStats.addAll(TenxVisiumFfpe.toLimsStats(tenxVisiumFfpeRepository.findByRunId(runId)));

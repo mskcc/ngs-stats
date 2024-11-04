@@ -23,7 +23,7 @@ public class TenxAbc {
             lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());
             lims.setMeanReadsPerCell(tenx.getMeanReadsPerCell().doubleValue());
             lims.setSeqSaturation(tenx.getSequencingSaturation());
-            lims.setTotalReads(tenx.getNumberOfReads().intValue());
+            lims.setTotalReads(tenx.getNumberOfReads().longValue());
             list.add(lims);
         }
         return list;
