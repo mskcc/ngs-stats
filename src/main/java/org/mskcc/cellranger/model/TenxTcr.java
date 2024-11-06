@@ -16,14 +16,14 @@ public class TenxTcr {
         for (TenxTcr tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
 
-            lims.setSampleId(tenx.getSampleId());
-            lims.setSequencerRunFolder(tenx.getRunId());
-            lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());
-            lims.setMeanReadsPerCell(tenx.getMeanReadPairsPerCell().doubleValue());
-            lims.setMedianTraIghUmisPerCell(tenx.getMedianTraUmisPerCell());
-            lims.setMedianTrbIgkUmisPerCell(tenx.getMedianTrbUmisPerCell());
-            lims.setVdjReadsMapped(tenx.getReadsMappedToAnyVdjGene());
-            lims.setTotalReads(tenx.getNumberOfReadPairs());
+            lims.setIGO_SAMPLE_ID(tenx.getSampleId());
+            lims.setRUN_ID(tenx.getRunId());
+            lims.setCELL_NUMBER(tenx.getEstimatedNumberOfCells().doubleValue());
+            lims.setMEAN_READS_PER_CELL(tenx.getMeanReadPairsPerCell().doubleValue());
+            lims.setMEDIAN_TRA_IGH_UMIs_PER_CELL(tenx.getMedianTraUmisPerCell());
+            lims.setMEDIAN_TRB_IGK_UMIs_PER_CELL(tenx.getMedianTrbUmisPerCell());
+            lims.setVDJ_READS_MAPPED(tenx.getReadsMappedToAnyVdjGene());
+            lims.setTOTAL_READS(tenx.getNumberOfReadPairs());
 
             list.add(lims);
         }

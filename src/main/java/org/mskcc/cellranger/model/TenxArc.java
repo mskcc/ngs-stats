@@ -16,17 +16,17 @@ public class TenxArc {
         for (TenxArc tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
 
-            lims.setSampleId(tenx.getSampleId());
-            lims.setSequencerRunFolder(tenx.getRunId());
-            lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());
-            lims.setMeanReadsPerCell(tenx.getGexMeanRawReadsPerCell());
-            lims.setAtacMeanRawReadsPerCell(tenx.getAtacMeanRawReadPairsPerCell());
-            lims.setAtacMedianHighQultyFragPerCell(tenx.getAtacMedianHighQualityFragmentsPerCell());
-            lims.setReadsMappedConfidentlyToGenome(tenx.getGexReadsMappedConfidentlyToGenome());
-            lims.setAtacConfidentlyMappedReadsPair(tenx.getAtacConfidentlyMappedReadPairs());
-            lims.setReadsMappedToTranscriptome(tenx.getGexReadsMappedConfidentlyToTranscriptome());
-            lims.setTotalReads(tenx.getGexSequencedReadPairs());
-            lims.setAtacTotalReads(tenx.getAtacSequencedReadPairs());
+            lims.setIGO_SAMPLE_ID(tenx.getSampleId());
+            lims.setRUN_ID(tenx.getRunId());
+            lims.setCELL_NUMBER(tenx.getEstimatedNumberOfCells().doubleValue());
+            lims.setMEAN_READS_PER_CELL(tenx.getGexMeanRawReadsPerCell());
+            lims.setATAC_MEAN_RAW_READS_PER_CELL(tenx.getAtacMeanRawReadPairsPerCell());
+            lims.setATAC_MEDIAN_HIGH_QUALITY_FRAGMENTS_PER_CELL(tenx.getAtacMedianHighQualityFragmentsPerCell());
+            lims.setREADS_MAPPED_CONFIDENTLY_TO_GENOME(tenx.getGexReadsMappedConfidentlyToGenome());
+            lims.setATAC_CONFIDENTLY_MAPPED_READ_PAIRS(tenx.getAtacConfidentlyMappedReadPairs());
+            lims.setREADS_MAPPED_TO_TRANSCRIPTOME(tenx.getGexReadsMappedConfidentlyToTranscriptome());
+            lims.setTOTAL_READS(tenx.getGexSequencedReadPairs());
+            lims.setATAC_TOTAL_READS(tenx.getAtacSequencedReadPairs());
 
             list.add(lims);
         }

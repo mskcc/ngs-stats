@@ -1,7 +1,6 @@
 package org.mskcc.cellranger.model;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,17 +18,17 @@ public class TenxCh {
         for (TenxCh tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
 
-            lims.setSampleId(tenx.getSampleId());
-            lims.setSequencerRunFolder(tenx.getRunId());
-            lims.setCellHashSampleId(tenx.getChSampleId());
-            lims.setCellNumber(tenx.getEstimatedNumberOfCellAssociatedBarcodes());
-            lims.setCellsAssignedToSample(tenx.getGexCellsAssignedToThisSample());
-            lims.setFractionUnrecognized(tenx.getFractionUnrecognizedCmo());
-            lims.setMeanReadsPerCell(tenx.getMeanReadsPerCellAssociatedBarcode().doubleValue());
-            lims.setMedianUmisPerCellBarcode(tenx.getMedianCmoUmisPerCellAssociatedBarcode());
-            lims.setSamplesAssignedAtLeastOneCell(tenx.getSamplesAssignedAtLeastOneCell().doubleValue());
-            lims.setSeqSaturation(tenx.getSequencingSaturation());
-            lims.setTotalReads(tenx.getNumberOfReads());
+            lims.setIGO_SAMPLE_ID(tenx.getSampleId());
+            lims.setRUN_ID(tenx.getRunId());
+            lims.setCELL_HASH_SAMPLE_ID(tenx.getChSampleId());
+            lims.setCELL_NUMBER(tenx.getEstimatedNumberOfCellAssociatedBarcodes());
+            lims.setCELLS_ASSIGNED_TO_SAMPLE(tenx.getGexCellsAssignedToThisSample());
+            lims.setABC_CH_FRACTION_UNRECOGNIZED(tenx.getFractionUnrecognizedCmo());
+            lims.setMEAN_READS_PER_CELL(tenx.getMeanReadsPerCellAssociatedBarcode().doubleValue());
+            lims.setMEDIAN_CH_UMIs_PER_CELL_BARCODE(tenx.getMedianCmoUmisPerCellAssociatedBarcode());
+            lims.setSAMPLES_ASSIGNED_AT_LEAST_ONE_CELL(tenx.getSamplesAssignedAtLeastOneCell().doubleValue());
+            lims.setSEQUENCING_SATURATION(tenx.getSequencingSaturation());
+            lims.setTOTAL_READS(tenx.getNumberOfReads());
 
             list.add(lims);
         }

@@ -18,12 +18,12 @@ public class TenxAbc {
         List<TenxLimsStats> list = new ArrayList<>();
         for (TenxAbc tenx : tenxAbcList) {
             TenxLimsStats lims = new TenxLimsStats();
-            lims.setSampleId(tenx.getSampleId());
-            lims.setSequencerRunFolder(tenx.getRunId());
-            lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());
-            lims.setMeanReadsPerCell(tenx.getMeanReadsPerCell().doubleValue());
-            lims.setSeqSaturation(tenx.getSequencingSaturation());
-            lims.setTotalReads(tenx.getNumberOfReads().longValue());
+            lims.setIGO_SAMPLE_ID(tenx.getSampleId());
+            lims.setRUN_ID(tenx.getRunId());
+            lims.setCELL_NUMBER(tenx.getEstimatedNumberOfCells().doubleValue());
+            lims.setMEAN_READS_PER_CELL(tenx.getMeanReadsPerCell().doubleValue());
+            lims.setSEQUENCING_SATURATION(tenx.getSequencingSaturation());
+            lims.setTOTAL_READS(tenx.getNumberOfReads().longValue());
             list.add(lims);
         }
         return list;

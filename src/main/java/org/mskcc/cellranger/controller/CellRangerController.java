@@ -88,6 +88,7 @@ public class CellRangerController {
         log.info(String.format("Get 10X stats for run: %s", runId));
         List<TenxLimsStats> limsStats = new ArrayList<>();
         limsStats.addAll(TenxAbc.toLimsStats(tenxAbcRepository.findByRunId(runId)));
+        // TODO FIX *_ch composite IDs and add them
         //limsStats.addAll(TenxAbcCh.toLimsStats(tenxAbcChRepository.findByRunId(runId)));
         limsStats.addAll(TenxArc.toLimsStats(tenxArcRepository.findByRunId(runId)));
         limsStats.addAll(TenxAtac.toLimsStats(tenxAtacRepository.findByRunId(runId)));

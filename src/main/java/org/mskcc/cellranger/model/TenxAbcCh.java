@@ -3,7 +3,6 @@ package org.mskcc.cellranger.model;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -20,17 +19,17 @@ public class TenxAbcCh implements Serializable {
         for (TenxAbcCh tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
 
-            lims.setSampleId(tenx.getSampleId());
-            lims.setSequencerRunFolder(tenx.getRunId());
-            lims.setCellHashSampleId(tenx.getChSampleId());
-            lims.setChCellNumber(tenx.getChEstimatedNumberOfCellAssociatedBarcodes().doubleValue());
-            lims.setFractionUnrecognized(tenx.getChFractionUnrecognizedCmo());
-            lims.setChMeanReadsPerCell(tenx.getChMeanReadsPerCellAssociatedBarcode());
-            lims.setMedianUmisPerCellBarcode(tenx.getChMeanReadsPerCellAssociatedBarcode());
-            lims.setSeqSaturation(tenx.getAbcSequencingSaturation());
-            lims.setChSeqSaturation(tenx.getChSequencingSaturation());
-            lims.setTotalReads(tenx.getAbcNumberOfReads());
-            lims.setChTotalReads(tenx.getChNumberOfReads());
+            lims.setIGO_SAMPLE_ID(tenx.getSampleId());
+            lims.setRUN_ID(tenx.getRunId());
+            lims.setCELL_HASH_SAMPLE_ID(tenx.getChSampleId());
+            lims.setCH_CELL_NUMBER(tenx.getChEstimatedNumberOfCellAssociatedBarcodes().doubleValue());
+            lims.setABC_CH_FRACTION_UNRECOGNIZED(tenx.getChFractionUnrecognizedCmo());
+            lims.setCH_MEAN_READS_PER_CELL(tenx.getChMeanReadsPerCellAssociatedBarcode());
+            lims.setCH_MEAN_READS_PER_CELL(tenx.getChMeanReadsPerCellAssociatedBarcode());
+            lims.setSEQUENCING_SATURATION(tenx.getAbcSequencingSaturation());
+            lims.setCH_SEQUENCING_SATURATION(tenx.getChSequencingSaturation());
+            lims.setTOTAL_READS(tenx.getAbcNumberOfReads());
+            lims.setCH_TOTAL_READS(tenx.getChNumberOfReads());
 
             list.add(lims);
         }

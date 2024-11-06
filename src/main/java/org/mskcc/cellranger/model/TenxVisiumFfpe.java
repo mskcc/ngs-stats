@@ -16,13 +16,13 @@ public class TenxVisiumFfpe {
         for (TenxVisiumFfpe tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
 
-            lims.setSampleId(tenx.getSampleId());
-            lims.setSequencerRunFolder(tenx.getRunId());
-            lims.setMeanReadsPerSpot(tenx.getMeanReadsPerSpot());
-            lims.setMedianGenesPerSpot(tenx.getMedianGenesPerSpot());
-            lims.setReadMappedConfidentlyToProbSet(tenx.getReadsMappedConfidentlyToProbeSet());
-            lims.setSeqSaturation(tenx.getSequencingSaturation());
-            lims.setTotalReads(tenx.getNumberOfReads());
+            lims.setIGO_SAMPLE_ID(tenx.getSampleId());
+            lims.setRUN_ID(tenx.getRunId());
+            lims.setMEAN_READS_PER_SPOT(tenx.getMeanReadsPerSpot());
+            lims.setMEDIAN_GENES_PER_SPOT(tenx.getMedianGenesPerSpot());
+            lims.setREADS_MAPPED_CONFIDENTLY_TO_PROBE_SET(tenx.getReadsMappedConfidentlyToProbeSet());
+            lims.setSEQUENCING_SATURATION(tenx.getSequencingSaturation());
+            lims.setTOTAL_READS(tenx.getNumberOfReads());
 
             list.add(lims);
         }

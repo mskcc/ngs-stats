@@ -16,15 +16,15 @@ public class TenxGex {
         for (TenxGex tenx : inputList) {
             TenxLimsStats lims = new TenxLimsStats();
 
-            lims.setSampleId(tenx.getSampleId());
-            lims.setSequencerRunFolder(tenx.getRunId());
-            lims.setCellNumber(tenx.getEstimatedNumberOfCells().doubleValue());
-            lims.setMeanReadsPerCell(tenx.getMeanReadsPerCell().doubleValue());
-            lims.setMedianGenesOrFragmentsPerCell(tenx.getMedianGenesPerCell().doubleValue());
-            lims.setReadsMappedConfidentlyToGenome(tenx.getReadsMappedConfidentlyToGenome());
-            lims.setReadsMappedToTranscriptome(tenx.getReadsMappedConfidentlyToTranscriptome());
-            lims.setSeqSaturation(tenx.getSequencingSaturation());
-            lims.setTotalReads(tenx.getNumberOfReads());
+            lims.setIGO_SAMPLE_ID(tenx.getSampleId());
+            lims.setRUN_ID(tenx.getRunId());
+            lims.setCELL_NUMBER(tenx.getEstimatedNumberOfCells().doubleValue());
+            lims.setMEAN_READS_PER_CELL(tenx.getMeanReadsPerCell().doubleValue());
+            lims.setMEDIAN_GENES_OR_FRAGMENTS_PER_CELL(tenx.getMedianGenesPerCell().doubleValue());
+            lims.setREADS_MAPPED_CONFIDENTLY_TO_GENOME(tenx.getReadsMappedConfidentlyToGenome());
+            lims.setREADS_MAPPED_TO_TRANSCRIPTOME(tenx.getReadsMappedConfidentlyToTranscriptome());
+            lims.setSEQUENCING_SATURATION(tenx.getSequencingSaturation());
+            lims.setTOTAL_READS(tenx.getNumberOfReads());
 
             list.add(lims);
         }
